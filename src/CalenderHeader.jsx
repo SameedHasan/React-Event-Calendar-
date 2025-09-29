@@ -2,7 +2,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Col, Row, Space, Typography } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nextMonth, previousMonth, setView, decrementWeek, incrementWeek, handleNextandPrevDay } from './store/calendarSlice';
+import { nextMonth, previousMonth, nextYear, previousYear, setView, decrementWeek, incrementWeek, handleNextandPrevDay } from './store/calendarSlice';
 import dayjs from 'dayjs';
 
 function CalendarHeader() {
@@ -14,6 +14,12 @@ function CalendarHeader() {
     };
     const handleNextMonth = () => {
         dispatch(nextMonth());
+    };
+    const handlePreviousYear = () => {
+        dispatch(previousYear());
+    };
+    const handleNextYear = () => {
+        dispatch(nextYear());
     };
 
     const [startDateStr] = weekRange.range.split(" - ");
@@ -44,6 +50,24 @@ function CalendarHeader() {
                         </Button>
                         <Button
                             onClick={handleNextMonth}
+                            type='primary'
+                            style={{ border: 'none', minWidth: '50px' }}
+                        >
+                            <RightOutlined />
+                        </Button>
+                    </Space.Compact>
+                )}
+                {view === 'year' && (
+                    <Space.Compact>
+                        <Button
+                            type='primary'
+                            style={{ border: 'none', minWidth: '50px' }}
+                            onClick={handlePreviousYear}
+                        >
+                            <LeftOutlined />
+                        </Button>
+                        <Button
+                            onClick={handleNextYear}
                             type='primary'
                             style={{ border: 'none', minWidth: '50px' }}
                         >
@@ -136,6 +160,11 @@ function CalendarHeader() {
                             {dayjs(currentDate).format('MMM-YYYY')}
                         </>
                     )}
+                    {view === 'year' && (
+                        <>
+                            {dayjs(currentDate).format('YYYY')}
+                        </>
+                    )}
                     {view === 'week' && <>{weekRange.range}</>}
                     {view === 'day' && <>{getCurrentDayDate()}</>}
                     {view === 'list' && <>{getCurrentDayDate()}</>}
@@ -167,6 +196,12 @@ function CalendarHeader() {
                     type='primary'
                 >
                     List View
+                </Button>
+                <Button
+                    onClick={() => dispatch(setView('year'))}
+                    type='primary'
+                >
+                    Year View
                 </Button>
             </Space.Compact>
             </Col>

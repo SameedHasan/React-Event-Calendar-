@@ -48,6 +48,14 @@ const calendarSlice = createSlice({
             const currentDate = new Date(state.currentDate);
             state.currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1).toISOString();
         },
+        previousYear: (state) => {
+            const currentDate = new Date(state.currentDate);
+            state.currentDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth()).toISOString();
+        },
+        nextYear: (state) => {
+            const currentDate = new Date(state.currentDate);
+            state.currentDate = new Date(currentDate.getFullYear() + 1, currentDate.getMonth()).toISOString();
+        },
         setCurrentDate: (state, action) => {
             state.currentDate = new Date().toISOString();
         },
@@ -88,5 +96,5 @@ const calendarSlice = createSlice({
     },
 });
 
-export const { previousMonth, nextMonth, handleNextandPrevDay, setCurrentDate, setView, setWeekRange, setCurrentWeek, incrementWeek, decrementWeek } = calendarSlice.actions;
+export const { previousMonth, nextMonth, previousYear, nextYear, handleNextandPrevDay, setCurrentDate, setView, setWeekRange, setCurrentWeek, incrementWeek, decrementWeek } = calendarSlice.actions;
 export default calendarSlice.reducer;

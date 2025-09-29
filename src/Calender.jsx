@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import DaysOfWeek from './DaysOfWeek';
 import CalenderDayView from './CalenderDayView';
 import CalenderListView from './CalenderListView';
+import CalenderYearView from './CalenderYearView';
 
 
 const Calendar = () => {
@@ -23,6 +24,8 @@ const Calendar = () => {
                 <CalenderDayView />}
             {view === "list" &&
                 <CalenderListView />}
+            {view === "year" &&
+                <CalenderYearView />}
         </div>
     );
 };

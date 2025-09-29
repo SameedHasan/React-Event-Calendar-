@@ -1,14 +1,14 @@
 import { LeftOutlined, RightOutlined, AimOutlined } from '@ant-design/icons';
 import { Button, Col, Row, Space, Typography, Select } from 'antd';
-import React from 'react';
-import useCalendarStore from './store/useCalendarStore';
+import React, { useMemo } from 'react';
 import dayjs from 'dayjs';
+import useCalendarStore from './store/useCalendarStore';
 
 function CalendarHeader() {
-    const { 
-        currentDate, 
-        view, 
-        weekRange, 
+    const {
+        currentDate,
+        view,
+        weekRange,
         currentDayIndex,
         previousMonth,
         nextMonth,
@@ -21,176 +21,127 @@ function CalendarHeader() {
         goToToday
     } = useCalendarStore();
 
-    const handlePreviousMonth = () => {
-        previousMonth();
-    };
-    const handleNextMonth = () => {
-        nextMonth();
-    };
-    const handlePreviousYear = () => {
-        previousYear();
-    };
-    const handleNextYear = () => {
-        nextYear();
-    };
+    // Memoized navigation handlers
+    const navigationHandlers = useMemo(() => ({
+        month: { prev: previousMonth, next: nextMonth },
+        year: { prev: previousYear, next: nextYear },
+        week: { prev: decrementWeek, next: incrementWeek },
+        day: {
+            prev: () => {
+                if (currentDayIndex > 0) {
+                    handleNextandPrevDay(currentDayIndex - 1);
+                } else {
+                    handleNextandPrevDay(6);
+                    decrementWeek();
+                }
+            },
+            next: () => {
+                if (currentDayIndex < 6) {
+                    handleNextandPrevDay(currentDayIndex + 1);
+                } else {
+                    handleNextandPrevDay(0);
+                    incrementWeek();
+                }
+            }
+        },
+        list: {
+            prev: () => {
+                if (currentDayIndex > 0) {
+                    handleNextandPrevDay(currentDayIndex - 1);
+                } else {
+                    handleNextandPrevDay(6);
+                    decrementWeek();
+                }
+            },
+            next: () => {
+                if (currentDayIndex < 6) {
+                    handleNextandPrevDay(currentDayIndex + 1);
+                } else {
+                    handleNextandPrevDay(0);
+                    incrementWeek();
+                }
+            }
+        }
+    }), [currentDayIndex, previousMonth, nextMonth, previousYear, nextYear, decrementWeek, incrementWeek, handleNextandPrevDay]);
 
-    const handleGoToToday = () => {
-        goToToday();
-    };
+    // Memoized current day date calculation
+    const currentDayDate = useMemo(() => {
+        if (view !== 'day' && view !== 'list') return null;
 
-    const [startDateStr] = weekRange.range.split(" - ");
-    const startDate = new Date(startDateStr);
-    const getCurrentDayDate = () => {
+        const [startDateStr] = weekRange.range.split(" - ");
+        const startDate = new Date(startDateStr);
         const weekStartDate = new Date(startDate);
-        const dayOfWeek = weekStartDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Convert to Monday-first
-        weekStartDate.setDate(weekStartDate.getDate() + mondayOffset); // Set to Monday
-        
+        const dayOfWeek = weekStartDate.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        weekStartDate.setDate(weekStartDate.getDate() + mondayOffset);
+
         const currentDayDate = new Date(weekStartDate);
         currentDayDate.setDate(weekStartDate.getDate() + currentDayIndex);
         return currentDayDate.toLocaleDateString('default', { year: 'numeric', month: 'long', day: 'numeric' });
+    }, [weekRange.range, currentDayIndex, view]);
+
+    // Memoized title content
+    const titleContent = useMemo(() => {
+        switch (view) {
+            case 'month':
+                return dayjs(currentDate).format('MMM-YYYY');
+            case 'year':
+                return dayjs(currentDate).format('YYYY');
+            case 'week':
+                return weekRange.range;
+            case 'day':
+            case 'list':
+                return currentDayDate;
+            default:
+                return '';
+        }
+    }, [view, currentDate, weekRange.range, currentDayDate]);
+
+    // Navigation button component
+    const NavigationButtons = () => {
+        const handlers = navigationHandlers[view];
+        if (!handlers) return null;
+
+        const buttonStyle = view === 'month' || view === 'year'
+            ? { border: 'none', minWidth: '50px' }
+            : {};
+
+        return (
+            <Space.Compact>
+                <Button
+                    type='primary'
+                    style={buttonStyle}
+                    onClick={handlers.prev}
+                >
+                    <LeftOutlined />
+                </Button>
+                <Button
+                    type='primary'
+                    style={buttonStyle}
+                    onClick={handlers.next}
+                >
+                    <RightOutlined />
+                </Button>
+            </Space.Compact>
+        );
     };
 
     return (
-        // Fixed header alignment with better flex properties
         <Row className='mb-24' style={{ display: 'flex', alignItems: 'center' }}>
             <Col span={12}>
-                {view === 'month' && (
-                    <Space.Compact>
-                        <Button
-                            type='primary'
-                            style={{ border: 'none', minWidth: '50px' }}
-                            onClick={handlePreviousMonth}
-                        >
-                            <LeftOutlined />
-                        </Button>
-                        <Button
-                            onClick={handleNextMonth}
-                            type='primary'
-                            style={{ border: 'none', minWidth: '50px' }}
-                        >
-                            <RightOutlined />
-                        </Button>
-                    </Space.Compact>
-                )}
-                {view === 'year' && (
-                    <Space.Compact>
-                        <Button
-                            type='primary'
-                            style={{ border: 'none', minWidth: '50px' }}
-                            onClick={handlePreviousYear}
-                        >
-                            <LeftOutlined />
-                        </Button>
-                        <Button
-                            onClick={handleNextYear}
-                            type='primary'
-                            style={{ border: 'none', minWidth: '50px' }}
-                        >
-                            <RightOutlined />
-                        </Button>
-                    </Space.Compact>
-                )}
-                {view === 'week' && (
-                    <Space.Compact>
-                        <Button
-                            type='primary'
-                            onClick={decrementWeek}
-                        >
-                            <LeftOutlined />
-                        </Button>
-                        <Button
-                            type='primary'
-                            onClick={incrementWeek}
-                        >
-                            <RightOutlined />
-                        </Button>
-                    </Space.Compact>
-                )}
-                {view === 'day' && (
-                    <Space.Compact>
-                        <Button
-                            type='primary'
-                            onClick={() => {
-                                if (currentDayIndex > 0) {
-                                    handleNextandPrevDay(currentDayIndex - 1);
-                                } else {
-                                    handleNextandPrevDay(6);
-                                    decrementWeek();
-                                }
-                            }}
-                        >
-                            <LeftOutlined />
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                if (currentDayIndex < 6) {
-                                    handleNextandPrevDay(currentDayIndex + 1);
-                                } else {
-                                    handleNextandPrevDay(0);
-                                    incrementWeek();
-                                }
-                            }}
-                            type='primary'
-                        >
-                            <RightOutlined />
-                        </Button>
-                    </Space.Compact>
-                )}
-                {view === 'list' && (
-                    <Space.Compact>
-                        <Button
-                            type='primary'
-                            onClick={() => {
-                                if (currentDayIndex > 0) {
-                                    handleNextandPrevDay(currentDayIndex - 1);
-                                } else {
-                                    handleNextandPrevDay(6);
-                                    decrementWeek();
-                                }
-                            }}
-                        >
-                            <LeftOutlined />
-                        </Button>
-                        <Button
-                            type='primary'
-                            onClick={() => {
-                                if (currentDayIndex < 6) {
-                                    handleNextandPrevDay(currentDayIndex + 1);
-                                } else {
-                                    handleNextandPrevDay(0);
-                                    incrementWeek();
-                                }
-                            }}
-                        >
-                            <RightOutlined />
-                        </Button>
-                    </Space.Compact>
-                )}
+                <NavigationButtons />
             </Col>
 
             <Col span={6} className='text-center'>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                     <Typography.Title level={4} className='mb-0' style={{ textAlign: "center", margin: 0 }}>
-                        {view === 'month' && (
-                            <>
-                                {dayjs(currentDate).format('MMM-YYYY')}
-                            </>
-                        )}
-                        {view === 'year' && (
-                            <>
-                                {dayjs(currentDate).format('YYYY')}
-                            </>
-                        )}
-                        {view === 'week' && <>{weekRange.range}</>}
-                        {view === 'day' && <>{getCurrentDayDate()}</>}
-                        {view === 'list' && <>{getCurrentDayDate()}</>}
+                        {titleContent}
                     </Typography.Title>
                     <Button
                         type="primary"
                         shape="circle"
                         icon={<AimOutlined />}
-                        onClick={handleGoToToday}
+                        onClick={goToToday}
                         style={{
                             width: '40px',
                             height: '40px',

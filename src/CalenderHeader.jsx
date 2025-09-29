@@ -1,5 +1,5 @@
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Col, Row, Space, Typography } from 'antd';
+import { Button, Col, Row, Space, Typography, Select } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { nextMonth, previousMonth, nextYear, previousYear, setView, decrementWeek, incrementWeek, handleNextandPrevDay } from './store/calendarSlice';
@@ -172,38 +172,18 @@ function CalendarHeader() {
             </Col>
 
             <Col span={6} className='text-right'>
-                  <Space.Compact>
-                <Button
-                    onClick={() => dispatch(setView('month'))}
-                    type='primary'
-                >
-                    Month View
-                </Button>
-                <Button
-                    onClick={() => dispatch(setView('week'))}
-                    type='primary'
-                >
-                    Week View
-                </Button>
-                <Button
-                    onClick={() => dispatch(setView('day'))}
-                    type='primary'
-                >
-                    Day View
-                </Button>
-                <Button
-                    onClick={() => dispatch(setView('list'))}
-                    type='primary'
-                >
-                    List View
-                </Button>
-                <Button
-                    onClick={() => dispatch(setView('year'))}
-                    type='primary'
-                >
-                    Year View
-                </Button>
-            </Space.Compact>
+                <Select
+                    value={view}
+                    onChange={(value) => dispatch(setView(value))}
+                    style={{ width: 200 }}
+                    options={[
+                        { value: 'month', label: 'Month View' },
+                        { value: 'week', label: 'Week View' },
+                        { value: 'day', label: 'Day View' },
+                        { value: 'list', label: 'List View' },
+                        { value: 'year', label: 'Year View' }
+                    ]}
+                />
             </Col>
 
 

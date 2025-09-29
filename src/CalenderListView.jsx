@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Row, Col, Typography, List } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { setWeekRange } from './store/calendarSlice';
+import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import { AudioOutlined, CustomerServiceOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import eventsData from './eventsData';
@@ -9,8 +8,7 @@ import eventsData from './eventsData';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, currentDayIndex } = useSelector(state => state.calendar);
-    const dispatch = useDispatch();
+    const { weekRange, currentWeek, currentDayIndex, setWeekRange } = useCalendarStore();
 
     // Calculate the date for the selected day in the current week (Monday-first)
     const getDateForCurrentDay = () => {
@@ -23,11 +21,11 @@ const CalenderListView = () => {
         const start = dayjs(currentWeek).startOf('week').add(1, 'day').format('MMM D, YYYY'); // Monday
         const end = dayjs(currentWeek).endOf('week').add(1, 'day').format('MMM D, YYYY'); // Sunday
 
-        dispatch(setWeekRange({
+        setWeekRange({
             count: weekNumber,
             range: `${start} - ${end}`
-        }));
-    }, [dispatch, currentWeek]);
+        });
+    }, [setWeekRange, currentWeek]);
 
     const currentDate = getDateForCurrentDay(); // Fetches the date for the current day in the week
     

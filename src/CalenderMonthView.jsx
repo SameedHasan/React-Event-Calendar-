@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import useCalendarStore from './store/useCalendarStore';
 import { Typography, Badge, Row, Col, Tag } from 'antd';
 import dayjs from 'dayjs';
 import eventsData from './eventsData';
@@ -13,7 +13,7 @@ const getWeekNumber = (date) => {
 };
 
 const CalenderMonthView = () => {
-    const currentDate = useSelector((state) => state.calendar.currentDate);
+    const { currentDate } = useCalendarStore();
     const currentDate_ = new Date(currentDate);
 
     // Function to get events for a specific date

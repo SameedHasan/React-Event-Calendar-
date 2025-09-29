@@ -1,15 +1,13 @@
 import React from 'react';
 import { Row, Col, Typography, Card, Badge, List } from 'antd';
-import { useSelector, useDispatch } from 'react-redux';
-import { setView, setCurrentDate } from './store/calendarSlice';
+import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import eventsData from './eventsData';
 
 const { Title, Text } = Typography;
 
 const CalenderYearView = () => {
-    const { currentDate } = useSelector(state => state.calendar);
-    const dispatch = useDispatch();
+    const { currentDate, setView, setCurrentDate } = useCalendarStore();
     const currentYear = new Date(currentDate).getFullYear();
     
     const months = [
@@ -42,8 +40,8 @@ const CalenderYearView = () => {
 
     const handleMonthClick = (monthNumber) => {
         const newDate = new Date(currentYear, monthNumber, 1);
-        dispatch(setCurrentDate(newDate.toISOString()));
-        dispatch(setView('month'));
+        setCurrentDate(newDate.toISOString());
+        setView('month');
     };
 
     const getEventTypeCount = (events, type) => {

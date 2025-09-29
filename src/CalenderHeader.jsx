@@ -1,41 +1,41 @@
 import { LeftOutlined, RightOutlined, AimOutlined } from '@ant-design/icons';
 import { Button, Col, Row, Space, Typography, Select } from 'antd';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { nextMonth, previousMonth, nextYear, previousYear, setView, decrementWeek, incrementWeek, handleNextandPrevDay, setCurrentDate, setCurrentWeek } from './store/calendarSlice';
+import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 
 function CalendarHeader() {
-    const { currentDate, view, weekRange, currentDayIndex } = useSelector((state) => state.calendar);
-    const dispatch = useDispatch();
+    const { 
+        currentDate, 
+        view, 
+        weekRange, 
+        currentDayIndex,
+        previousMonth,
+        nextMonth,
+        previousYear,
+        nextYear,
+        setView,
+        decrementWeek,
+        incrementWeek,
+        handleNextandPrevDay,
+        goToToday
+    } = useCalendarStore();
 
     const handlePreviousMonth = () => {
-        dispatch(previousMonth());
+        previousMonth();
     };
     const handleNextMonth = () => {
-        dispatch(nextMonth());
+        nextMonth();
     };
     const handlePreviousYear = () => {
-        dispatch(previousYear());
+        previousYear();
     };
     const handleNextYear = () => {
-        dispatch(nextYear());
+        nextYear();
     };
 
     const handleGoToToday = () => {
-        const today = new Date();
-        
-        // Reset to current date based on view
-        dispatch(setCurrentDate(today.toISOString()));
-        
-        if (view === 'week' || view === 'day' || view === 'list') {
-            // For week/day/list views, also reset the current week and day index
-            dispatch(setCurrentWeek(today.toISOString()));
-            
-            // Calculate current day index for Monday-first week (0=Monday, 6=Sunday)
-            const currentDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
-            dispatch(handleNextandPrevDay(currentDayIndex));
-        }
+        goToToday();
     };
 
     const [startDateStr] = weekRange.range.split(" - ");
@@ -95,13 +95,13 @@ function CalendarHeader() {
                     <Space.Compact>
                         <Button
                             type='primary'
-                            onClick={() => dispatch(decrementWeek())}
+                            onClick={decrementWeek}
                         >
                             <LeftOutlined />
                         </Button>
                         <Button
                             type='primary'
-                            onClick={() => dispatch(incrementWeek())}
+                            onClick={incrementWeek}
                         >
                             <RightOutlined />
                         </Button>
@@ -113,10 +113,10 @@ function CalendarHeader() {
                             type='primary'
                             onClick={() => {
                                 if (currentDayIndex > 0) {
-                                    dispatch(handleNextandPrevDay(currentDayIndex - 1));
+                                    handleNextandPrevDay(currentDayIndex - 1);
                                 } else {
-                                    dispatch(handleNextandPrevDay(6));
-                                    dispatch(decrementWeek());
+                                    handleNextandPrevDay(6);
+                                    decrementWeek();
                                 }
                             }}
                         >
@@ -125,10 +125,10 @@ function CalendarHeader() {
                         <Button
                             onClick={() => {
                                 if (currentDayIndex < 6) {
-                                    dispatch(handleNextandPrevDay(currentDayIndex + 1));
+                                    handleNextandPrevDay(currentDayIndex + 1);
                                 } else {
-                                    dispatch(handleNextandPrevDay(0));
-                                    dispatch(incrementWeek());
+                                    handleNextandPrevDay(0);
+                                    incrementWeek();
                                 }
                             }}
                             type='primary'
@@ -143,10 +143,10 @@ function CalendarHeader() {
                             type='primary'
                             onClick={() => {
                                 if (currentDayIndex > 0) {
-                                    dispatch(handleNextandPrevDay(currentDayIndex - 1));
+                                    handleNextandPrevDay(currentDayIndex - 1);
                                 } else {
-                                    dispatch(handleNextandPrevDay(6));
-                                    dispatch(decrementWeek());
+                                    handleNextandPrevDay(6);
+                                    decrementWeek();
                                 }
                             }}
                         >
@@ -156,10 +156,10 @@ function CalendarHeader() {
                             type='primary'
                             onClick={() => {
                                 if (currentDayIndex < 6) {
-                                    dispatch(handleNextandPrevDay(currentDayIndex + 1));
+                                    handleNextandPrevDay(currentDayIndex + 1);
                                 } else {
-                                    dispatch(handleNextandPrevDay(0));
-                                    dispatch(incrementWeek());
+                                    handleNextandPrevDay(0);
+                                    incrementWeek();
                                 }
                             }}
                         >
@@ -207,7 +207,7 @@ function CalendarHeader() {
             <Col span={6} className='text-right'>
                 <Select
                     value={view}
-                    onChange={(value) => dispatch(setView(value))}
+                    onChange={setView}
                     style={{ width: 200 }}
                     options={[
                         { value: 'month', label: 'Month View' },

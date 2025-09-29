@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react';
 import { Row, Col, Typography } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { setWeekRange, incrementWeek, decrementWeek } from './store/calendarSlice';
+import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import eventsData from './eventsData';
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const DaysOfWeek = () => {
-    const { weekRange, currentWeek } = useSelector(state => state.calendar);
-    const dispatch = useDispatch();
+    const { weekRange, currentWeek, setWeekRange } = useCalendarStore();
     const today = new Date().getDay();
 
     // Generate 24-hour time slots in 12-hour format with AM/PM
@@ -90,11 +88,11 @@ const DaysOfWeek = () => {
     const displayedDates = getDisplayedDates(currentWeek);
 
     useEffect(() => {
-        dispatch(setWeekRange({
+        setWeekRange({
             count: weekNumber,
             range: `${start} - ${end}`
-        }));
-    }, [dispatch, weekNumber, start, end]);
+        });
+    }, [setWeekRange, weekNumber, start, end]);
 
     return (
         <div>

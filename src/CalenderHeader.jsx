@@ -1,8 +1,8 @@
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, AimOutlined } from '@ant-design/icons';
 import { Button, Col, Row, Space, Typography, Select } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nextMonth, previousMonth, nextYear, previousYear, setView, decrementWeek, incrementWeek, handleNextandPrevDay } from './store/calendarSlice';
+import { nextMonth, previousMonth, nextYear, previousYear, setView, decrementWeek, incrementWeek, handleNextandPrevDay, setCurrentDate, setCurrentWeek } from './store/calendarSlice';
 import dayjs from 'dayjs';
 
 function CalendarHeader() {
@@ -20,6 +20,22 @@ function CalendarHeader() {
     };
     const handleNextYear = () => {
         dispatch(nextYear());
+    };
+
+    const handleGoToToday = () => {
+        const today = new Date();
+        
+        // Reset to current date based on view
+        dispatch(setCurrentDate(today.toISOString()));
+        
+        if (view === 'week' || view === 'day' || view === 'list') {
+            // For week/day/list views, also reset the current week and day index
+            dispatch(setCurrentWeek(today.toISOString()));
+            
+            // Calculate current day index for Monday-first week (0=Monday, 6=Sunday)
+            const currentDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            dispatch(handleNextandPrevDay(currentDayIndex));
+        }
     };
 
     const [startDateStr] = weekRange.range.split(" - ");
@@ -154,21 +170,38 @@ function CalendarHeader() {
             </Col>
 
             <Col span={6} className='text-center'>
-                <Typography.Title level={4} className='mb-0' style={{ textAlign: "center" }}>
-                    {view === 'month' && (
-                        <>
-                            {dayjs(currentDate).format('MMM-YYYY')}
-                        </>
-                    )}
-                    {view === 'year' && (
-                        <>
-                            {dayjs(currentDate).format('YYYY')}
-                        </>
-                    )}
-                    {view === 'week' && <>{weekRange.range}</>}
-                    {view === 'day' && <>{getCurrentDayDate()}</>}
-                    {view === 'list' && <>{getCurrentDayDate()}</>}
-                </Typography.Title>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                    <Typography.Title level={4} className='mb-0' style={{ textAlign: "center", margin: 0 }}>
+                        {view === 'month' && (
+                            <>
+                                {dayjs(currentDate).format('MMM-YYYY')}
+                            </>
+                        )}
+                        {view === 'year' && (
+                            <>
+                                {dayjs(currentDate).format('YYYY')}
+                            </>
+                        )}
+                        {view === 'week' && <>{weekRange.range}</>}
+                        {view === 'day' && <>{getCurrentDayDate()}</>}
+                        {view === 'list' && <>{getCurrentDayDate()}</>}
+                    </Typography.Title>
+                    <Button
+                        type="primary"
+                        shape="circle"
+                        icon={<AimOutlined />}
+                        onClick={handleGoToToday}
+                        style={{
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                        title="Go to Today"
+                    />
+                </div>
             </Col>
 
             <Col span={6} className='text-right'>

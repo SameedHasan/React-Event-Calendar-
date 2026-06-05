@@ -71,46 +71,6 @@
   width: calc(100% / 7);
   text-align: center;
 }
-
-.week {
-  padding: 6px 10px;
-  border: 1px solid #e9e6e6;
-  font-size: 12px;
-  overflow-y: auto;
-}
-
-.day {
-  padding: 13px 0px;
-  width: calc(100% / 7);
-}
-
-.day ul {
-  padding: 0px;
-}
-
-.day.empty .daycount.next-month,
-.day.empty .daycount.prev-month {
-  color: var(--color-table-header-border);
-}
-
-.day.emptyq {
-  background-color: #3cff0161;
-}
-
-.day {
-  border: 1px solid #e9e6e6;
-  /* border-left: none; */
-  background-color: #fff;
-  transition: background-color 0.3s;
-  height: 140px;
-}
-.calendar-days .day:nth-child(7),
-.calendar-days .day:nth-child(14),
-.calendar-days .day:nth-child(21),
-.calendar-days .day:nth-child(28),
-.calendar-days .day:nth-child(35) {
-  /* border-right: none; */
-}
 .listStyleSession,
 .listStyle {
   list-style: none;
@@ -152,42 +112,10 @@
 
 .calendar-days-of-week {
   background-color: #fff;
-  padding: 15px 0px;
   border-radius: 12px 12px 0px 0px;
 }
-.calendar-days-of-week .ant-typography {
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0.5px;
-  text-align: center;
-  vertical-align: middle;
-  text-transform: uppercase;
-  color: var(--color-tab-text);
-}
 
-.daycount {
-  width: 28px;
-  height: 28px;
-  margin: 0 auto;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0.4px;
-  text-align: center;
-  vertical-align: middle;
-  color: var(--color-text-base);
-}
-.daycount.selected {
-  background-color: #1272bf;
-  border-radius: 50px;
-  color: #fff;
-  line-height: 28px;
-  font-weight: 700;
-  font-size: 14px;
-  text-align: center;
-  vertical-align: middle;
-}
+/* daycount styles now handled inline in components */
 .custom-ant-header .ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
   border: none;
   border-radius: 30px;

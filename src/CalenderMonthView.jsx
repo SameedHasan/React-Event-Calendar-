@@ -1,200 +1,206 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import useCalendarStore from './store/useCalendarStore';
-import { Typography, Badge, Row, Col, Tag,Tooltip } from 'antd';
+import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
-import eventsData from './eventsData';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import { getEventStyle } from './utils/eventColors';
 
-const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+dayjs.extend(isoWeek);
 
-const getWeekNumber = (date) => {
-    const startOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date - startOfYear) / 86400000;
-    return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
-};
+const { Text } = Typography;
 
-// Function to create tooltip content for remaining events
-const getRemainingEventsTooltip = (dayEvents) => {
-    const remainingEvents = dayEvents.slice(1); // Skip the first event (already shown)
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const TooltipContent = ({ events }) => (
+    <div style={{ padding: '2px 0' }}>
+        <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: '#1e293b' }}>
+            All Events ({events.length})
+        </div>
+        {events.map(ev => {
+            const cfg = getEventStyle(ev);
+            return (
+                <div key={ev.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '5px 8px', marginBottom: '4px',
+                    background: cfg.bg, borderRadius: '6px', border: `1px solid ${cfg.border}`,
+                }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b', flex: 1 }}>{ev.title}</span>
+                    <span style={{ fontSize: '11px', color: cfg.color, fontWeight: 600 }}>{ev.type}</span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>{dayjs(ev.start).format('h:mm A')}</span>
+                </div>
+            );
+        })}
+    </div>
+);
+
+const EventPill = ({ event }) => {
+    const cfg = getEventStyle(event);
     return (
-        <>
-            <p>Remaining Events ({remainingEvents.length})</p>
-            {remainingEvents.map((event, index) => (
-                <ul key={index}>
-                    <li>
-                        <span>{event.clientName || event.title}</span>
-                        <span className='time'>{dayjs(event.start).format('h:mm A')}</span>
-                    </li>
-                </ul>
-            ))}
-        </>
+        <div style={{
+            display: 'flex', alignItems: 'center', gap: '4px',
+            padding: '2px 6px', marginBottom: '3px',
+            background: cfg.bg, borderRadius: '5px',
+            borderLeft: `3px solid ${cfg.color}`,
+            overflow: 'hidden', cursor: 'pointer',
+            transition: 'opacity 0.15s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+            <Text style={{
+                fontSize: '11px', fontWeight: 600, color: '#1e293b',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+            }}>
+                {event.title}
+            </Text>
+            <Text style={{ fontSize: '10px', color: '#64748b', flexShrink: 0 }}>
+                {dayjs(event.start).format('h:mm')}
+            </Text>
+        </div>
     );
 };
 
-
 const CalenderMonthView = () => {
-    const { currentDate } = useCalendarStore();
-    const currentDate_ = new Date(currentDate);
+    const { currentDate, events } = useCalendarStore();
+    const today = dayjs();
+    const current = dayjs(currentDate);
 
-    // Function to get events for a specific date
-    const getEventsForDate = (date) => {
-        return eventsData.filter(event => {
-            const eventDate = new Date(event.start);
-            return eventDate.getDate() === date.getDate() &&
-                eventDate.getMonth() === date.getMonth() &&
-                eventDate.getFullYear() === date.getFullYear();
-        });
-    };
+    const getEventsForDate = (date) =>
+        events.filter(ev => dayjs(ev.start).isSame(date, 'day'))
+               .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-    const renderDaysOfWeek = () => {
-        return daysOfWeek.map((day, index) => (
-            <Col key={index} className="day-of-week">
-                <Typography.Text>{day}</Typography.Text>
-            </Col>
-        ));
-    };
-
-    const renderDaysOfMonth = () => {
-        const startOfMonth = new Date(currentDate_.getFullYear(), currentDate_.getMonth(), 1);
-        const endOfMonth = new Date(currentDate_.getFullYear(), currentDate_.getMonth() + 1, 0);
-        const daysInMonth = [];
-        let currentWeekNumber = getWeekNumber(startOfMonth);
-
-        // Previous month days (Monday-first week)
-        const startDay = startOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const mondayOffset = startDay === 0 ? 6 : startDay - 1; // Convert to Monday-first (0 = Monday)
-
-        for (let i = 0; i < mondayOffset; i++) {
-            const daysBeforeStart = mondayOffset - i;
-            const prevMonthDate = new Date(currentDate_.getFullYear(), currentDate_.getMonth(), -daysBeforeStart + 1);
-            if (i === 0) {
-                daysInMonth.push(
-                    <Col key={`empty-start-${i}`} className="day empty">
-                        {/* <Tag color='geekblue' style={{ padding: "0px 10px", position: "absolute", left: 3, top: 3 }}>Week {currentWeekNumber}</Tag> */}
-                        <div className='daycount prev-month'>{prevMonthDate.getDate()}</div>
-                    </Col>
-                );
-            } else {
-                daysInMonth.push(
-                    <Col key={`empty-start-${i}`} className="day empty">
-                        <div className='daycount prev-month'>{prevMonthDate.getDate()}</div>
-                    </Col>
-                );
-            }
+    // Build grid: days from Mon of week containing 1st to Sun of week containing last
+    const gridDays = useMemo(() => {
+        const firstDay = current.startOf('month');
+        const lastDay = current.endOf('month');
+        const gridStart = firstDay.isoWeekday(1); // Monday of that week
+        const gridEnd = lastDay.isoWeekday(7);   // Sunday of that week
+        const days = [];
+        let d = gridStart;
+        while (d.isBefore(gridEnd) || d.isSame(gridEnd, 'day')) {
+            days.push(d);
+            d = d.add(1, 'day');
         }
-
-        // Current month days
-        for (let day = 1; day <= endOfMonth.getDate(); day++) {
-            const date = new Date(currentDate_.getFullYear(), currentDate_.getMonth(), day);
-            const today = new Date();
-            const isToday = today.toDateString() === date.toDateString();
-            const isMonday = date.getDay() === 1;
-            const dayEvents = getEventsForDate(date);
-
-            if (isMonday) {
-                currentWeekNumber = getWeekNumber(date);
-                daysInMonth.push(
-                    <Col
-                        key={day}
-                        className='day'
-                        style={{ backgroundColor: isToday ? '#2263a712' : '' }}
-                    >
-                        {/* <Tag
-                      color='geekblue'
-                      style={{ padding: '0px 10px', position: 'absolute', left: 3, top: 3 }}
-                    >
-                      Week {currentWeekNumber}
-                    </Tag> */}
-                        <div className='daycount'>{day}</div>
-                        <ul style={{ marginTop: '8px' }}>
-                            {dayEvents.slice(0, 1).map((event, i) => (
-                                <li key={i} className='listStyle ' style={{ textTransform: 'capitalize' }}>
-                                    {event.title}
-                                    <span>{dayjs(event.start).format('h:mm A')}</span>
-                                </li>
-                            ))}
-                            {dayEvents.length > 1 && (
-                                <Tooltip
-                                    title={getRemainingEventsTooltip(dayEvents)}
-                                    placement="top"
-                                    overlayClassName='calendar-tooltip'
-                                >
-                                    <div className="listStyleSession" style={{ textTransform: "capitalize", cursor: 'pointer' }}>
-                                        +{dayEvents.length - 1} more
-                                    </div>
-                                </Tooltip>
-                            )}
-                        </ul>
-                    </Col>
-                );
-            } else {
-                daysInMonth.push(
-                    <Col
-                        key={day}
-                        className='day'
-                    >
-                        <div className={isToday ? 'selected daycount' : 'daycount'}>{day}</div>
-                        <ul style={{ marginTop: '8px' }}>
-                            {dayEvents.slice(0, 1).map((event, i) => (
-                                <li key={i} className='listStyle' style={{ textTransform: 'capitalize' }}>
-                                    {event.title}
-                                    <span>{dayjs(event.start).format('h:mm A')}</span>
-                                </li>
-                            ))}
-                            {dayEvents.length > 1 && (
-                                <Tooltip
-                                    title={getRemainingEventsTooltip(dayEvents)}
-                                    placement="top"
-                                    overlayClassName='calendar-tooltip'
-                                >
-                                    <div className="listStyleSession" style={{ textTransform: "capitalize", cursor: 'pointer' }}>
-                                        +{dayEvents.length - 1} more
-                                    </div>
-                                </Tooltip>
-                            )}
-                        </ul>
-                    </Col>
-                );
-            }
-        }
-
-        // Next month days (Monday-first week) - only add if week is incomplete
-        const endDay = endOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const totalDaysInGrid = mondayOffset + endOfMonth.getDate(); // Total days already in grid
-        const remainingDays = (7 - (totalDaysInGrid % 7)) % 7; // Days needed to complete the week
-
-        // Only add next month days if there are remaining days to complete the week
-        if (remainingDays > 0) {
-            for (let i = 0, day = 1; i < remainingDays; i++, day++) {
-                if (i === 0 && endDay === 0) { // If month ends on Sunday, next Monday starts new week
-                    currentWeekNumber = getWeekNumber(new Date(currentDate_.getFullYear(), currentDate_.getMonth() + 1, 0));
-                    daysInMonth.push(
-                        <Col key={`empty-end-${i}`} className="day empty">
-                            <Badge count={`W ${currentWeekNumber}`} style={{ backgroundColor: 'green' }} />
-                            <div className='daycount next-month'>{day}</div>
-                        </Col>
-                    );
-                } else {
-                    daysInMonth.push(
-                        <Col key={`empty-end-${i}`} className="day empty">
-                            <div className='daycount next-month'>{day}</div>
-                        </Col>
-                    );
-                }
-            }
-        }
-
-        return daysInMonth;
-    };
+        return days;
+    }, [currentDate]);
 
     return (
-        <>
-            <Row className="calendar-days-of-week">
-                {renderDaysOfWeek()}
-            </Row>
-            <Row className="calendar-days">
-                {renderDaysOfMonth()}
-            </Row>
-        </>
+        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            {/* Day-of-week header */}
+            <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)',
+                borderBottom: '1px solid #e2e8f0',
+            }}>
+                {DOW.map((d, i) => (
+                    <div key={d} style={{
+                        padding: '12px 0', textAlign: 'center',
+                        borderRight: i < 6 ? '1px solid #e2e8f0' : 'none',
+                    }}>
+                        <Text style={{
+                            fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            color: i >= 5 ? '#94a3b8' : '#64748b',
+                        }}>
+                            {d}
+                        </Text>
+                    </div>
+                ))}
+            </div>
+
+            {/* Day grid */}
+            <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+                background: '#fff',
+            }}>
+                {gridDays.map((day, i) => {
+                    const isCurrentMonth = day.month() === current.month();
+                    const isToday = day.isSame(today, 'day');
+                    const isWeekend = day.isoWeekday() >= 6;
+                    const dayEvents = getEventsForDate(day);
+                    const col = i % 7;
+
+                    return (
+                        <div
+                            key={day.toString()}
+                            style={{
+                                minHeight: '110px',
+                                padding: '8px 6px 6px',
+                                borderRight: col < 6 ? '1px solid #f1f5f9' : 'none',
+                                borderBottom: '1px solid #f1f5f9',
+                                background: isToday
+                                    ? '#f0f7ff'
+                                    : !isCurrentMonth
+                                        ? '#fafafa'
+                                        : isWeekend
+                                            ? '#fdfcff'
+                                            : '#fff',
+                                transition: 'background 0.15s',
+                                position: 'relative',
+                                cursor: 'default',
+                            }}
+                            onMouseEnter={e => {
+                                if (!isToday) e.currentTarget.style.background = '#f8fafc';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = isToday
+                                    ? '#f0f7ff'
+                                    : !isCurrentMonth ? '#fafafa'
+                                    : isWeekend ? '#fdfcff'
+                                    : '#fff';
+                            }}
+                        >
+                            {/* Day number */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '6px' }}>
+                                <div style={{
+                                    width: '26px', height: '26px',
+                                    borderRadius: '50%',
+                                    background: isToday ? '#1272bf' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <Text style={{
+                                        fontSize: '13px',
+                                        fontWeight: isToday ? 700 : isCurrentMonth ? 500 : 400,
+                                        color: isToday ? '#fff' : isCurrentMonth ? '#1e293b' : '#c1c9d4',
+                                    }}>
+                                        {day.date()}
+                                    </Text>
+                                </div>
+                            </div>
+
+                            {/* Events */}
+                            <div>
+                                {dayEvents.slice(0, 2).map(ev => (
+                                    isCurrentMonth
+                                        ? <EventPill key={ev.id} event={ev} />
+                                        : null
+                                ))}
+                                {isCurrentMonth && dayEvents.length > 2 && (
+                                    <Tooltip
+                                        title={<TooltipContent events={dayEvents} />}
+                                        overlayInnerStyle={{ background: '#fff', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
+                                        color="#fff"
+                                        placement="top"
+                                    >
+                                        <div style={{
+                                            fontSize: '11px', fontWeight: 600,
+                                            color: '#1272bf', background: '#eff6ff',
+                                            padding: '2px 6px', borderRadius: '5px',
+                                            cursor: 'pointer', display: 'inline-block',
+                                            border: '1px solid #bfdbfe',
+                                        }}>
+                                            +{dayEvents.length - 2} more
+                                        </div>
+                                    </Tooltip>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 };
 

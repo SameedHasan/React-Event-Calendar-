@@ -1,5 +1,4 @@
-// src/components/Calendar.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import CalenderHeader from './CalenderHeader';
 import CalenderMonthView from './CalenderMonthView';
 import useCalendarStore from './store/useCalendarStore';
@@ -8,23 +7,48 @@ import CalenderDayView from './CalenderDayView';
 import CalenderListView from './CalenderListView';
 import CalenderYearView from './CalenderYearView';
 
+/**
+ * <Calendar> — the main component.
+ *
+ * Props
+ * ─────
+ * events       {Array}   Required. Array of event objects. Each event:
+ *                        { id, title, start (Date), end (Date),
+ *                          type ('Video'|'Audio'|'Inperson'), description }
+ *
+ * defaultView  {string}  Optional. Initial view: 'month'|'week'|'day'|'list'|'year'
+ *                        Defaults to 'month'.
+ */
+const Calendar = ({ events = [], defaultView = 'month' }) => {
+    const { view, setEvents, setView } = useCalendarStore();
 
-const Calendar = () => {
-    const { view } = useCalendarStore();
+    // Seed the store whenever the events prop changes
+    useEffect(() => {
+        setEvents(events);
+    }, [events, setEvents]);
+
+    // Apply defaultView only on first mount
+    useEffect(() => {
+        if (defaultView && defaultView !== 'month') {
+            setView(defaultView);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
-        <div style={{ margin: "20px 16px", padding: "20px", height: `calc(100vh - 104px)`, overflow: "auto", backgroundColor: "var(--white-color)" }}>
+        <div style={{
+            margin: '20px 16px',
+            padding: '20px',
+            height: 'calc(100vh - 104px)',
+            overflow: 'auto',
+            backgroundColor: 'var(--white-color)',
+        }}>
             <CalenderHeader />
-            {view === "month" &&
-                <CalenderMonthView />
-            }
-            {view === "week" &&
-                <DaysOfWeek />}
-            {view === "day" &&
-                <CalenderDayView />}
-            {view === "list" &&
-                <CalenderListView />}
-            {view === "year" &&
-                <CalenderYearView />}
+            {view === 'month' && <CalenderMonthView />}
+            {view === 'week'  && <DaysOfWeek />}
+            {view === 'day'   && <CalenderDayView />}
+            {view === 'list'  && <CalenderListView />}
+            {view === 'year'  && <CalenderYearView />}
         </div>
     );
 };

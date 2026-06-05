@@ -35,6 +35,7 @@ const useCalendarStore = create((set, get) => ({
     },
     currentWeek: new Date().toISOString(),
     currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1, // Convert to Monday-first (0=Mon, 6=Sun)
+    events: [], // Populated via setEvents — pass your own events array as a prop
 
     // Actions
     previousMonth: () => {
@@ -65,12 +66,16 @@ const useCalendarStore = create((set, get) => ({
         set({ currentDate: newDate.toISOString() });
     },
 
-    setCurrentDate: () => {
-        set({ currentDate: new Date().toISOString() });
+    setCurrentDate: (date) => {
+        set({ currentDate: date ? new Date(date).toISOString() : new Date().toISOString() });
     },
 
     setView: (view) => {
         set({ view });
+    },
+
+    setEvents: (events) => {
+        set({ events: Array.isArray(events) ? events : [] });
     },
 
     setWeekRange: (weekRange) => {

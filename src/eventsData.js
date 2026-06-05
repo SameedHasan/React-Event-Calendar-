@@ -187,6 +187,30 @@ const eventsData = [
     ev(121, 'Lunch Break',          2026, 5,  5, 13, 14, 'Social',      'Lunch with colleagues'),
     ev(122, 'Client Call',          2026, 5,  5, 14, 15, 'Call',        'Project discussion with client'),
     ev(123, 'Code Review',          2026, 5,  6,  9, 10, 'Review',      'Review pull requests'),
+    {
+        id: 201,
+        title: 'Global Developer Conference',
+        start: new Date(2026, 5, 2, 9, 0),
+        end: new Date(2026, 5, 4, 18, 0),
+        type: 'Conference',
+        description: 'Annual global developer conference and keynote'
+    },
+    {
+        id: 202,
+        title: 'Overnight Code-a-Thon',
+        start: new Date(2026, 5, 4, 22, 0),
+        end: new Date(2026, 5, 5, 3, 0),
+        type: 'Workshop',
+        description: 'Overnight collaborative hack and coding challenge'
+    },
+    {
+        id: 203,
+        title: 'Strategy & Leadership Retreat',
+        start: new Date(2026, 5, 8, 8, 0),
+        end: new Date(2026, 5, 12, 17, 0),
+        type: 'Planning',
+        description: 'Offsite planning and strategy formulation'
+    },
     ev(124, 'Sprint Review',        2026, 5,  9, 14, 15, 'Review',      'Sprint 4 review'),
     ev(125, 'Mid-Year Planning',    2026, 5, 15, 10, 12, 'Planning',    'Mid-year planning session'),
     ev(126, 'Team Retreat',         2026, 5, 19,  9, 17, 'Social',      'Annual team retreat'),

@@ -4,6 +4,7 @@ import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -13,16 +14,16 @@ const HOUR_HEIGHT = 56; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-
 const DOW_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const WeekEventBlock = ({ event, dayStart }) => {
     const cfg = getEventStyle(event);
-    const startMinutes = dayjs(event.start).hour() * 60 + dayjs(event.start).minute() - START_HOUR * 60;
-    const rawDuration = dayjs(event.end).diff(dayjs(event.start), 'minute');
-    const durationMinutes = Math.min(rawDuration, (TOTAL_HOURS * 60) - startMinutes); // cap at grid end
+    const segment = getEventDaySegment(event, dayStart);
+    if (!segment) return null;
+
+    const startMinutes = segment.start.hour() * 60 + segment.start.minute() - START_HOUR * 60;
     const top = (startMinutes / 60) * HOUR_HEIGHT;
-    const height = Math.max((durationMinutes / 60) * HOUR_HEIGHT, 22);
+    const height = Math.max((segment.durationMinutes / 60) * HOUR_HEIGHT, 22);
 
     return (
         <div style={{
@@ -93,8 +94,69 @@ const DaysOfWeek = () => {
     }, []);
 
     const getEventsForDay = (day) =>
-        events.filter(ev => dayjs(ev.start).isSame(day, 'day'))
+        events.filter(ev => isEventOnDay(ev, day) && !isAllDayOrMultiDay(ev))
                .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    const hasAllDayEvents = useMemo(() => {
+        return events.some(ev => isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day)));
+    }, [events, weekDays]);
+
+    const monday = weekDays[0];
+
+    const { allDayEventsWithLayout, allDayTracks } = useMemo(() => {
+        if (!hasAllDayEvents) {
+            return { allDayEventsWithLayout: [], allDayTracks: [] };
+        }
+        // 1. Get all-day events overlapping with this week
+        const weekAllDayEvents = events.filter(ev =>
+            isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day))
+        );
+
+        // 2. Sort by start date (earlier start goes first) and then by duration (longer first)
+        const sorted = [...weekAllDayEvents].sort((a, b) => {
+            const diffStart = dayjs(a.start).diff(dayjs(b.start));
+            if (diffStart !== 0) return diffStart;
+            return dayjs(b.end).diff(dayjs(b.start)) - dayjs(a.end).diff(dayjs(a.start));
+        });
+
+        // 3. Assign tracks
+        const tracks = [];
+        const layout = sorted.map(event => {
+            const startCol = dayjs(event.start).isBefore(monday, 'day')
+                ? 0
+                : dayjs(event.start).diff(monday, 'day');
+            const endCol = dayjs(event.end).isAfter(weekDays[6], 'day')
+                ? 6
+                : dayjs(event.end).diff(monday, 'day');
+
+            let trackIndex = 0;
+            while (true) {
+                if (!tracks[trackIndex]) {
+                    tracks[trackIndex] = [];
+                }
+                const hasOverlap = tracks[trackIndex].some(item =>
+                    !(endCol < item.startCol || startCol > item.endCol)
+                );
+                if (!hasOverlap) {
+                    tracks[trackIndex].push({ startCol, endCol });
+                    break;
+                }
+                trackIndex++;
+            }
+
+            return {
+                event,
+                track: trackIndex,
+                startCol,
+                endCol
+            };
+        });
+
+        return {
+            allDayEventsWithLayout: layout,
+            allDayTracks: tracks
+        };
+    }, [events, weekDays, monday, hasAllDayEvents]);
 
     // Current time indicator
     const now = dayjs();
@@ -149,7 +211,75 @@ const DaysOfWeek = () => {
                         </div>
                     );
                 })}
+                {/* Scrollbar spacer to align with body */}
+                <div style={{ width: '8px', flexShrink: 0 }} />
             </div>
+
+            {/* All-Day Events row */}
+            {hasAllDayEvents && (
+                <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0, position: 'relative' }}>
+                    <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #e2e8f0' }}>
+                        <Text style={{ fontSize: '9px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', textAlign: 'center', lineHeight: 1 }}>All-day</Text>
+                    </div>
+
+                    <div style={{ flex: 1, position: 'relative', height: `${allDayTracks.length * 28 + 12}px` }}>
+                        {/* Background Column Dividers */}
+                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', pointerEvents: 'none' }}>
+                            {Array.from({ length: 7 }).map((_, idx) => (
+                                <div key={idx} style={{ flex: 1, borderRight: idx < 6 ? '1px solid #e2e8f0' : 'none' }} />
+                            ))}
+                        </div>
+
+                        {/* Spanning Event Bars */}
+                        {allDayEventsWithLayout.map(({ event, track, startCol, endCol }) => {
+                            const style = getEventStyle(event);
+                            const leftPct = (startCol / 7) * 100;
+                            const widthPct = ((endCol - startCol + 1) / 7) * 100;
+
+                            return (
+                                <div
+                                    key={event.id}
+                                    style={{
+                                        position: 'absolute',
+                                        top: `${track * 28 + 6}px`,
+                                        left: `calc(${leftPct}% + 4px)`,
+                                        width: `calc(${widthPct}% - 8px)`,
+                                        height: '22px',
+                                        background: style.bg,
+                                        border: `1px solid ${style.border}`,
+                                        borderLeft: `4px solid ${style.color}`,
+                                        borderRadius: '4px',
+                                        padding: '0 8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        boxSizing: 'border-box',
+                                        cursor: 'pointer',
+                                        zIndex: 10,
+                                    }}
+                                    title={`${event.title} - ${event.description || ''}`}
+                                >
+                                    <Text style={{
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        color: '#1e293b',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        {event.title}
+                                    </Text>
+                                    <span style={{ fontSize: '10px', color: style.color, fontWeight: 700, flexShrink: 0, marginLeft: '6px' }}>
+                                        {event.type}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {/* Scrollbar spacer to align with body */}
+                    <div style={{ width: '8px', flexShrink: 0 }} />
+                </div>
+            )}
 
             {/* Scrollable grid body */}
             <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: '#fff' }}>

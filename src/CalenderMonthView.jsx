@@ -4,6 +4,7 @@ import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
+import { isEventOnDay } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -11,13 +12,14 @@ const { Text } = Typography;
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-const TooltipContent = ({ events }) => (
+const TooltipContent = ({ events, day }) => (
     <div style={{ padding: '2px 0' }}>
         <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: '#1e293b' }}>
             All Events ({events.length})
         </div>
         {events.map(ev => {
             const cfg = getEventStyle(ev);
+            const isStartDay = dayjs(ev.start).isSame(day, 'day');
             return (
                 <div key={ev.id} style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
@@ -27,15 +29,18 @@ const TooltipContent = ({ events }) => (
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b', flex: 1 }}>{ev.title}</span>
                     <span style={{ fontSize: '11px', color: cfg.color, fontWeight: 600 }}>{ev.type}</span>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>{dayjs(ev.start).format('h:mm A')}</span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                        {isStartDay ? dayjs(ev.start).format('h:mm A') : '← Cont.'}
+                    </span>
                 </div>
             );
         })}
     </div>
 );
 
-const EventPill = ({ event }) => {
+const EventPill = ({ event, day }) => {
     const cfg = getEventStyle(event);
+    const isStartDay = dayjs(event.start).isSame(day, 'day');
     return (
         <div style={{
             display: 'flex', alignItems: 'center', gap: '4px',
@@ -56,7 +61,7 @@ const EventPill = ({ event }) => {
                 {event.title}
             </Text>
             <Text style={{ fontSize: '10px', color: '#64748b', flexShrink: 0 }}>
-                {dayjs(event.start).format('h:mm')}
+                {isStartDay ? dayjs(event.start).format('h:mm A') : '← Cont.'}
             </Text>
         </div>
     );
@@ -68,7 +73,7 @@ const CalenderMonthView = () => {
     const current = dayjs(currentDate);
 
     const getEventsForDate = (date) =>
-        events.filter(ev => dayjs(ev.start).isSame(date, 'day'))
+        events.filter(ev => isEventOnDay(ev, date))
                .sort((a, b) => new Date(a.start) - new Date(b.start));
 
     // Build grid: days from Mon of week containing 1st to Sun of week containing last
@@ -174,12 +179,12 @@ const CalenderMonthView = () => {
                             <div>
                                 {dayEvents.slice(0, 2).map(ev => (
                                     isCurrentMonth
-                                        ? <EventPill key={ev.id} event={ev} />
+                                        ? <EventPill key={ev.id} event={ev} day={day} />
                                         : null
                                 ))}
                                 {isCurrentMonth && dayEvents.length > 2 && (
                                     <Tooltip
-                                        title={<TooltipContent events={dayEvents} />}
+                                        title={<TooltipContent events={dayEvents} day={day} />}
                                         overlayInnerStyle={{ background: '#fff', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
                                         color="#fff"
                                         placement="top"

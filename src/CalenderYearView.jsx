@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
+import { isEventOnDay } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -27,16 +28,19 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
     // Build a map: "YYYY-MM-DD" -> [events]
     const eventMap = useMemo(() => {
         const map = {};
-        eventsForYear.forEach(event => {
-            const d = dayjs(event.start);
-            if (d.month() === monthNumber && d.year() === year) {
-                const key = d.format('YYYY-MM-DD');
-                if (!map[key]) map[key] = [];
-                map[key].push(event);
+        days.forEach(day => {
+            if (day.month() === monthNumber && day.year() === year) {
+                const key = day.format('YYYY-MM-DD');
+                eventsForYear.forEach(event => {
+                    if (isEventOnDay(event, day)) {
+                        if (!map[key]) map[key] = [];
+                        map[key].push(event);
+                    }
+                });
             }
         });
         return map;
-    }, [eventsForYear, year, monthNumber]);
+    }, [eventsForYear, days, year, monthNumber]);
 
     const totalEvents = Object.values(eventMap).reduce((sum, arr) => sum + arr.length, 0);
 
@@ -299,9 +303,13 @@ const CalenderYearView = () => {
     const isCurrentYear = today.year() === currentYear;
     const currentMonth = today.month();
 
-    // Filter events for the current year
+    // Filter events for the current year (including events that span across this year)
     const eventsForYear = useMemo(() => {
-        return events.filter(e => dayjs(e.start).year() === currentYear);
+        return events.filter(e => {
+            const startYear = dayjs(e.start).year();
+            const endYear = dayjs(e.end).year();
+            return startYear <= currentYear && endYear >= currentYear;
+        });
     }, [currentYear, events]);
 
     const totalYearEvents = eventsForYear.length;

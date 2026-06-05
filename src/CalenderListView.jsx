@@ -5,25 +5,27 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
+import { isEventOnDay } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
 const { Text, Title } = Typography;
 
 const getDayEvents = (date, events) => {
-    return events.filter(event => {
-        const eventDate = dayjs(event.start);
-        return (
-            eventDate.date() === date.date() &&
-            eventDate.month() === date.month() &&
-            eventDate.year() === date.year()
-        );
-    });
+    return events.filter(event => isEventOnDay(event, date));
 };
 
-const EventCard = ({ event, isFirst }) => {
+const EventCard = ({ event, isFirst, date }) => {
     const config = getEventStyle(event);
-    const duration = dayjs(event.end).diff(dayjs(event.start), 'minute');
+    const dayStart = dayjs(date).startOf('day');
+    const dayEnd = dayjs(date).endOf('day');
+    const eventStart = dayjs(event.start);
+    const eventEnd = dayjs(event.end);
+
+    const isSpanningFromPrev = eventStart.isBefore(dayStart);
+    const isSpanningToNext = eventEnd.isAfter(dayEnd);
+
+    const duration = eventEnd.diff(eventStart, 'minute');
     const hours = Math.floor(duration / 60);
     const mins = duration % 60;
     const durationStr = hours > 0
@@ -58,13 +60,18 @@ const EventCard = ({ event, isFirst }) => {
             }}
         >
             {/* Time column */}
-            <div style={{ minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <Text style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
-                    {dayjs(event.start).format('h:mm A')}
+            <div style={{ minWidth: '95px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
+                <Text style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>
+                    {isSpanningFromPrev ? eventStart.format('MMM D, h:mm A') : eventStart.format('h:mm A')}
                 </Text>
                 <Text style={{ fontSize: '11px', color: '#94a3b8' }}>
-                    {dayjs(event.end).format('h:mm A')}
+                    {isSpanningToNext ? eventEnd.format('MMM D, h:mm A') : eventEnd.format('h:mm A')}
                 </Text>
+                {(isSpanningFromPrev || isSpanningToNext) && (
+                    <Text style={{ fontSize: '9px', color: '#e11d48', fontWeight: 700, textTransform: 'uppercase', marginTop: '2px' }}>
+                        Spanning
+                    </Text>
+                )}
             </div>
 
             {/* Divider */}
@@ -190,7 +197,7 @@ const DaySection = ({ date, events, isToday }) => {
                 {dayEvents
                     .sort((a, b) => new Date(a.start) - new Date(b.start))
                     .map((event, i) => (
-                        <EventCard key={event.id} event={event} isFirst={i === 0} />
+                        <EventCard key={event.id} event={event} isFirst={i === 0} date={date} />
                     ))}
             </div>
         </div>
@@ -218,10 +225,7 @@ const CalenderListView = () => {
     // Summary stats for the week
     const weekEvents = useMemo(() => {
         return events.filter(event => {
-            const d = dayjs(event.start);
-            return weekDays.some(wd =>
-                wd.date() === d.date() && wd.month() === d.month() && wd.year() === d.year()
-            );
+            return weekDays.some(wd => isEventOnDay(event, wd));
         });
     }, [weekDays, events]);
 

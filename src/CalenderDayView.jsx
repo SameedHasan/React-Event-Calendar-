@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -14,15 +15,15 @@ const HOUR_HEIGHT = 64; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-const DayEventBlock = ({ event }) => {
+const DayEventBlock = ({ event, currentDate }) => {
     const cfg = getEventStyle(event);
-    const startMin = dayjs(event.start).hour() * 60 + dayjs(event.start).minute();
-    const endMin = dayjs(event.end).hour() * 60 + dayjs(event.end).minute();
+    const segment = getEventDaySegment(event, currentDate);
+    if (!segment) return null;
+
+    const startMin = segment.start.hour() * 60 + segment.start.minute();
     const top = ((startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT;
-    const rawDuration = endMin - startMin;
-    const safeDuration = Math.min(rawDuration, TOTAL_HOURS * 60 - startMin); // cap at grid end
-    const height = Math.max((safeDuration / 60) * HOUR_HEIGHT, 28);
-    const durationMin = endMin - startMin;
+    const height = Math.max((segment.durationMinutes / 60) * HOUR_HEIGHT, 28);
+    const durationMin = segment.durationMinutes;
     const durationStr = durationMin >= 60
         ? `${Math.floor(durationMin / 60)}h${durationMin % 60 > 0 ? ` ${durationMin % 60}m` : ''}`
         : `${durationMin}m`;
@@ -140,8 +141,13 @@ const CalenderDayView = () => {
 
     const dayEvents = useMemo(() =>
         events
-            .filter(ev => dayjs(ev.start).isSame(currentDate, 'day'))
+            .filter(ev => isEventOnDay(ev, currentDate) && !isAllDayOrMultiDay(ev))
             .sort((a, b) => new Date(a.start) - new Date(b.start)),
+        [currentDate, events]
+    );
+
+    const allDayEvents = useMemo(() =>
+        events.filter(ev => isEventOnDay(ev, currentDate) && isAllDayOrMultiDay(ev)),
         [currentDate, events]
     );
 
@@ -204,14 +210,63 @@ const CalenderDayView = () => {
                     </div>
                     <Text style={{ fontSize: '13px', color: '#64748b' }}>
                         {currentDate.format('MMMM D, YYYY')}
-                        {dayEvents.length > 0 && (
+                        {(dayEvents.length + allDayEvents.length) > 0 && (
                             <span style={{ marginLeft: '8px', color: '#1272bf', fontWeight: 600 }}>
-                                · {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
+                                · {dayEvents.length + allDayEvents.length} event{(dayEvents.length + allDayEvents.length) !== 1 ? 's' : ''}
                             </span>
                         )}
                     </Text>
                 </div>
             </div>
+
+            {/* All-Day Events row */}
+            {allDayEvents.length > 0 && (
+                <div style={{
+                    padding: '10px 16px',
+                    background: '#f8fafc',
+                    borderBottom: '1px solid #e2e8f0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                    flexShrink: 0,
+                }}>
+                    <Text style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        All-day & Spanning Events
+                    </Text>
+                    {allDayEvents.map(event => {
+                        const style = getEventStyle(event);
+                        return (
+                            <div key={event.id} style={{
+                                background: style.bg,
+                                border: `1px solid ${style.border}`,
+                                borderLeft: `4px solid ${style.color}`,
+                                borderRadius: '6px',
+                                padding: '6px 12px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Text style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                                        {event.title}
+                                    </Text>
+                                    {event.description && (
+                                        <Text style={{ fontSize: '11px', color: '#64748b' }}>
+                                            — {event.description}
+                                        </Text>
+                                    )}
+                                </div>
+                                <Tag style={{
+                                    margin: 0, fontSize: '10px', borderRadius: '6px',
+                                    background: style.bg, borderColor: style.border, color: style.color, fontWeight: 600,
+                                }}>
+                                    {event.type}
+                                </Tag>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Scrollable time grid */}
             <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#fff', position: 'relative' }}>
@@ -255,7 +310,7 @@ const CalenderDayView = () => {
 
                         {/* Events */}
                         {dayEvents.map(ev => (
-                            <DayEventBlock key={ev.id} event={ev} />
+                            <DayEventBlock key={ev.id} event={ev} currentDate={currentDate} />
                         ))}
 
                         {/* Current time indicator */}
@@ -283,7 +338,7 @@ const CalenderDayView = () => {
                         )}
 
                         {/* Empty state */}
-                        {dayEvents.length === 0 && (
+                        {dayEvents.length === 0 && allDayEvents.length === 0 && (
                             <div style={{
                                 position: 'absolute', top: '50%', left: '50%',
                                 transform: 'translate(-50%, -50%)',

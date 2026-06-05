@@ -9,8 +9,14 @@ Ready to be dropped into any React application or published directly as a standa
 ## ✨ Features
 
 - 📅 **5 Interactive Views**: Standard Month, Time-Grid Week (Monday-first), Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
+- 🔗 **Advanced Spanning & Overnight Support**:
+  - **Month View**: Renders multi-day events as continuous horizontal solid-colored spanning bars across columns, and single-day events as transparent rows with colored dots.
+  - **Week View**: Features a sticky **All-day** row showing multi-day events as continuous spanning bars aligned perfectly with the column grid.
+  - **Day View**: Includes a dedicated header section for **All-day & Spanning Events**.
+  - **List View**: Spans overnight and multi-day events across dates, displaying relative times (e.g. including dates on boundary days) and a custom `SPANNING` tag.
+  - **Contextual Continuation Labels**: Spanning segments rendered on subsequent days automatically display a `← Cont.` (Continuation) label instead of original start times.
 - 🎨 **Dynamic Color Hash Engine**: Pass any custom string category as the event `type` (e.g. `'Workshop'`, `'Review'`, `'Sync'`) and the suite automatically generates a consistent, modern HSL-based style palette (text, background, border) for it. Custom colors can also be specified per-event.
-- 📐 **Pure CSS Grid & Flexbox**: Replaced rigid and heavy UI libraries with a light, highly responsive, native CSS Grid design layout.
+- 📐 **Pure CSS Grid & Flexbox**: Built with high performance in mind, using a fully responsive, native CSS Grid design. Synchronized layouts ensure sticky headers, all-day rows, and grid columns align perfectly under uniform scrollbar rules.
 - 🚀 **Prop-Driven State Engine**: Completely data-agnostic. Manage calendar data globally by simply changing the `events` array prop. Powered internally by a lightweight Zustand store.
 - 🔍 **Tooltips & Detailed Aggregates**: Auto-calculating status legends, busy metrics, real-time current time tracker lines, and clean tooltip overlays for overlapping event blocks.
 

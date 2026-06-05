@@ -20,6 +20,24 @@ Ready to be dropped into any React application or published directly as a standa
 - 📐 **Pure CSS Grid & Flexbox**: Built with high performance in mind, using a fully responsive, native CSS Grid design. Synchronized layouts ensure sticky headers, all-day rows, and grid columns align perfectly under uniform scrollbar rules.
 - 🚀 **Prop-Driven State Engine**: Completely data-agnostic. Manage calendar data globally by simply changing the `events` array prop. Powered internally by a lightweight Zustand store.
 - 🔍 **Tooltips & Detailed Aggregates**: Auto-calculating status legends, busy metrics, real-time current time tracker lines, and clean tooltip overlays for overlapping event blocks.
+- ⌨️ **Keyboard Shortcuts**: Built-in keyboard navigation for fast, mouse-free control — switch views, navigate periods, and jump to today instantly.
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+The calendar includes built-in keyboard shortcuts for efficient navigation. Shortcuts are automatically disabled when focus is inside an input, textarea, or editable element.
+
+| Key | Action |
+| :--- | :--- |
+| `T` | Jump to today |
+| `M` | Switch to Month view |
+| `W` | Switch to Week view |
+| `D` | Switch to Day view |
+| `L` | Switch to List view |
+| `Y` | Switch to Year view |
+| `←` | Navigate to previous period (month/week/day depending on current view) |
+| `→` | Navigate to next period |
 
 ---
 

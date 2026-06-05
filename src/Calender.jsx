@@ -6,6 +6,7 @@ import DaysOfWeek from './DaysOfWeek';
 import CalenderDayView from './CalenderDayView';
 import CalenderListView from './CalenderListView';
 import CalenderYearView from './CalenderYearView';
+import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 
 /**
  * <Calendar> — the main component.
@@ -21,6 +22,9 @@ import CalenderYearView from './CalenderYearView';
  */
 const Calendar = ({ events = [], defaultView = 'month', startOfWeek = 'monday', timeFormat = '12h' }) => {
     const { view, setEvents, setView, setStartOfWeek, setTimeFormat } = useCalendarStore();
+
+    // Activate keyboard shortcuts
+    useKeyboardShortcuts();
 
     // Seed the store whenever the events prop changes
     useEffect(() => {

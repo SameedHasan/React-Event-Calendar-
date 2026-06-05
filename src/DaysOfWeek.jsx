@@ -37,7 +37,7 @@ const DaysOfWeek = () => {
         const end = new Date(date);
         const day = start.getDay(); // 0 = Sunday, 1 = Monday, etc.
         const mondayOffset = day === 0 ? -6 : 1 - day; // Convert to Monday-first
-        
+
         start.setDate(start.getDate() + mondayOffset); // Set to Monday
         end.setDate(start.getDate() + 6); // Set to Sunday
 
@@ -76,7 +76,7 @@ const DaysOfWeek = () => {
         const dateTime = combineDateAndTime(date, time);
         const nextHour = new Date(dateTime);
         nextHour.setHours(nextHour.getHours() + 1);
-        
+
         return eventsData.filter(event => {
             return event.start >= dateTime && event.start < nextHour;
         });
@@ -101,9 +101,9 @@ const DaysOfWeek = () => {
                     <Typography.Text className='fs-12 fw-500'>Weeks {weekRange?.count}</Typography.Text>
                 </Col>
                 {daysOfWeek.map((day, index) => (
-                    <Col span={3} key={index} className="day-of-week" style={{ backgroundColor: dayjs(displayedDates[index]).format('DD MM YYYY') === dayjs().format('DD MM YYYY') && "rgba(34, 99, 167, 0.07)" }}>
+                    <Col span={3} key={index} className="day-of-week" style={{ backgroundColor: dayjs(displayedDates[index]).format('DD MM YYYY') === dayjs().format('DD MM YYYY') && "rgb(255 255 255)" }}>
                         <Typography.Text style={{ color: today === index ? 'black' : 'inherit' }}>
-                            {day} 
+                            {day}
                         </Typography.Text>
                         {/* <div>{dayjs(displayedDates[index]).format('DD')}</div> */}
                     </Col>
@@ -112,7 +112,7 @@ const DaysOfWeek = () => {
                     <Typography.Text className='fs-12 fw-500'>All Days</Typography.Text>
                 </Col>
                 {daysOfWeek.map((day, index) => (
-                    <Col span={3} key={`date-${index}`} className="day-of-week week" style={{ backgroundColor: dayjs(displayedDates[index]).format('DD MM YYYY') === dayjs().format('DD MM YYYY') && "rgba(34, 99, 167, 0.07)" }}>
+                    <Col span={3} key={`date-${index}`} className="day-of-week week" style={{ backgroundColor: dayjs(displayedDates[index]).format('DD MM YYYY') === dayjs().format('DD MM YYYY') && "rgb(255 255 255)" }}>
                         <Typography.Text>{dayjs(displayedDates[index]).format('DD')}</Typography.Text>
                     </Col>
                 ))}
@@ -124,17 +124,21 @@ const DaysOfWeek = () => {
                         {displayedDates.map((date, dayIndex) => {
                             const dayEvents = getEventsForDateTime(new Date(date), time);
                             return (
-                                <Col 
-                                    span={3} 
-                                    key={`${index}-${dayIndex}`} 
-                                    className="day-of-week week" 
-                                    style={{ backgroundColor: dayjs(date).format('DD MM YYYY') === dayjs().format('DD MM YYYY') && "rgba(34, 99, 167, 0.07)" }}
+                                <Col
+                                    span={3}
+                                    key={`${index}-${dayIndex}`}
+                                    className='day-of-week week'
+                                    style={{
+                                        backgroundColor:
+                                            dayjs(date).format('DD MM YYYY') ===
+                                            dayjs().format('DD MM YYYY') && 'rgb(255 255 255)',
+                                    }}
                                 >
                                     {dayEvents.map((event, eventIndex) => (
-                                        <div 
+                                        <div
                                             key={eventIndex}
-                                            className={event.type === "Video" ? "listStyleVideo1" : event.type === "Audio" ? "listStyleAudio1" : "listStyleInperson1"}
-                                            style={{ textTransform: "capitalize", marginBottom: '2px' }}
+                                            className='listStyle'
+                                            style={{ textTransform: 'capitalize', marginBottom: '2px' }}
                                         >
                                             {event.title}
                                         </div>

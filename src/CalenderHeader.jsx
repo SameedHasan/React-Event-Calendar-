@@ -1,9 +1,9 @@
 import { LeftOutlined, RightOutlined, AimOutlined } from '@ant-design/icons';
-import { Button, Col, Row, Space, Typography, Select } from 'antd';
+import { Button, Col, Row, Space, Typography, Select, Flex } from 'antd';
 import React, { useMemo } from 'react';
 import dayjs from 'dayjs';
 import useCalendarStore from './store/useCalendarStore';
-
+const { Title } = Typography;
 function CalendarHeader() {
     const {
         currentDate,
@@ -102,9 +102,8 @@ function CalendarHeader() {
         const handlers = navigationHandlers[view];
         if (!handlers) return null;
 
-        const buttonStyle = view === 'month' || view === 'year'
-            ? { border: 'none', minWidth: '50px' }
-            : {};
+        const buttonStyle = { border: 'none', minWidth: '50px' }
+
 
         return (
             <Space.Compact>
@@ -127,50 +126,29 @@ function CalendarHeader() {
     };
 
     return (
-        <Row className='mb-24' style={{ display: 'flex', alignItems: 'center' }}>
-            <Col span={12}>
-                <NavigationButtons />
+        <Row>
+            <Col span={24}>
+                <Flex gap={30} align='center'>
+                    <Title level={1}>{titleContent}</Title>
+                    <Flex align='center' gap={12}>
+                        <Select
+                            value={view}
+                            onChange={setView}
+                            options={[
+                                { value: 'month', label: 'Month View' },
+                                { value: 'week', label: 'Week View' },
+                                { value: 'day', label: 'Day View' },
+                                { value: 'list', label: 'List View' },
+                                { value: 'year', label: 'Year View' },
+                            ]}
+                        />
+                        <NavigationButtons />
+                        <Button shape='circle' 
+                            type="primary" 
+                            icon={<AimOutlined />} onClick={goToToday} title='Go to Today' />
+                    </Flex>
+                </Flex>
             </Col>
-
-            <Col span={6} className='text-center'>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                    <Typography.Title level={4} className='mb-0' style={{ textAlign: "center", margin: 0 }}>
-                        {titleContent}
-                    </Typography.Title>
-                    <Button
-                        type="primary"
-                        shape="circle"
-                        icon={<AimOutlined />}
-                        onClick={goToToday}
-                        style={{
-                            width: '40px',
-                            height: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                        }}
-                        title="Go to Today"
-                    />
-                </div>
-            </Col>
-
-            <Col span={6} className='text-right'>
-                <Select
-                    value={view}
-                    onChange={setView}
-                    style={{ width: 200 }}
-                    options={[
-                        { value: 'month', label: 'Month View' },
-                        { value: 'week', label: 'Week View' },
-                        { value: 'day', label: 'Day View' },
-                        { value: 'list', label: 'List View' },
-                        { value: 'year', label: 'Year View' }
-                    ]}
-                />
-            </Col>
-
-
         </Row>
     );
 }

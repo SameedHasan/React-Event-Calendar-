@@ -1,6 +1,6 @@
 import React from 'react';
 import useCalendarStore from './store/useCalendarStore';
-import { Typography, Badge, Row, Col, Tag } from 'antd';
+import { Typography, Badge, Row, Col, Tag,Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import eventsData from './eventsData';
 
@@ -12,6 +12,25 @@ const getWeekNumber = (date) => {
     return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
 };
 
+// Function to create tooltip content for remaining events
+const getRemainingEventsTooltip = (dayEvents) => {
+    const remainingEvents = dayEvents.slice(1); // Skip the first event (already shown)
+    return (
+        <>
+            <p>Remaining Events ({remainingEvents.length})</p>
+            {remainingEvents.map((event, index) => (
+                <ul key={index}>
+                    <li>
+                        <span>{event.clientName || event.title}</span>
+                        <span className='time'>{dayjs(event.start).format('h:mm A')}</span>
+                    </li>
+                </ul>
+            ))}
+        </>
+    );
+};
+
+
 const CalenderMonthView = () => {
     const { currentDate } = useCalendarStore();
     const currentDate_ = new Date(currentDate);
@@ -21,8 +40,8 @@ const CalenderMonthView = () => {
         return eventsData.filter(event => {
             const eventDate = new Date(event.start);
             return eventDate.getDate() === date.getDate() &&
-                   eventDate.getMonth() === date.getMonth() &&
-                   eventDate.getFullYear() === date.getFullYear();
+                eventDate.getMonth() === date.getMonth() &&
+                eventDate.getFullYear() === date.getFullYear();
         });
     };
 
@@ -39,18 +58,18 @@ const CalenderMonthView = () => {
         const endOfMonth = new Date(currentDate_.getFullYear(), currentDate_.getMonth() + 1, 0);
         const daysInMonth = [];
         let currentWeekNumber = getWeekNumber(startOfMonth);
-        
+
         // Previous month days (Monday-first week)
         const startDay = startOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
         const mondayOffset = startDay === 0 ? 6 : startDay - 1; // Convert to Monday-first (0 = Monday)
-        
+
         for (let i = 0; i < mondayOffset; i++) {
             const daysBeforeStart = mondayOffset - i;
             const prevMonthDate = new Date(currentDate_.getFullYear(), currentDate_.getMonth(), -daysBeforeStart + 1);
             if (i === 0) {
                 daysInMonth.push(
                     <Col key={`empty-start-${i}`} className="day empty">
-                        <Tag color='geekblue' style={{ padding: "0px 10px", position: "absolute", left: 3, top: 3 }}>Week {currentWeekNumber}</Tag>
+                        {/* <Tag color='geekblue' style={{ padding: "0px 10px", position: "absolute", left: 3, top: 3 }}>Week {currentWeekNumber}</Tag> */}
                         <div className='daycount prev-month'>{prevMonthDate.getDate()}</div>
                     </Col>
                 );
@@ -62,7 +81,7 @@ const CalenderMonthView = () => {
                 );
             }
         }
-        
+
         // Current month days
         for (let day = 1; day <= endOfMonth.getDate(); day++) {
             const date = new Date(currentDate_.getFullYear(), currentDate_.getMonth(), day);
@@ -70,49 +89,67 @@ const CalenderMonthView = () => {
             const isToday = today.toDateString() === date.toDateString();
             const isMonday = date.getDay() === 1;
             const dayEvents = getEventsForDate(date);
-            
+
             if (isMonday) {
                 currentWeekNumber = getWeekNumber(date);
                 daysInMonth.push(
-                    <Col key={day} className="day" style={{ backgroundColor: isToday ? "#2263a712" : "" }}>
-                        <Tag color='geekblue' style={{ padding: "0px 10px", position: "absolute", left: 3, top: 3 }}>Week {currentWeekNumber}</Tag>
+                    <Col
+                        key={day}
+                        className='day'
+                        style={{ backgroundColor: isToday ? '#2263a712' : '' }}
+                    >
+                        {/* <Tag
+                      color='geekblue'
+                      style={{ padding: '0px 10px', position: 'absolute', left: 3, top: 3 }}
+                    >
+                      Week {currentWeekNumber}
+                    </Tag> */}
                         <div className='daycount'>{day}</div>
-                        <ul style={{ marginTop: "12px" }}>
-                            {dayEvents.slice(0, 3).map((event, i) => (
-                                <li 
-                                    key={i} 
-                                    className={event.type === "Video" ? "listStyleVideo" : event.type === "Audio" ? "listStyleAudio" : "listStyleInperson"}
-                                    style={{ textTransform: "capitalize" }}
-                                >
-                                    {dayjs(event.start).format("h:mm A")} {event.title}
+                        <ul style={{ marginTop: '8px' }}>
+                            {dayEvents.slice(0, 1).map((event, i) => (
+                                <li key={i} className='listStyle ' style={{ textTransform: 'capitalize' }}>
+                                    {event.title}
+                                    <span>{dayjs(event.start).format('h:mm A')}</span>
                                 </li>
                             ))}
-                            {dayEvents.length > 3 && (
-                                <li className="listStyleInperson" style={{ textTransform: "capitalize" }}>
-                                    +{dayEvents.length - 3} more
-                                </li>
+                            {dayEvents.length > 1 && (
+                                <Tooltip
+                                    title={getRemainingEventsTooltip(dayEvents)}
+                                    placement="top"
+                                    overlayClassName='calendar-tooltip'
+                                >
+                                    <div className="listStyleSession" style={{ textTransform: "capitalize", cursor: 'pointer' }}>
+                                        +{dayEvents.length - 1} more
+                                    </div>
+                                </Tooltip>
                             )}
                         </ul>
                     </Col>
                 );
             } else {
                 daysInMonth.push(
-                    <Col key={day} className="day" style={{ backgroundColor: isToday ? "#2263a712" : "" }}>
-                        <div className='daycount'>{day}</div>
-                        <ul style={{ marginTop: "15px" }}>
-                            {dayEvents.slice(0, 3).map((event, i) => (
-                                <li 
-                                    key={i} 
-                                    className={event.type === "Video" ? "listStyleVideo" : event.type === "Audio" ? "listStyleAudio" : "listStyleInperson"}
-                                    style={{ textTransform: "capitalize" }}
-                                >
-                                    {dayjs(event.start).format("h:mm A")} {event.title}
+                    <Col
+                        key={day}
+                        className='day'
+                    >
+                        <div className={isToday ? 'selected daycount' : 'daycount'}>{day}</div>
+                        <ul style={{ marginTop: '8px' }}>
+                            {dayEvents.slice(0, 1).map((event, i) => (
+                                <li key={i} className='listStyle' style={{ textTransform: 'capitalize' }}>
+                                    {event.title}
+                                    <span>{dayjs(event.start).format('h:mm A')}</span>
                                 </li>
                             ))}
-                            {dayEvents.length > 3 && (
-                                <li className="listStyleInperson" style={{ textTransform: "capitalize" }}>
-                                    +{dayEvents.length - 3} more
-                                </li>
+                            {dayEvents.length > 1 && (
+                                <Tooltip
+                                    title={getRemainingEventsTooltip(dayEvents)}
+                                    placement="top"
+                                    overlayClassName='calendar-tooltip'
+                                >
+                                    <div className="listStyleSession" style={{ textTransform: "capitalize", cursor: 'pointer' }}>
+                                        +{dayEvents.length - 1} more
+                                    </div>
+                                </Tooltip>
                             )}
                         </ul>
                     </Col>
@@ -124,7 +161,7 @@ const CalenderMonthView = () => {
         const endDay = endOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
         const totalDaysInGrid = mondayOffset + endOfMonth.getDate(); // Total days already in grid
         const remainingDays = (7 - (totalDaysInGrid % 7)) % 7; // Days needed to complete the week
-        
+
         // Only add next month days if there are remaining days to complete the week
         if (remainingDays > 0) {
             for (let i = 0, day = 1; i < remainingDays; i++, day++) {

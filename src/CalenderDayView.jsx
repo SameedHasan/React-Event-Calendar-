@@ -43,7 +43,7 @@ const CalenderDayView = () => {
         const dateTime = combineDateAndTime(date, time);
         const nextHour = new Date(dateTime);
         nextHour.setHours(nextHour.getHours() + 1);
-        
+
         return eventsData.filter(event => {
             return event.start >= dateTime && event.start < nextHour;
         });
@@ -53,7 +53,7 @@ const CalenderDayView = () => {
         const weekNumber = dayjs(currentWeek).week();
         const start = dayjs(currentWeek).startOf('week').add(1, 'day').format('MMM D, YYYY'); // Monday
         const end = dayjs(currentWeek).endOf('week').add(1, 'day').format('MMM D, YYYY'); // Sunday
-        
+
         setWeekRange({
             count: weekNumber,
             range: `${start} - ${end}`
@@ -77,17 +77,18 @@ const CalenderDayView = () => {
                     const timeEvents = getEventsForDateTime(currentDate, time);
                     return (
                         <React.Fragment key={index}>
-                            <Col span={3} className="day-of-week week">
+                            <Col span={3} className='day-of-week week'>
                                 <Typography.Text className='fs-12'>{time}</Typography.Text>
                             </Col>
-                            <Col span={21} className="day-of-week week">
+                            <Col span={21} className='day-of-week week'>
                                 {timeEvents.map((event, eventIndex) => (
-                                    <div 
+                                    <div
                                         key={eventIndex}
-                                        className={event.type === "Video" ? "listStyleVideo1" : event.type === "Audio" ? "listStyleAudio1" : "listStyleInperson1"}
-                                        style={{ textTransform: "capitalize", marginBottom: '4px' }}
+                                        className='listStyle'
+                                        style={{ textTransform: 'capitalize', marginBottom: '4px' }}
                                     >
-                                        {dayjs(event.start).format("h:mm A")} - {dayjs(event.end).format("h:mm A")}: {event.title}
+                                        {dayjs(event.start).format('h:mm A')} -{' '}
+                                        {dayjs(event.end).format('h:mm A')}: {event.title}
                                     </div>
                                 ))}
                             </Col>

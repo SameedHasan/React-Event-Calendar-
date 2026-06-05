@@ -5,25 +5,23 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
 const { Text, Title } = Typography;
 
-const DOW_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-// Get all days to display in a month grid (Mon-first, 6 weeks)
-const getMonthGridDays = (year, month) => {
+// Get all days to display in a month grid (Mon/Sun-first, 6 weeks)
+const getMonthGridDays = (year, month, startOfWeek = 'monday') => {
     const firstDay = dayjs(new Date(year, month, 1));
-    const startOffset = firstDay.isoWeekday() - 1; // 0 for Mon, 6 for Sun
+    const startOffset = getDayIndex(firstDay.toDate(), startOfWeek);
     const gridStart = firstDay.subtract(startOffset, 'day');
     return Array.from({ length: 42 }, (_, i) => gridStart.add(i, 'day'));
 };
 
-const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear }) => {
+const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear, startOfWeek, timeFormat }) => {
     const today = dayjs();
-    const days = useMemo(() => getMonthGridDays(year, monthNumber), [year, monthNumber]);
+    const days = useMemo(() => getMonthGridDays(year, monthNumber, startOfWeek), [year, monthNumber, startOfWeek]);
 
     // Build a map: "YYYY-MM-DD" -> [events]
     const eventMap = useMemo(() => {
@@ -134,7 +132,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
 
             {/* Day-of-week labels */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', marginBottom: '4px' }}>
-                {DOW_LABELS.map((d, i) => (
+                {getShiftedSingleDOW(startOfWeek).map((d, i) => (
                     <div key={i} style={{
                         textAlign: 'center',
                         fontSize: '9px',
@@ -243,7 +241,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color }} />
                                                     <span style={{ fontWeight: 600, color: '#1e293b' }}>{ev.title}</span>
                                                     <span style={{ color: '#64748b', marginLeft: 'auto' }}>
-                                                        {dayjs(ev.start).format('h:mm A')}
+                                                        {formatTime(ev.start, timeFormat)}
                                                     </span>
                                                 </div>
                                             );
@@ -297,7 +295,7 @@ const MONTHS = [
 ];
 
 const CalenderYearView = () => {
-    const { currentDate, setView, setCurrentDate, events } = useCalendarStore();
+    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat } = useCalendarStore();
     const currentYear = dayjs(currentDate).year();
     const today = dayjs();
     const isCurrentYear = today.year() === currentYear;
@@ -452,6 +450,8 @@ const CalenderYearView = () => {
                         onClick={handleMonthClick}
                         isCurrentMonth={isCurrentYear && i === currentMonth}
                         eventsForYear={eventsForYear}
+                        startOfWeek={startOfWeek}
+                        timeFormat={timeFormat}
                     />
                 ))}
             </div>

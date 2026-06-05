@@ -19,13 +19,22 @@ import CalenderYearView from './CalenderYearView';
  * defaultView  {string}  Optional. Initial view: 'month'|'week'|'day'|'list'|'year'
  *                        Defaults to 'month'.
  */
-const Calendar = ({ events = [], defaultView = 'month' }) => {
-    const { view, setEvents, setView } = useCalendarStore();
+const Calendar = ({ events = [], defaultView = 'month', startOfWeek = 'monday', timeFormat = '12h' }) => {
+    const { view, setEvents, setView, setStartOfWeek, setTimeFormat } = useCalendarStore();
 
     // Seed the store whenever the events prop changes
     useEffect(() => {
         setEvents(events);
     }, [events, setEvents]);
+
+    // Sync startOfWeek and timeFormat configuration props with the store
+    useEffect(() => {
+        setStartOfWeek(startOfWeek);
+    }, [startOfWeek, setStartOfWeek]);
+
+    useEffect(() => {
+        setTimeFormat(timeFormat);
+    }, [timeFormat, setTimeFormat]);
 
     // Apply defaultView only on first mount
     useEffect(() => {

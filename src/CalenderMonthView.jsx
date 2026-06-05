@@ -4,15 +4,13 @@ import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
 const { Text } = Typography;
 
-const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-const TooltipContent = ({ events, day }) => (
+const TooltipContent = ({ events, day, timeFormat }) => (
     <div style={{ padding: '2px 0' }}>
         <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: '#1e293b' }}>
             All Events ({events.length})
@@ -30,7 +28,7 @@ const TooltipContent = ({ events, day }) => (
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b', flex: 1 }}>{ev.title}</span>
                     <span style={{ fontSize: '11px', color: cfg.color, fontWeight: 600 }}>{ev.type}</span>
                     <span style={{ fontSize: '11px', color: '#64748b' }}>
-                        {isStartDay ? dayjs(ev.start).format('h:mm A') : '← Cont.'}
+                        {isStartDay ? formatTime(ev.start, timeFormat) : '← Cont.'}
                     </span>
                 </div>
             );
@@ -39,7 +37,7 @@ const TooltipContent = ({ events, day }) => (
 );
 
 const CalenderMonthView = () => {
-    const { currentDate, events } = useCalendarStore();
+    const { currentDate, events, startOfWeek, timeFormat } = useCalendarStore();
     const today = dayjs();
     const current = dayjs(currentDate);
 
@@ -47,12 +45,17 @@ const CalenderMonthView = () => {
         events.filter(ev => isEventOnDay(ev, date))
                .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-    // Build grid: days from Mon of week containing 1st to Sun of week containing last
+    // Build grid: days from startOfWeek of week containing 1st to end of week containing last
     const gridDays = useMemo(() => {
         const firstDay = current.startOf('month');
         const lastDay = current.endOf('month');
-        const gridStart = firstDay.isoWeekday(1); // Monday of that week
-        const gridEnd = lastDay.isoWeekday(7);   // Sunday of that week
+        
+        const startOffset = getDayIndex(firstDay.toDate(), startOfWeek);
+        const gridStart = firstDay.subtract(startOffset, 'day');
+        
+        const endOffset = 6 - getDayIndex(lastDay.toDate(), startOfWeek);
+        const gridEnd = lastDay.add(endOffset, 'day');
+
         const days = [];
         let d = gridStart;
         while (d.isBefore(gridEnd) || d.isSame(gridEnd, 'day')) {
@@ -60,7 +63,7 @@ const CalenderMonthView = () => {
             d = d.add(1, 'day');
         }
         return days;
-    }, [currentDate]);
+    }, [currentDate, startOfWeek]);
 
     // Group gridDays into weeks
     const weeks = useMemo(() => {
@@ -71,6 +74,8 @@ const CalenderMonthView = () => {
         return result;
     }, [gridDays]);
 
+    const dow = getShiftedShortDOW(startOfWeek);
+
     return (
         <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             {/* Day-of-week header */}
@@ -79,7 +84,7 @@ const CalenderMonthView = () => {
                 background: 'linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)',
                 borderBottom: '1px solid #e2e8f0',
             }}>
-                {DOW.map((d, i) => (
+                {dow.map((d, i) => (
                     <div key={d} style={{
                         padding: '12px 0', textAlign: 'center',
                         borderRight: i < 6 ? '1px solid #e2e8f0' : 'none',
@@ -207,7 +212,7 @@ const CalenderMonthView = () => {
                                         {hiddenCount > 0 && (
                                             <div style={{ display: 'flex', justifyContent: 'flex-start', height: '24px', alignItems: 'center' }}>
                                                 <Tooltip
-                                                    title={<TooltipContent events={dayEvents} day={day} />}
+                                                    title={<TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} />}
                                                     overlayInnerStyle={{ background: '#fff', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
                                                     color="#fff"
                                                     placement="top"
@@ -300,7 +305,7 @@ const CalenderMonthView = () => {
                                                 }}
                                                 onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                                title={`${dayjs(event.start).format('h:mm A')} - ${event.title}`}
+                                                title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
                                                 >
                                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color, flexShrink: 0 }} />
                                                     <Text style={{
@@ -309,7 +314,7 @@ const CalenderMonthView = () => {
                                                         fontWeight: 700,
                                                         flexShrink: 0,
                                                     }}>
-                                                        {dayjs(event.start).format('h:mm A')}
+                                                        {formatTime(event.start, timeFormat)}
                                                     </Text>
                                                     <Text style={{
                                                         fontSize: '11px',

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getDayIndex, calculateWeekRange } from '../utils/dateHelpers';
 
 const getWeekNumber = (date) => {
     const start = new Date(date.getFullYear(), 0, 1);
@@ -6,36 +7,42 @@ const getWeekNumber = (date) => {
     return Math.ceil((days + start.getDay() + 1) / 7);
 };
 
-const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
-
-const calculateWeekRange = (date) => {
-    const start = new Date(date);
-    const end = new Date(date);
-    const day = start.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    const mondayOffset = day === 0 ? -6 : 1 - day; // Convert to Monday-first
-    
-    start.setDate(start.getDate() + mondayOffset); // Set to Monday
-    end.setDate(start.getDate() + 6); // Set to Sunday
-
-    return {
-        start: formatDate(start),
-        end: formatDate(end)
-    };
-};
-
 const useCalendarStore = create((set, get) => ({
     // Initial state
     currentDate: new Date().toISOString(),
     view: "month",
+    startOfWeek: "monday",
+    timeFormat: "12h",
     weekRange: {
         count: "",
         range: ""
     },
     currentWeek: new Date().toISOString(),
-    currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1, // Convert to Monday-first (0=Mon, 6=Sun)
+    currentDayIndex: getDayIndex(new Date(), "monday"),
     events: [], // Populated via setEvents — pass your own events array as a prop
+
+    // Configuration Actions
+    setStartOfWeek: (startOfWeek) => {
+        const state = get();
+        const cleanedStartOfWeek = String(startOfWeek || 'monday').toLowerCase();
+        const today = new Date(state.currentDate);
+        const weekNumber = getWeekNumber(today);
+        const { start, end } = calculateWeekRange(today, cleanedStartOfWeek);
+        const currentDayIndex = getDayIndex(today, cleanedStartOfWeek);
+        
+        set({
+            startOfWeek: cleanedStartOfWeek,
+            currentDayIndex,
+            weekRange: {
+                count: weekNumber,
+                range: `${start} - ${end}`
+            }
+        });
+    },
+
+    setTimeFormat: (timeFormat) => {
+        set({ timeFormat: timeFormat === '24h' ? '24h' : '12h' });
+    },
 
     // Actions
     previousMonth: () => {
@@ -91,7 +98,7 @@ const useCalendarStore = create((set, get) => ({
         const newWeek = new Date(state.currentWeek);
         newWeek.setDate(newWeek.getDate() + 7);
         const weekNumber = getWeekNumber(newWeek);
-        const { start, end } = calculateWeekRange(newWeek);
+        const { start, end } = calculateWeekRange(newWeek, state.startOfWeek);
         set({
             currentWeek: newWeek.toISOString(),
             weekRange: {
@@ -106,7 +113,7 @@ const useCalendarStore = create((set, get) => ({
         const newWeek = new Date(state.currentWeek);
         newWeek.setDate(newWeek.getDate() - 7);
         const weekNumber = getWeekNumber(newWeek);
-        const { start, end } = calculateWeekRange(newWeek);
+        const { start, end } = calculateWeekRange(newWeek, state.startOfWeek);
         set({
             currentWeek: newWeek.toISOString(),
             weekRange: {
@@ -128,13 +135,20 @@ const useCalendarStore = create((set, get) => ({
         set({ currentDate: today.toISOString() });
         
         if (state.view === 'week' || state.view === 'day' || state.view === 'list') {
-            const currentDayIndex = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            const currentDayIndex = getDayIndex(today, state.startOfWeek);
+            const weekNumber = getWeekNumber(today);
+            const { start, end } = calculateWeekRange(today, state.startOfWeek);
             set({
                 currentWeek: today.toISOString(),
-                currentDayIndex: currentDayIndex
+                currentDayIndex: currentDayIndex,
+                weekRange: {
+                    count: weekNumber,
+                    range: `${start} - ${end}`
+                }
             });
         }
     }
 }));
+
 
 export default useCalendarStore;

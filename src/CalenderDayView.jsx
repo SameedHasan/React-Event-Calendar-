@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -15,7 +15,7 @@ const HOUR_HEIGHT = 64; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-const DayEventBlock = ({ event, currentDate }) => {
+const DayEventBlock = ({ event, currentDate, timeFormat }) => {
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, currentDate);
     if (!segment) return null;
@@ -92,7 +92,7 @@ const DayEventBlock = ({ event, currentDate }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <ClockCircleOutlined style={{ fontSize: '11px', color: '#94a3b8' }} />
                         <Text style={{ fontSize: '11px', color: '#64748b', fontWeight: 500 }}>
-                            {dayjs(event.start).format('h:mm A')} – {dayjs(event.end).format('h:mm A')}
+                            {formatTime(event.start, timeFormat)} – {formatTime(event.end, timeFormat)}
                         </Text>
                     </div>
                     <Text style={{ fontSize: '10px', color: '#94a3b8' }}>· {durationStr}</Text>
@@ -114,20 +114,22 @@ const DayEventBlock = ({ event, currentDate }) => {
 };
 
 const CalenderDayView = () => {
-    const { weekRange, currentWeek, currentDayIndex, setWeekRange, events } = useCalendarStore();
+    const { weekRange, currentWeek, currentDayIndex, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
     const containerRef = useRef(null);
 
     // Get the actual date for the current day in the week
     const currentDate = useMemo(() => {
-        return dayjs(currentWeek).isoWeekday(1).add(currentDayIndex, 'day');
-    }, [currentWeek, currentDayIndex]);
+        const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        return startDay.add(currentDayIndex, 'day');
+    }, [currentWeek, currentDayIndex, startOfWeek]);
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
-        const start = dayjs(currentWeek).isoWeekday(1).format('MMM D, YYYY');
-        const end = dayjs(currentWeek).isoWeekday(7).format('MMM D, YYYY');
+        const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        const start = startDay.format('MMM D, YYYY');
+        const end = startDay.add(6, 'day').format('MMM D, YYYY');
         setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
-    }, [setWeekRange, currentWeek]);
+    }, [setWeekRange, currentWeek, startOfWeek]);
 
     // Scroll to 7 AM
     useEffect(() => {
@@ -283,7 +285,7 @@ const CalenderDayView = () => {
                                 right: '10px', textAlign: 'right',
                             }}>
                                 <Text style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8' }}>
-                                    {h === 0 ? '' : dayjs().hour(h).minute(0).format('h A')}
+                                    {h === 0 ? '' : formatHourLabel(h, timeFormat)}
                                 </Text>
                             </div>
                         ))}
@@ -310,7 +312,7 @@ const CalenderDayView = () => {
 
                         {/* Events */}
                         {dayEvents.map(ev => (
-                            <DayEventBlock key={ev.id} event={ev} currentDate={currentDate} />
+                            <DayEventBlock key={ev.id} event={ev} currentDate={currentDate} timeFormat={timeFormat} />
                         ))}
 
                         {/* Current time indicator */}
@@ -332,7 +334,7 @@ const CalenderDayView = () => {
                                     background: '#fff', border: '1px solid #fecaca',
                                     padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', flexShrink: 0,
                                 }}>
-                                    {now.format('h:mm A')}
+                                    {formatTime(now, timeFormat)}
                                 </div>
                             </div>
                         )}

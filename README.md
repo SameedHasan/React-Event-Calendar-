@@ -8,7 +8,8 @@ Ready to be dropped into any React application or published directly as a standa
 
 ## ✨ Features
 
-- 📅 **5 Interactive Views**: Standard Month, Time-Grid Week (Monday-first), Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
+- 📅 **5 Interactive Views**: Standard Month, Time-Grid Week, Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
+- ⚙️ **Localization & Format Settings**: Fully configurable week start day (any day of the week, e.g., `'monday'`, `'sunday'`, `'wednesday'`, etc.) and time format (`'12h'` or `'24h'`) passed directly as props. All grid columns, boundary offsets, hour gutters, time-indicator lines, overnight range formats, and tooltips automatically sync dynamically to these selections.
 - 🔗 **Advanced Spanning & Overnight Support**:
   - **Month View**: Renders multi-day events as continuous horizontal solid-colored spanning bars across columns, and single-day events as transparent rows with colored dots.
   - **Week View**: Features a sticky **All-day** row showing multi-day events as continuous spanning bars aligned perfectly with the column grid.
@@ -73,6 +74,8 @@ function App() {
       <Calendar 
         events={myEvents} 
         defaultView="month" 
+        startOfWeek="sunday" 
+        timeFormat="12h" 
       />
     </div>
   );
@@ -89,6 +92,8 @@ export default App;
 | :--- | :--- | :--- | :--- |
 | `events` | `Array` | `[]` | **Required.** Array of event objects following the schema below. |
 | `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts. |
+| `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
+| `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
 
 ---
 

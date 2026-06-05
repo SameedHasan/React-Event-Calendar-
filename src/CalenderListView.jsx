@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -15,7 +15,7 @@ const getDayEvents = (date, events) => {
     return events.filter(event => isEventOnDay(event, date));
 };
 
-const EventCard = ({ event, isFirst, date }) => {
+const EventCard = ({ event, isFirst, date, timeFormat }) => {
     const config = getEventStyle(event);
     const dayStart = dayjs(date).startOf('day');
     const dayEnd = dayjs(date).endOf('day');
@@ -62,10 +62,10 @@ const EventCard = ({ event, isFirst, date }) => {
             {/* Time column */}
             <div style={{ minWidth: '95px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
                 <Text style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>
-                    {isSpanningFromPrev ? eventStart.format('MMM D, h:mm A') : eventStart.format('h:mm A')}
+                    {isSpanningFromPrev ? eventStart.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventStart, timeFormat)}
                 </Text>
                 <Text style={{ fontSize: '11px', color: '#94a3b8' }}>
-                    {isSpanningToNext ? eventEnd.format('MMM D, h:mm A') : eventEnd.format('h:mm A')}
+                    {isSpanningToNext ? eventEnd.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventEnd, timeFormat)}
                 </Text>
                 {(isSpanningFromPrev || isSpanningToNext) && (
                     <Text style={{ fontSize: '9px', color: '#e11d48', fontWeight: 700, textTransform: 'uppercase', marginTop: '2px' }}>
@@ -136,7 +136,7 @@ const EventCard = ({ event, isFirst, date }) => {
     );
 };
 
-const DaySection = ({ date, events, isToday }) => {
+const DaySection = ({ date, events, isToday, timeFormat }) => {
     const dayEvents = getDayEvents(date, events);
     if (dayEvents.length === 0) return null;
 
@@ -197,7 +197,7 @@ const DaySection = ({ date, events, isToday }) => {
                 {dayEvents
                     .sort((a, b) => new Date(a.start) - new Date(b.start))
                     .map((event, i) => (
-                        <EventCard key={event.id} event={event} isFirst={i === 0} date={date} />
+                        <EventCard key={event.id} event={event} isFirst={i === 0} date={date} timeFormat={timeFormat} />
                     ))}
             </div>
         </div>
@@ -205,20 +205,21 @@ const DaySection = ({ date, events, isToday }) => {
 };
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, setWeekRange, events } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
-        const start = dayjs(currentWeek).isoWeekday(1).format('MMM D, YYYY');
-        const end = dayjs(currentWeek).isoWeekday(7).format('MMM D, YYYY');
+        const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        const start = startDay.format('MMM D, YYYY');
+        const end = startDay.add(6, 'day').format('MMM D, YYYY');
         setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
-    }, [setWeekRange, currentWeek]);
+    }, [setWeekRange, currentWeek, startOfWeek]);
 
-    // Build the 7 days of the current week starting Monday
+    // Build the 7 days of the current week starting on startOfWeek
     const weekDays = useMemo(() => {
-        const monday = dayjs(currentWeek).isoWeekday(1);
-        return Array.from({ length: 7 }, (_, i) => monday.add(i, 'day'));
-    }, [currentWeek]);
+        const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        return Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
+    }, [currentWeek, startOfWeek]);
 
     const today = dayjs();
 
@@ -318,6 +319,7 @@ const CalenderListView = () => {
                         date={day}
                         events={events}
                         isToday={day.isSame(today, 'day')}
+                        timeFormat={timeFormat}
                     />
                 ))
             )}

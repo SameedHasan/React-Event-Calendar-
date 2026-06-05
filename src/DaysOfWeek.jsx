@@ -4,7 +4,7 @@ import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -14,9 +14,7 @@ const HOUR_HEIGHT = 56; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-const DOW_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-const WeekEventBlock = ({ event, dayStart }) => {
+const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, dayStart);
     if (!segment) return null;
@@ -62,7 +60,7 @@ const WeekEventBlock = ({ event, dayStart }) => {
             </div>
             {height > 36 && (
                 <Text style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '2px' }}>
-                    {dayjs(event.start).format('h:mm')}–{dayjs(event.end).format('h:mm A')}
+                    {formatTime(event.start, timeFormat)}–{formatTime(event.end, timeFormat)}
                 </Text>
             )}
         </div>
@@ -70,14 +68,14 @@ const WeekEventBlock = ({ event, dayStart }) => {
 };
 
 const DaysOfWeek = () => {
-    const { weekRange, currentWeek, setWeekRange, events } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
     const today = dayjs();
     const containerRef = useRef(null);
 
     const weekDays = useMemo(() => {
-        const monday = dayjs(currentWeek).isoWeekday(1);
-        return Array.from({ length: 7 }, (_, i) => monday.add(i, 'day'));
-    }, [currentWeek]);
+        const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        return Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
+    }, [currentWeek, startOfWeek]);
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
@@ -101,7 +99,7 @@ const DaysOfWeek = () => {
         return events.some(ev => isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day)));
     }, [events, weekDays]);
 
-    const monday = weekDays[0];
+    const startOfWeekDay = weekDays[0];
 
     const { allDayEventsWithLayout, allDayTracks } = useMemo(() => {
         if (!hasAllDayEvents) {
@@ -122,12 +120,12 @@ const DaysOfWeek = () => {
         // 3. Assign tracks
         const tracks = [];
         const layout = sorted.map(event => {
-            const startCol = dayjs(event.start).isBefore(monday, 'day')
+            const startCol = dayjs(event.start).isBefore(startOfWeekDay, 'day')
                 ? 0
-                : dayjs(event.start).diff(monday, 'day');
+                : dayjs(event.start).diff(startOfWeekDay, 'day');
             const endCol = dayjs(event.end).isAfter(weekDays[6], 'day')
                 ? 6
-                : dayjs(event.end).diff(monday, 'day');
+                : dayjs(event.end).diff(startOfWeekDay, 'day');
 
             let trackIndex = 0;
             while (true) {
@@ -156,7 +154,7 @@ const DaysOfWeek = () => {
             allDayEventsWithLayout: layout,
             allDayTracks: tracks
         };
-    }, [events, weekDays, monday, hasAllDayEvents]);
+    }, [events, weekDays, startOfWeekDay, hasAllDayEvents]);
 
     // Current time indicator
     const now = dayjs();
@@ -165,6 +163,7 @@ const DaysOfWeek = () => {
     const todayColIndex = weekDays.findIndex(d => d.isSame(today, 'day'));
 
     const TIME_GUTTER = 56; // width of time column in px
+    const dow = getShiftedShortDOW(startOfWeek);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -191,7 +190,7 @@ const DaysOfWeek = () => {
                                 letterSpacing: '0.4px', display: 'block',
                                 color: isToday ? '#1272bf' : isWeekend ? '#94a3b8' : '#64748b',
                             }}>
-                                {DOW_SHORT[i]}
+                                {dow[i]}
                             </Text>
                             <div style={{
                                 width: '32px', height: '32px', borderRadius: '50%', margin: '4px auto 0',
@@ -292,7 +291,7 @@ const DaysOfWeek = () => {
                                 right: '8px', width: '40px', textAlign: 'right',
                             }}>
                                 <Text style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8' }}>
-                                    {h === 0 ? '' : dayjs().hour(h).minute(0).format('h A')}
+                                    {h === 0 ? '' : formatHourLabel(h, timeFormat)}
                                 </Text>
                             </div>
                         ))}
@@ -327,7 +326,7 @@ const DaysOfWeek = () => {
                                 ))}
                                 {/* Events */}
                                 {dayEvents.map(ev => (
-                                    <WeekEventBlock key={ev.id} event={ev} dayStart={day} />
+                                    <WeekEventBlock key={ev.id} event={ev} dayStart={day} timeFormat={timeFormat} />
                                 ))}
                                 {/* Current time line for today */}
                                 {isToday && (

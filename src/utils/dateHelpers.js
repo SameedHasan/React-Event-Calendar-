@@ -46,3 +46,67 @@ export const getEventDaySegment = (event, day) => {
         durationMinutes: segmentEnd.diff(segmentStart, 'minute'),
     };
 };
+
+/**
+ * Formats a dayjs object or string into a time string, respecting 12h or 24h format.
+ */
+export const formatTime = (time, formatType = '12h') => {
+    const t = dayjs(time);
+    if (formatType === '24h') {
+        return t.format('HH:mm');
+    }
+    return t.format('h:mm A');
+};
+
+/**
+ * Formats an hour number (0 to 23) into a header label, respecting 12h or 24h format.
+ */
+export const formatHourLabel = (hour, formatType = '12h') => {
+    if (formatType === '24h') {
+        return `${String(hour).padStart(2, '0')}:00`;
+    }
+    if (hour === 0) return '12 AM';
+    if (hour === 12) return '12 PM';
+    return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+};
+
+export const DAY_INDEX_MAP = {
+    sunday: 0,
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6
+};
+
+export const getDayIndex = (date, startOfWeek = "monday") => {
+    const d = dayjs(date).day();
+    const s = DAY_INDEX_MAP[String(startOfWeek).toLowerCase()] ?? 1;
+    return (d - s + 7) % 7;
+};
+
+export const calculateWeekRange = (date, startOfWeek = "monday") => {
+    const d = dayjs(date);
+    const relativeIndex = getDayIndex(d.toDate(), startOfWeek);
+    const start = d.subtract(relativeIndex, 'day');
+    const end = start.add(6, 'day');
+
+    return {
+        start: start.format('MMM D, YYYY'),
+        end: end.format('MMM D, YYYY')
+    };
+};
+
+export const getShiftedShortDOW = (startOfWeek = "monday") => {
+    const s = DAY_INDEX_MAP[String(startOfWeek).toLowerCase()] ?? 1;
+    const base = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return [...base.slice(s), ...base.slice(0, s)];
+};
+
+export const getShiftedSingleDOW = (startOfWeek = "monday") => {
+    const s = DAY_INDEX_MAP[String(startOfWeek).toLowerCase()] ?? 1;
+    const base = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    return [...base.slice(s), ...base.slice(0, s)];
+};
+

@@ -21,6 +21,7 @@ Ready to be dropped into any React application or published directly as a standa
 - 🚀 **Prop-Driven State Engine**: Completely data-agnostic. Manage calendar data globally by simply changing the `events` array prop. Powered internally by a lightweight Zustand store.
 - 🔍 **Tooltips & Detailed Aggregates**: Auto-calculating status legends, busy metrics, real-time current time tracker lines, and clean tooltip overlays for overlapping event blocks.
 - ⌨️ **Keyboard Shortcuts**: Built-in keyboard navigation for fast, mouse-free control — switch views, navigate periods, and jump to today instantly.
+- 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
 
 ---
 
@@ -38,6 +39,25 @@ The calendar includes built-in keyboard shortcuts for efficient navigation. Shor
 | `Y` | Switch to Year view |
 | `←` | Navigate to previous period (month/week/day depending on current view) |
 | `→` | Navigate to next period |
+
+---
+
+## 📤 Exporting to iCalendar (iCal / ICS)
+
+The calendar includes built-in support for exporting events to standard RFC 5545 `.ics` format.
+
+- **Header Toolbar Button:** A pre-styled, responsive **Export** button is rendered on the right side of the header. Clicking it downloads the active calendar events.
+- **Standalone Export API:** You can also import the utility helpers directly into your app to build custom export flows:
+
+```javascript
+import { exportEventsToICS } from 'react-event-calendar-suite/utils/icsExport';
+
+// Trigger download of .ics file
+exportEventsToICS(events, {
+  calendarName: 'React Event Calendar Suite',
+  filename: 'calendar-events.ics'
+});
+```
 
 ---
 

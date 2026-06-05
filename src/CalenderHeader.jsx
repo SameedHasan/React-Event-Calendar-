@@ -8,10 +8,12 @@ import {
     AppstoreOutlined,
     FieldTimeOutlined,
     TableOutlined,
+    DownloadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import useCalendarStore from './store/useCalendarStore';
+import { exportEventsToICS } from './utils/icsExport';
 
 dayjs.extend(isoWeek);
 
@@ -40,6 +42,7 @@ function CalendarHeader() {
         incrementWeek,
         handleNextandPrevDay,
         goToToday,
+        events,
     } = useCalendarStore();
 
     // Navigation handlers per view
@@ -198,55 +201,91 @@ function CalendarHeader() {
                 </div>
             </div>
 
-            {/* ── RIGHT: view switcher ── */}
-            <div style={{
-                display: 'flex',
-                background: '#f1f5f9',
-                borderRadius: '10px',
-                padding: '3px',
-                gap: '2px',
-                flexShrink: 0,
-            }}>
-                {VIEWS.map(({ value, label, icon }) => {
-                    const isActive = view === value;
-                    return (
-                        <button
-                            key={value}
-                            onClick={() => setView(value)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '5px',
-                                padding: '6px 13px',
-                                borderRadius: '8px',
-                                border: 'none',
-                                background: isActive ? '#fff' : 'transparent',
-                                color: isActive ? '#1272bf' : '#64748b',
-                                fontSize: '13px',
-                                fontWeight: isActive ? 700 : 500,
-                                cursor: 'pointer',
-                                transition: 'all 0.18s ease',
-                                boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
-                                whiteSpace: 'nowrap',
-                            }}
-                            onMouseEnter={e => {
-                                if (!isActive) {
-                                    e.currentTarget.style.background = '#e2e8f0';
-                                    e.currentTarget.style.color = '#334155';
-                                }
-                            }}
-                            onMouseLeave={e => {
-                                if (!isActive) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#64748b';
-                                }
-                            }}
-                        >
-                            <span style={{ fontSize: '13px' }}>{icon}</span>
-                            {label}
-                        </button>
-                    );
-                })}
+            {/* ── RIGHT: view switcher & export button ── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                {/* Export button */}
+                <button
+                    onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}
+                    title="Export all events to iCal (.ics)"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        background: '#fff',
+                        color: '#475569',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.18s ease',
+                        lineHeight: '20px',
+                    }}
+                    onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = '#1272bf';
+                        e.currentTarget.style.color = '#1272bf';
+                        e.currentTarget.style.background = '#eff6ff';
+                    }}
+                    onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.color = '#475569';
+                        e.currentTarget.style.background = '#fff';
+                    }}
+                >
+                    <DownloadOutlined style={{ fontSize: '14px' }} />
+                    <span>Export</span>
+                </button>
+
+                {/* View Switcher */}
+                <div style={{
+                    display: 'flex',
+                    background: '#f1f5f9',
+                    borderRadius: '10px',
+                    padding: '3px',
+                    gap: '2px',
+                }}>
+                    {VIEWS.map(({ value, label, icon }) => {
+                        const isActive = view === value;
+                        return (
+                            <button
+                                key={value}
+                                onClick={() => setView(value)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '6px 13px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: isActive ? '#fff' : 'transparent',
+                                    color: isActive ? '#1272bf' : '#64748b',
+                                    fontSize: '13px',
+                                    fontWeight: isActive ? 700 : 500,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.18s ease',
+                                    boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
+                                    whiteSpace: 'nowrap',
+                                }}
+                                onMouseEnter={e => {
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = '#e2e8f0';
+                                        e.currentTarget.style.color = '#334155';
+                                    }
+                                }}
+                                onMouseLeave={e => {
+                                    if (!isActive) {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = '#64748b';
+                                    }
+                                }}
+                            >
+                                <span style={{ fontSize: '13px' }}>{icon}</span>
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

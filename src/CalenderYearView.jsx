@@ -60,9 +60,9 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
             className="year-month-card"
             onClick={() => onClick(monthNumber)}
             style={{
-                background: '#fff',
+                background: 'var(--white-color)',
                 borderRadius: '14px',
-                border: isCurrentMonth ? '2px solid #1272bf' : '1px solid #e2e8f0',
+                border: isCurrentMonth ? '2px solid #1272bf' : '1px solid var(--border-color)',
                 padding: '16px',
                 cursor: 'pointer',
                 transition: 'all 0.22s ease',
@@ -102,7 +102,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                     <Text style={{
                         fontSize: '14px',
                         fontWeight: 700,
-                        color: isCurrentMonth ? '#1272bf' : '#1e293b',
+                        color: isCurrentMonth ? '#1272bf' : 'var(--text-primary)',
                         display: 'block',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
@@ -110,7 +110,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                         {monthName}
                     </Text>
                     {totalEvents > 0 && (
-                        <Text style={{ fontSize: '11px', color: '#94a3b8', marginTop: '1px', display: 'block' }}>
+                        <Text style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '1px', display: 'block' }}>
                             {totalEvents} event{totalEvents !== 1 ? 's' : ''}
                         </Text>
                     )}
@@ -120,7 +120,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                         fontSize: '10px',
                         fontWeight: 700,
                         color: '#1272bf',
-                        background: '#eff6ff',
+                        background: 'var(--color-active-menu-bg)',
                         padding: '2px 7px',
                         borderRadius: '20px',
                         border: '1px solid #bfdbfe',
@@ -137,7 +137,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                         textAlign: 'center',
                         fontSize: '9px',
                         fontWeight: 700,
-                        color: i >= 5 ? '#94a3b8' : '#cbd5e1',
+                        color: 'var(--text-secondary)',
                         paddingBottom: '4px',
                         textTransform: 'uppercase',
                         letterSpacing: '0.3px',
@@ -171,7 +171,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 background: isTodayCell
                                     ? '#1272bf'
                                     : hasEvents && isThisMonth
-                                        ? '#f0f7ff'
+                                        ? 'var(--color-active-menu-bg)'
                                         : 'transparent',
                                 cursor: hasEvents && isThisMonth ? 'pointer' : 'default',
                             }}
@@ -182,8 +182,8 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 color: isTodayCell
                                     ? '#fff'
                                     : isThisMonth
-                                        ? (hasEvents ? '#1272bf' : '#475569')
-                                        : '#d1d5db',
+                                        ? (hasEvents ? '#1272bf' : 'var(--text-primary)')
+                                        : 'var(--text-secondary)',
                                 lineHeight: 1,
                              }}>
                                 {day.date()}
@@ -221,7 +221,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 key={i}
                                 title={
                                     <div>
-                                        <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '12px', color: '#1e293b' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: '8px', fontSize: '12px', color: 'var(--text-primary)' }}>
                                             {day.format('MMM D, YYYY')}
                                         </div>
                                         {dayEvs.map(ev => {
@@ -239,8 +239,8 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                                     border: `1px solid ${style.border}`,
                                                 }}>
                                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color }} />
-                                                    <span style={{ fontWeight: 600, color: '#1e293b' }}>{ev.title}</span>
-                                                    <span style={{ color: '#64748b', marginLeft: 'auto' }}>
+                                                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{ev.title}</span>
+                                                    <span style={{ color: 'var(--text-secondary)', marginLeft: 'auto' }}>
                                                         {formatTime(ev.start, timeFormat)}
                                                     </span>
                                                 </div>
@@ -249,8 +249,8 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                     </div>
                                 }
                                 overlayStyle={{ maxWidth: '240px' }}
-                                color="#fff"
-                                overlayInnerStyle={{ color: '#1e293b', padding: '10px 12px' }}
+                                color="var(--white-color)"
+                                overlayInnerStyle={{ color: 'var(--text-primary)', padding: '10px 12px', background: 'var(--white-color)', border: '1px solid var(--border-color)' }}
                                 placement="top"
                             >
                                 {cellContent}
@@ -268,7 +268,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                     gap: '8px',
                     marginTop: '12px',
                     paddingTop: '10px',
-                    borderTop: '1px solid #f1f5f9',
+                    borderTop: '1px solid var(--border-color)',
                     flexWrap: 'wrap',
                 }}>
                     {monthLegend.map(({ type, count, style }) => (
@@ -277,7 +277,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 width: '6px', height: '6px', borderRadius: '50%',
                                 background: style.color, flexShrink: 0,
                             }} />
-                            <Text style={{ fontSize: '10px', color: '#64748b', fontWeight: 500 }}>
+                            <Text style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                 {count} {type}
                             </Text>
                         </div>
@@ -388,7 +388,7 @@ const CalenderYearView = () => {
                     }}>
                         <div style={{
                             width: '32px', height: '32px', borderRadius: '8px',
-                            background: '#fff', border: `1px solid ${style.border}`,
+                            background: 'var(--white-color)', border: `1px solid ${style.border}`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             marginBottom: '8px',
                         }}>
@@ -398,7 +398,7 @@ const CalenderYearView = () => {
                             <div style={{ fontSize: '26px', fontWeight: 800, color: style.color, lineHeight: 1 }}>
                                 {count}
                             </div>
-                            <Text style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                            <Text style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                 {type}
                             </Text>
                         </div>
@@ -409,22 +409,22 @@ const CalenderYearView = () => {
                 {busyMonths.length > 0 && (
                     <div style={{
                         flex: '1 1 160px',
-                        background: '#f8fafc',
+                        background: 'var(--bg-color)',
                         borderRadius: '14px',
                         padding: '18px 20px',
-                        border: '1px solid #e2e8f0',
+                        border: '1px solid var(--border-color)',
                     }}>
-                        <Text style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '10px' }}>
+                        <Text style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '10px' }}>
                             Busiest Months
                         </Text>
                         {busyMonths.map((m, i) => (
                             <div key={m.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                                <Text style={{ fontSize: '13px', color: '#475569', fontWeight: 500 }}>
+                                <Text style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>
                                     {i + 1}. {m.name}
                                 </Text>
                                 <span style={{
                                     fontSize: '11px', fontWeight: 700,
-                                    color: '#1272bf', background: '#eff6ff',
+                                    color: '#1272bf', background: 'var(--color-active-menu-bg)',
                                     padding: '1px 8px', borderRadius: '20px',
                                 }}>
                                     {m.count}

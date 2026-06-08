@@ -1,5 +1,35 @@
 :root {
     --color-active-menu-bg: #e8f3fd;
+    --primary-color: #1272bf;
+    --white-color: #ffffff;
+    --bg-color: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --tag-bg: #f1f5f9;
+}
+
+/* Dark Mode overrides for the premium calendar container */
+.calendar-root.theme-dark {
+    --white-color: #1e293b;
+    --bg-color: #0f172a;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --color-active-menu-bg: #334155;
+    --tag-bg: #334155;
+}
+
+/* Global typography compatibility rules inside dark mode root */
+.calendar-root.theme-dark .ant-typography,
+.calendar-root.theme-dark span,
+.calendar-root.theme-dark div,
+.calendar-root.theme-dark button {
+    color: var(--text-primary);
+}
+
+.calendar-root.theme-dark .ant-typography-secondary {
+    color: var(--text-secondary) !important;
 }
 
 .filters:has(+ .calendar-days-of-week) {

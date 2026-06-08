@@ -12,6 +12,8 @@
  *   const { color, bg, border } = getEventStyle(event);
  */
 
+import useCalendarStore from '../store/useCalendarStore';
+
 const PALETTE = [
     { color: '#3b82f6', bg: '#eff6ff',  border: '#bfdbfe' }, // blue
     { color: '#10b981', bg: '#ecfdf5',  border: '#a7f3d0' }, // emerald
@@ -25,10 +27,6 @@ const PALETTE = [
     { color: '#6366f1', bg: '#eef2ff',  border: '#c7d2fe' }, // indigo
 ];
 
-/**
- * Simple deterministic hash: maps a string to a palette index.
- * Same type string always gets the same color, regardless of insertion order.
- */
 const hashType = (str = '') => {
     let h = 0;
     for (let i = 0; i < str.length; i++) {
@@ -37,19 +35,26 @@ const hashType = (str = '') => {
     return h % PALETTE.length;
 };
 
-/**
- * Returns { color, bg, border } for a given event.
- *
- * @param {object} event  - event object (needs .type and optionally .color)
- * @returns {{ color: string, bg: string, border: string }}
- */
 export const getEventStyle = (event = {}) => {
+    try {
+        const store = useCalendarStore.getState();
+        if (store && store.eventColors && store.eventColors[event.type]) {
+            const hex = store.eventColors[event.type];
+            return {
+                color: hex,
+                bg: `${hex}18`,
+                border: `${hex}50`,
+            };
+        }
+    } catch (e) {
+        // Fallback
+    }
+
     if (event.color) {
-        // Consumer supplied a custom color — derive light bg/border from it
         return {
             color:  event.color,
-            bg:     `${event.color}18`,   // ~10% opacity tint
-            border: `${event.color}50`,   // ~31% opacity
+            bg:     `${event.color}18`,
+            border: `${event.color}50`,
         };
     }
     return PALETTE[hashType(event.type)];

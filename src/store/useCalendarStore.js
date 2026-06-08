@@ -22,6 +22,20 @@ const useCalendarStore = create((set, get) => ({
     events: [], // Populated via setEvents — pass your own events array as a prop
     categories: ['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference'],
     
+    // Advanced Props
+    onDateChange: null,
+    onViewChange: null,
+    hideWeekends: false,
+    showWeekNumbers: false,
+    showToolbar: true,
+    showExportButton: true,
+    showAddEventButton: true,
+    allowDateClick: true,
+    eventColors: {},
+    theme: 'light',
+    onEventClick: null,
+    onDateClick: null,
+
     // Modal & CRUD state
     isModalOpen: false,
     selectedEvent: null,
@@ -32,6 +46,7 @@ const useCalendarStore = create((set, get) => ({
         onDeleteEvent: null,
     },
 
+    setConfigs: (configs) => set(configs),
     setCallbacks: (callbacks) => set({ callbacks }),
     openCreateModal: (date) => set({ isModalOpen: true, selectedEvent: null, prepopulatedStartDate: date ? date.toISOString() : null }),
     openEditModal: (event) => set({ isModalOpen: true, selectedEvent: event, prepopulatedStartDate: null }),
@@ -97,6 +112,7 @@ const useCalendarStore = create((set, get) => ({
         const currentDate = new Date(state.currentDate);
         const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
         set({ currentDate: newDate.toISOString() });
+        if (state.onDateChange) state.onDateChange(newDate);
     },
 
     nextMonth: () => {
@@ -104,6 +120,7 @@ const useCalendarStore = create((set, get) => ({
         const currentDate = new Date(state.currentDate);
         const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
         set({ currentDate: newDate.toISOString() });
+        if (state.onDateChange) state.onDateChange(newDate);
     },
 
     previousYear: () => {
@@ -111,6 +128,7 @@ const useCalendarStore = create((set, get) => ({
         const currentDate = new Date(state.currentDate);
         const newDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth());
         set({ currentDate: newDate.toISOString() });
+        if (state.onDateChange) state.onDateChange(newDate);
     },
 
     nextYear: () => {
@@ -118,14 +136,20 @@ const useCalendarStore = create((set, get) => ({
         const currentDate = new Date(state.currentDate);
         const newDate = new Date(currentDate.getFullYear() + 1, currentDate.getMonth());
         set({ currentDate: newDate.toISOString() });
+        if (state.onDateChange) state.onDateChange(newDate);
     },
 
     setCurrentDate: (date) => {
-        set({ currentDate: date ? new Date(date).toISOString() : new Date().toISOString() });
+        const newDate = date ? new Date(date) : new Date();
+        set({ currentDate: newDate.toISOString() });
+        const state = get();
+        if (state.onDateChange) state.onDateChange(newDate);
     },
 
     setView: (view) => {
         set({ view });
+        const state = get();
+        if (state.onViewChange) state.onViewChange(view);
     },
 
     setEvents: (events) => {
@@ -153,6 +177,7 @@ const useCalendarStore = create((set, get) => ({
                 range: `${start} - ${end}`
             }
         });
+        if (state.onDateChange) state.onDateChange(newWeek);
     },
 
     decrementWeek: () => {
@@ -168,10 +193,19 @@ const useCalendarStore = create((set, get) => ({
                 range: `${start} - ${end}`
             }
         });
+        if (state.onDateChange) state.onDateChange(newWeek);
     },
 
     handleNextandPrevDay: (dayIndex) => {
         set({ currentDayIndex: dayIndex });
+        const state = get();
+        if (state.onDateChange) {
+            const activeWeek = new Date(state.currentWeek);
+            const { start } = calculateWeekRange(activeWeek, state.startOfWeek);
+            const parsedStart = new Date(start);
+            parsedStart.setDate(parsedStart.getDate() + dayIndex);
+            state.onDateChange(parsedStart);
+        }
     },
 
     // Helper function to reset to today
@@ -194,6 +228,7 @@ const useCalendarStore = create((set, get) => ({
                 }
             });
         }
+        if (state.onDateChange) state.onDateChange(today);
     }
 }));
 

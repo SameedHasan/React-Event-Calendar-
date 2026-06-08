@@ -15,7 +15,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
-    const { openEditModal } = useCalendarStore();
+    const { openEditModal, onEventClick } = useCalendarStore();
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, dayStart);
     if (!segment) return null;
@@ -43,6 +43,10 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
         }}
         onClick={(e) => {
             e.stopPropagation();
+            if (onEventClick) {
+                const res = onEventClick(event);
+                if (res === false) return;
+            }
             openEditModal(event);
         }}
         onMouseEnter={e => {
@@ -64,7 +68,7 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
                 </Text>
             </div>
             {height > 36 && (
-                <Text style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                <Text style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
                     {formatTime(event.start, timeFormat)}–{formatTime(event.end, timeFormat)}
                 </Text>
             )}
@@ -73,19 +77,36 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
 };
 
 const DaysOfWeek = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, openCreateModal, openEditModal } = useCalendarStore();
+    const {
+        weekRange,
+        currentWeek,
+        setWeekRange,
+        events,
+        startOfWeek,
+        timeFormat,
+        openCreateModal,
+        openEditModal,
+        hideWeekends,
+        onEventClick,
+        onDateClick,
+        allowDateClick,
+    } = useCalendarStore();
     const today = dayjs();
     const containerRef = useRef(null);
 
     const weekDays = useMemo(() => {
         const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
-        return Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
-    }, [currentWeek, startOfWeek]);
+        const baseDays = Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
+        if (hideWeekends) {
+            return baseDays.filter(d => d.day() !== 0 && d.day() !== 6);
+        }
+        return baseDays;
+    }, [currentWeek, startOfWeek, hideWeekends]);
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
         const start = weekDays[0].format('MMM D, YYYY');
-        const end = weekDays[6].format('MMM D, YYYY');
+        const end = weekDays[weekDays.length - 1].format('MMM D, YYYY');
         setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
     }, [currentWeek, setWeekRange, weekDays]);
 
@@ -125,12 +146,24 @@ const DaysOfWeek = () => {
         // 3. Assign tracks
         const tracks = [];
         const layout = sorted.map(event => {
-            const startCol = dayjs(event.start).isBefore(startOfWeekDay, 'day')
-                ? 0
-                : dayjs(event.start).diff(startOfWeekDay, 'day');
-            const endCol = dayjs(event.end).isAfter(weekDays[6], 'day')
-                ? 6
-                : dayjs(event.end).diff(startOfWeekDay, 'day');
+            let startCol = 0;
+            let endCol = 0;
+
+            if (dayjs(event.start).isBefore(startOfWeekDay, 'day')) {
+                startCol = 0;
+            } else {
+                startCol = weekDays.findIndex(d => d.isSame(dayjs(event.start), 'day'));
+            }
+
+            if (dayjs(event.end).isAfter(weekDays[weekDays.length - 1], 'day')) {
+                endCol = weekDays.length - 1;
+            } else {
+                endCol = weekDays.findIndex(d => d.isSame(dayjs(event.end), 'day'));
+            }
+
+            if (startCol === -1 || endCol === -1) {
+                return null;
+            }
 
             let trackIndex = 0;
             while (true) {
@@ -153,7 +186,7 @@ const DaysOfWeek = () => {
                 startCol,
                 endCol
             };
-        });
+        }).filter(Boolean);
 
         return {
             allDayEventsWithLayout: layout,
@@ -168,34 +201,33 @@ const DaysOfWeek = () => {
     const todayColIndex = weekDays.findIndex(d => d.isSame(today, 'day'));
 
     const TIME_GUTTER = 56; // width of time column in px
-    const dow = getShiftedShortDOW(startOfWeek);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             {/* Sticky header row */}
             <div style={{
                 display: 'flex', flexShrink: 0,
-                background: 'linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)',
-                borderBottom: '2px solid #e2e8f0',
+                background: 'linear-gradient(135deg, var(--bg-color) 0%, var(--tag-bg) 100%)',
+                borderBottom: '2px solid var(--border-color)',
             }}>
                 {/* Gutter */}
-                <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, borderRight: '1px solid #e2e8f0' }} />
+                <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, borderRight: '1px solid var(--border-color)' }} />
                 {/* Day columns */}
                 {weekDays.map((day, i) => {
                     const isToday = day.isSame(today, 'day');
-                    const isWeekend = day.isoWeekday() >= 6;
+                    const isWeekend = day.day() === 0 || day.day() === 6;
                     return (
                         <div key={i} style={{
                             flex: 1, padding: '10px 4px', textAlign: 'center',
-                            borderRight: i < 6 ? '1px solid #e2e8f0' : 'none',
-                            background: isToday ? '#eff6ff' : 'transparent',
+                            borderRight: i < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none',
+                            background: isToday ? 'var(--color-active-menu-bg)' : 'transparent',
                         }}>
                             <Text style={{
                                 fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
                                 letterSpacing: '0.4px', display: 'block',
-                                color: isToday ? '#1272bf' : isWeekend ? '#94a3b8' : '#64748b',
+                                color: isToday ? '#1272bf' : isWeekend ? 'var(--text-secondary)' : 'var(--text-primary)',
                             }}>
-                                {dow[i]}
+                                {day.format('ddd')}
                             </Text>
                             <div style={{
                                 width: '32px', height: '32px', borderRadius: '50%', margin: '4px auto 0',
@@ -204,12 +236,12 @@ const DaysOfWeek = () => {
                             }}>
                                 <Text style={{
                                     fontSize: '16px', fontWeight: isToday ? 700 : 500,
-                                    color: isToday ? '#fff' : isWeekend ? '#94a3b8' : '#1e293b',
+                                    color: isToday ? '#fff' : isWeekend ? 'var(--text-secondary)' : 'var(--text-primary)',
                                 }}>
                                     {day.format('D')}
                                 </Text>
                             </div>
-                            <Text style={{ fontSize: '10px', color: isToday ? '#1272bf' : '#94a3b8', display: 'block', marginTop: '1px' }}>
+                            <Text style={{ fontSize: '10px', color: isToday ? '#1272bf' : 'var(--text-secondary)', display: 'block', marginTop: '1px' }}>
                                 {day.format('MMM')}
                             </Text>
                         </div>
@@ -221,29 +253,36 @@ const DaysOfWeek = () => {
 
             {/* All-Day Events row */}
             {hasAllDayEvents && (
-                <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0, position: 'relative' }}>
-                    <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #e2e8f0' }}>
-                        <Text style={{ fontSize: '9px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', textAlign: 'center', lineHeight: 1 }}>All-day</Text>
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-color)', flexShrink: 0, position: 'relative' }}>
+                    <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid var(--border-color)' }}>
+                        <Text style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', textAlign: 'center', lineHeight: 1 }}>All-day</Text>
                     </div>
 
                     <div style={{ flex: 1, position: 'relative', height: `${allDayTracks.length * 28 + 12}px` }}>
                         {/* Background Column Dividers */}
                         <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', pointerEvents: 'none' }}>
-                            {Array.from({ length: 7 }).map((_, idx) => (
-                                <div key={idx} style={{ flex: 1, borderRight: idx < 6 ? '1px solid #e2e8f0' : 'none' }} />
+                            {Array.from({ length: weekDays.length }).map((_, idx) => (
+                                <div key={idx} style={{ flex: 1, borderRight: idx < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none' }} />
                             ))}
                         </div>
 
                         {/* Spanning Event Bars */}
                         {allDayEventsWithLayout.map(({ event, track, startCol, endCol }) => {
                             const style = getEventStyle(event);
-                            const leftPct = (startCol / 7) * 100;
-                            const widthPct = ((endCol - startCol + 1) / 7) * 100;
+                            const leftPct = (startCol / weekDays.length) * 100;
+                            const widthPct = ((endCol - startCol + 1) / weekDays.length) * 100;
 
                             return (
                                 <div
                                     key={event.id}
-                                    onClick={() => openEditModal(event)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onEventClick) {
+                                            const res = onEventClick(event);
+                                            if (res === false) return;
+                                        }
+                                        openEditModal(event);
+                                    }}
                                     style={{
                                         position: 'absolute',
                                         top: `${track * 28 + 6}px`,
@@ -267,7 +306,7 @@ const DaysOfWeek = () => {
                                     <Text style={{
                                         fontSize: '11px',
                                         fontWeight: 700,
-                                        color: '#1e293b',
+                                        color: 'var(--text-primary)',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
@@ -287,16 +326,16 @@ const DaysOfWeek = () => {
             )}
 
             {/* Scrollable grid body */}
-            <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: '#fff' }}>
+            <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: 'var(--white-color)' }}>
                 <div style={{ display: 'flex', position: 'relative', height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}>
                     {/* Time gutter */}
-                    <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, position: 'relative', borderRight: '1px solid #e2e8f0' }}>
+                    <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, position: 'relative', borderRight: '1px solid var(--border-color)' }}>
                         {Array.from({ length: TOTAL_HOURS }, (_, h) => (
                             <div key={h} style={{
                                 position: 'absolute', top: `${h * HOUR_HEIGHT - 8}px`,
                                 right: '8px', width: '40px', textAlign: 'right',
                             }}>
-                                <Text style={{ fontSize: '10px', fontWeight: 600, color: '#94a3b8' }}>
+                                <Text style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                                     {h === 0 ? '' : formatHourLabel(h, timeFormat)}
                                 </Text>
                             </div>
@@ -306,7 +345,7 @@ const DaysOfWeek = () => {
                     {/* Day columns */}
                     {weekDays.map((day, colIdx) => {
                         const isToday = day.isSame(today, 'day');
-                        const isWeekend = day.isoWeekday() >= 6;
+                        const isWeekend = day.day() === 0 || day.day() === 6;
                         const dayEvents = getEventsForDay(day);
                         return (
                             <div
@@ -316,12 +355,18 @@ const DaysOfWeek = () => {
                                     const y = e.clientY - rect.top;
                                     const clickedHour = Math.max(0, Math.min(23, Math.floor(y / HOUR_HEIGHT)));
                                     const prepopulated = dayjs(day).hour(clickedHour).minute(0);
-                                    openCreateModal(prepopulated.toDate());
+                                    if (onDateClick) {
+                                        const res = onDateClick(prepopulated.toDate());
+                                        if (res === false) return;
+                                    }
+                                    if (allowDateClick) {
+                                        openCreateModal(prepopulated.toDate());
+                                    }
                                 }}
                                 style={{
                                     flex: 1, position: 'relative',
-                                    borderRight: colIdx < 6 ? '1px solid #f1f5f9' : 'none',
-                                    background: isToday ? '#fafeff' : isWeekend ? '#fdfcff' : '#fff',
+                                    borderRight: colIdx < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none',
+                                    background: isToday ? 'var(--color-active-menu-bg)' : isWeekend ? 'var(--bg-color)' : 'var(--white-color)',
                                     cursor: 'pointer',
                                 }}
                             >
@@ -330,7 +375,7 @@ const DaysOfWeek = () => {
                                     <div key={h} style={{
                                         position: 'absolute', top: `${h * HOUR_HEIGHT}px`,
                                         left: 0, right: 0,
-                                        borderTop: h === 0 ? 'none' : '1px solid #f1f5f9',
+                                        borderTop: h === 0 ? 'none' : '1px solid var(--border-color)',
                                     }} />
                                 ))}
                                 {/* Half-hour lines */}
@@ -338,7 +383,7 @@ const DaysOfWeek = () => {
                                     <div key={`half-${h}`} style={{
                                         position: 'absolute', top: `${h * HOUR_HEIGHT + HOUR_HEIGHT / 2}px`,
                                         left: '8px', right: 0,
-                                        borderTop: '1px dashed #f1f5f9',
+                                        borderTop: '1px dashed var(--border-color)',
                                     }} />
                                 ))}
                                 {/* Events */}

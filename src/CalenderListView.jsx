@@ -16,7 +16,7 @@ const getDayEvents = (date, events) => {
 };
 
 const EventCard = ({ event, isFirst, date, timeFormat }) => {
-    const { openEditModal } = useCalendarStore();
+    const { openEditModal, onEventClick } = useCalendarStore();
     const config = getEventStyle(event);
     const dayStart = dayjs(date).startOf('day');
     const dayEnd = dayjs(date).endOf('day');
@@ -36,13 +36,19 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
     return (
         <div
             className="list-event-card"
-            onClick={() => openEditModal(event)}
+            onClick={() => {
+                if (onEventClick) {
+                    const res = onEventClick(event);
+                    if (res === false) return;
+                }
+                openEditModal(event);
+            }}
             style={{
                 display: 'flex',
                 gap: '14px',
                 padding: '14px 16px',
                 marginBottom: '10px',
-                background: '#fff',
+                background: 'var(--white-color)',
                 borderRadius: '10px',
                 border: `1px solid ${config.border}`,
                 borderLeft: `4px solid ${config.color}`,
@@ -63,10 +69,10 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
         >
             {/* Time column */}
             <div style={{ minWidth: '95px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
-                <Text style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b' }}>
+                <Text style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {isSpanningFromPrev ? eventStart.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventStart, timeFormat)}
                 </Text>
-                <Text style={{ fontSize: '11px', color: '#94a3b8' }}>
+                <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                     {isSpanningToNext ? eventEnd.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventEnd, timeFormat)}
                 </Text>
                 {(isSpanningFromPrev || isSpanningToNext) && (
@@ -104,7 +110,7 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
                 <Text style={{
                     fontSize: '14px',
                     fontWeight: 600,
-                    color: '#1e293b',
+                    color: 'var(--text-primary)',
                     display: 'block',
                     marginBottom: '4px',
                     overflow: 'hidden',
@@ -114,7 +120,7 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
                 }}>
                     {event.title}
                 </Text>
-                <Text style={{ fontSize: '12px', color: '#64748b' }}>
+                <Text style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                     {event.description}
                 </Text>
             </div>
@@ -130,8 +136,8 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
                     {event.type}
                 </Tag>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <ClockCircleOutlined style={{ fontSize: '11px', color: '#94a3b8' }} />
-                    <Text style={{ fontSize: '11px', color: '#94a3b8' }}>{durationStr}</Text>
+                    <ClockCircleOutlined style={{ fontSize: '11px', color: 'var(--text-secondary)' }} />
+                    <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{durationStr}</Text>
                 </div>
             </div>
         </div>
@@ -151,14 +157,14 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                 gap: '12px',
                 marginBottom: '12px',
                 padding: '8px 0',
-                borderBottom: '1px solid #f1f5f9',
+                borderBottom: '1px solid var(--border-color)',
             }}>
                 <div style={{
                     width: '44px',
                     height: '44px',
                     borderRadius: '10px',
-                    background: isToday ? '#1272bf' : '#f8fafc',
-                    border: isToday ? 'none' : '1px solid #e2e8f0',
+                    background: isToday ? '#1272bf' : 'var(--bg-color)',
+                    border: isToday ? 'none' : '1px solid var(--border-color)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -168,7 +174,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                     <Text style={{
                         fontSize: '10px',
                         fontWeight: 700,
-                        color: isToday ? 'rgba(255,255,255,0.85)' : '#94a3b8',
+                        color: isToday ? 'rgba(255,255,255,0.85)' : 'var(--text-secondary)',
                         textTransform: 'uppercase',
                         lineHeight: 1,
                     }}>
@@ -177,7 +183,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                     <Text style={{
                         fontSize: '18px',
                         fontWeight: 800,
-                        color: isToday ? '#fff' : '#1e293b',
+                        color: isToday ? '#fff' : 'var(--text-primary)',
                         lineHeight: 1.1,
                         marginTop: '2px',
                     }}>
@@ -185,10 +191,10 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                     </Text>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Text style={{ fontSize: '14px', fontWeight: 700, color: '#1e293b' }}>
+                    <Text style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
                         {date.format('MMMM YYYY')}
                     </Text>
-                    <Text style={{ fontSize: '11px', color: '#64748b' }}>
+                    <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                         {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
                     </Text>
                 </div>
@@ -207,7 +213,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
 };
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends } = useCalendarStore();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
@@ -217,11 +223,15 @@ const CalenderListView = () => {
         setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
     }, [setWeekRange, currentWeek, startOfWeek]);
 
-    // Build the 7 days of the current week starting on startOfWeek
+    // Build the days of the current week starting on startOfWeek
     const weekDays = useMemo(() => {
         const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
-        return Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
-    }, [currentWeek, startOfWeek]);
+        const baseDays = Array.from({ length: 7 }, (_, i) => startDay.add(i, 'day'));
+        if (hideWeekends) {
+            return baseDays.filter(d => d.day() !== 0 && d.day() !== 6);
+        }
+        return baseDays;
+    }, [currentWeek, startOfWeek, hideWeekends]);
 
     const today = dayjs();
 
@@ -252,9 +262,9 @@ const CalenderListView = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px 18px',
-                background: 'linear-gradient(135deg, #f0f7ff 0%, #e8f3fd 100%)',
+                background: 'linear-gradient(135deg, var(--bg-color) 0%, var(--tag-bg) 100%)',
                 borderRadius: '12px',
-                border: '1px solid #bfdbfe',
+                border: '1px solid var(--border-color)',
                 marginBottom: '28px',
                 flexWrap: 'wrap',
                 gap: '12px',
@@ -262,10 +272,10 @@ const CalenderListView = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <CalendarOutlined style={{ fontSize: '18px', color: '#1272bf' }} />
                     <div>
-                        <Text style={{ fontSize: '13px', color: '#64748b', display: 'block' }}>
+                        <Text style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>
                             Week {weekRange.count}
                         </Text>
-                        <Text style={{ fontSize: '14px', fontWeight: 700, color: '#1e293b' }}>
+                        <Text style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
                             {weekRange.range}
                         </Text>
                     </div>
@@ -304,10 +314,10 @@ const CalenderListView = () => {
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                     description={
                         <div style={{ textAlign: 'center' }}>
-                            <Text style={{ fontSize: '15px', color: '#64748b', display: 'block', marginBottom: '4px' }}>
+                            <Text style={{ fontSize: '15px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
                                 No events this week
                             </Text>
-                            <Text style={{ fontSize: '13px', color: '#94a3b8' }}>
+                            <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                 Navigate to another week to see your schedule
                             </Text>
                         </div>

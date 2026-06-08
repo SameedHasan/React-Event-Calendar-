@@ -16,7 +16,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const DayEventBlock = ({ event, currentDate, timeFormat }) => {
-    const { openEditModal } = useCalendarStore();
+    const { openEditModal, onEventClick } = useCalendarStore();
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, currentDate);
     if (!segment) return null;
@@ -34,6 +34,10 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
         <div
             onClick={(e) => {
                 e.stopPropagation();
+                if (onEventClick) {
+                    const res = onEventClick(event);
+                    if (res === false) return;
+                }
                 openEditModal(event);
             }}
             style={{
@@ -75,7 +79,7 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
                 }} />
                 <Text style={{
                     fontSize: isCompact ? '12px' : '14px',
-                    fontWeight: 700, color: '#1e293b',
+                    fontWeight: 700, color: 'var(--text-primary)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     flex: 1,
                 }}>
@@ -95,19 +99,19 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
             {!isCompact && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <ClockCircleOutlined style={{ fontSize: '11px', color: '#94a3b8' }} />
-                        <Text style={{ fontSize: '11px', color: '#64748b', fontWeight: 500 }}>
+                        <ClockCircleOutlined style={{ fontSize: '11px', color: 'var(--text-secondary)' }} />
+                        <Text style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                             {formatTime(event.start, timeFormat)} – {formatTime(event.end, timeFormat)}
                         </Text>
                     </div>
-                    <Text style={{ fontSize: '10px', color: '#94a3b8' }}>· {durationStr}</Text>
+                    <Text style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>· {durationStr}</Text>
                 </div>
             )}
 
             {/* Description row */}
             {height > 80 && event.description && (
                 <Text style={{
-                    fontSize: '11px', color: '#64748b',
+                    fontSize: '11px', color: 'var(--text-secondary)',
                     overflow: 'hidden', textOverflow: 'ellipsis',
                     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 }}>
@@ -119,7 +123,20 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
 };
 
 const CalenderDayView = () => {
-    const { weekRange, currentWeek, currentDayIndex, setWeekRange, events, startOfWeek, timeFormat, openCreateModal, openEditModal } = useCalendarStore();
+    const { 
+        weekRange, 
+        currentWeek, 
+        currentDayIndex, 
+        setWeekRange, 
+        events, 
+        startOfWeek, 
+        timeFormat, 
+        openCreateModal, 
+        openEditModal,
+        onEventClick,
+        onDateClick,
+        allowDateClick,
+    } = useCalendarStore();
     const containerRef = useRef(null);
 
     // Get the actual date for the current day in the week
@@ -168,7 +185,7 @@ const CalenderDayView = () => {
             display: 'flex', flexDirection: 'column',
             height: 'calc(100vh - 180px)',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border-color)',
             overflow: 'hidden',
             boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         }}>
@@ -177,45 +194,45 @@ const CalenderDayView = () => {
                 display: 'flex', alignItems: 'center', gap: '16px',
                 padding: '14px 20px',
                 background: isToday
-                    ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)'
-                    : 'linear-gradient(135deg, #f8fafc 0%, #f0f7ff 100%)',
-                borderBottom: '2px solid #e2e8f0',
+                    ? 'var(--color-active-menu-bg)'
+                    : 'linear-gradient(135deg, var(--bg-color) 0%, var(--tag-bg) 100%)',
+                borderBottom: '2px solid var(--border-color)',
                 flexShrink: 0,
             }}>
                 {/* Date circle */}
                 <div style={{
                     width: '52px', height: '52px', borderRadius: '14px',
-                    background: isToday ? '#1272bf' : '#fff',
-                    border: isToday ? 'none' : '1px solid #e2e8f0',
+                    background: isToday ? '#1272bf' : 'var(--white-color)',
+                    border: isToday ? 'none' : '1px solid var(--border-color)',
                     display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center',
                     boxShadow: isToday ? '0 4px 12px rgba(18,114,191,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
                     flexShrink: 0,
                 }}>
-                    <Text style={{ fontSize: '20px', fontWeight: 800, color: isToday ? '#fff' : '#1e293b', lineHeight: 1.1 }}>
+                    <Text style={{ fontSize: '20px', fontWeight: 800, color: isToday ? '#fff' : 'var(--text-primary)', lineHeight: 1.1 }}>
                         {currentDate.format('D')}
                     </Text>
-                    <Text style={{ fontSize: '10px', fontWeight: 600, color: isToday ? 'rgba(255,255,255,0.75)' : '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                    <Text style={{ fontSize: '10px', fontWeight: 600, color: isToday ? 'rgba(255,255,255,0.75)' : 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                         {currentDate.format('MMM')}
                     </Text>
                 </div>
 
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Text style={{ fontSize: '20px', fontWeight: 700, color: '#1e293b' }}>
+                        <Text style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
                             {currentDate.format('dddd')}
                         </Text>
                         {isToday && (
                             <span style={{
                                 fontSize: '11px', fontWeight: 700, color: '#1272bf',
-                                background: '#fff', padding: '2px 10px',
+                                background: 'var(--white-color)', padding: '2px 10px',
                                 borderRadius: '20px', border: '1.5px solid #bfdbfe',
                             }}>
                                 Today
                             </span>
                         )}
                     </div>
-                    <Text style={{ fontSize: '13px', color: '#64748b' }}>
+                    <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                         {currentDate.format('MMMM D, YYYY')}
                         {(dayEvents.length + allDayEvents.length) > 0 && (
                             <span style={{ marginLeft: '8px', color: '#1272bf', fontWeight: 600 }}>
@@ -230,14 +247,14 @@ const CalenderDayView = () => {
             {allDayEvents.length > 0 && (
                 <div style={{
                     padding: '10px 16px',
-                    background: '#f8fafc',
-                    borderBottom: '1px solid #e2e8f0',
+                    background: 'var(--bg-color)',
+                    borderBottom: '1px solid var(--border-color)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '6px',
                     flexShrink: 0,
                 }}>
-                    <Text style={{ fontSize: '10px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <Text style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         All-day & Spanning Events
                     </Text>
                     {allDayEvents.map(event => {
@@ -245,7 +262,13 @@ const CalenderDayView = () => {
                         return (
                             <div
                                 key={event.id}
-                                onClick={() => openEditModal(event)}
+                                onClick={() => {
+                                    if (onEventClick) {
+                                        const res = onEventClick(event);
+                                        if (res === false) return;
+                                    }
+                                    openEditModal(event);
+                                }}
                                 style={{
                                     background: style.bg,
                                     border: `1px solid ${style.border}`,
@@ -259,11 +282,11 @@ const CalenderDayView = () => {
                                 }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Text style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
+                                    <Text style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                                         {event.title}
                                     </Text>
                                     {event.description && (
-                                        <Text style={{ fontSize: '11px', color: '#64748b' }}>
+                                        <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                                             — {event.description}
                                         </Text>
                                     )}
@@ -281,12 +304,12 @@ const CalenderDayView = () => {
             )}
 
             {/* Scrollable time grid */}
-            <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#fff', position: 'relative' }}>
+            <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: 'var(--white-color)', position: 'relative' }}>
                 <div style={{ display: 'flex', height: `${TOTAL_HOURS * HOUR_HEIGHT}px`, position: 'relative' }}>
                     {/* Time gutter */}
                     <div style={{
                         width: `${TIME_GUTTER}px`, flexShrink: 0,
-                        borderRight: '1px solid #e2e8f0',
+                        borderRight: '1px solid var(--border-color)',
                         position: 'relative',
                     }}>
                         {Array.from({ length: TOTAL_HOURS }, (_, h) => (
@@ -294,7 +317,7 @@ const CalenderDayView = () => {
                                 position: 'absolute', top: `${h * HOUR_HEIGHT - 9}px`,
                                 right: '10px', textAlign: 'right',
                             }}>
-                                <Text style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8' }}>
+                                <Text style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                                     {h === 0 ? '' : formatHourLabel(h, timeFormat)}
                                 </Text>
                             </div>
@@ -308,11 +331,17 @@ const CalenderDayView = () => {
                             const y = e.clientY - rect.top;
                             const clickedHour = Math.max(0, Math.min(23, Math.floor(y / HOUR_HEIGHT)));
                             const prepopulated = dayjs(currentDate).hour(clickedHour).minute(0);
-                            openCreateModal(prepopulated.toDate());
+                            if (onDateClick) {
+                                const res = onDateClick(prepopulated.toDate());
+                                if (res === false) return;
+                            }
+                            if (allowDateClick) {
+                                openCreateModal(prepopulated.toDate());
+                            }
                         }}
                         style={{
                             flex: 1, position: 'relative',
-                            background: isToday ? '#fafeff' : '#fff',
+                            background: isToday ? 'var(--color-active-menu-bg)' : 'var(--white-color)',
                             cursor: 'pointer',
                         }}
                     >
@@ -322,13 +351,13 @@ const CalenderDayView = () => {
                                 <div style={{
                                     position: 'absolute', top: `${h * HOUR_HEIGHT}px`,
                                     left: 0, right: 0,
-                                    borderTop: h === 0 ? 'none' : '1px solid #f1f5f9',
+                                    borderTop: h === 0 ? 'none' : '1px solid var(--border-color)',
                                 }} />
                                 {/* Half-hour dotted line */}
                                 <div style={{
                                     position: 'absolute', top: `${h * HOUR_HEIGHT + HOUR_HEIGHT / 2}px`,
                                     left: '12px', right: 0,
-                                    borderTop: '1px dashed #f1f5f9',
+                                    borderTop: '1px dashed var(--border-color)',
                                 }} />
                             </React.Fragment>
                         ))}
@@ -354,7 +383,7 @@ const CalenderDayView = () => {
                                 <div style={{ flex: 1, height: '2px', background: '#ef4444' }} />
                                 <div style={{
                                     fontSize: '10px', fontWeight: 700, color: '#ef4444',
-                                    background: '#fff', border: '1px solid #fecaca',
+                                    background: 'var(--white-color)', border: '1px solid #fecaca',
                                     padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', flexShrink: 0,
                                 }}>
                                     {formatTime(now, timeFormat)}
@@ -370,7 +399,7 @@ const CalenderDayView = () => {
                                 textAlign: 'center', pointerEvents: 'none',
                             }}>
                                 <div style={{ fontSize: '32px', marginBottom: '8px' }}>📅</div>
-                                <Text style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 500 }}>
+                                <Text style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                     No events scheduled
                                 </Text>
                             </div>

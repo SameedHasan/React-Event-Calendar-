@@ -141,10 +141,23 @@ export default App;
 | `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts. |
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
-| `categories` | `string[]` | `['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference']` | Optional. List of event categories/types available in the dropdown selection for creating or editing events. |
-| `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local component/store state automatically. |
-| `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local component/store state automatically. |
-| `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local component/store state automatically. |
+| `categories` | `string[]` | `['Meeting', ...]` | Optional. List of event categories/types available for creating or editing events. |
+| `currentDate` | `Date \| string` | `undefined` | Optional. Controls the calendar's currently focused date from the parent. |
+| `onDateChange` | `(date: Date) => void` | `undefined` | Optional. Fires when the active calendar date/range changes. |
+| `onViewChange` | `(view: string) => void` | `undefined` | Optional. Fires when the active calendar view switches. |
+| `hideWeekends` | `boolean` | `false` | Optional. Hides Saturday and Sunday columns in Month, Week, and List views. |
+| `showWeekNumbers` | `boolean` | `false` | Optional. Shows the week number column on Month and Week views. |
+| `showToolbar` | `boolean` | `true` | Optional. Renders the main header navigation toolbar. |
+| `showExportButton` | `boolean` | `true` | Optional. Renders the toolbar "Export" iCal button. |
+| `showAddEventButton` | `boolean` | `true` | Optional. Renders the toolbar "+ Add Event" button. |
+| `allowDateClick` | `boolean` | `true` | Optional. Enables/disables the click-to-add event action on empty day slots. |
+| `eventColors` | `object` | `{}` | Optional. Custom color overrides per category (e.g. `{ Meeting: '#ef4444' }`). |
+| `theme` | `'light' \| 'dark'` | `'light'` | Optional. Applies light or premium dark styles to the calendar. |
+| `onEventClick` | `(event: CalendarEvent) => void \| boolean` | `undefined` | Optional. Intercepts event clicks. Return `false` to block the default edit modal. |
+| `onDateClick` | `(date: Date) => void \| boolean` | `undefined` | Optional. Intercepts empty cell clicks. Return `false` to block the default creation modal. |
+| `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local state automatically. |
+| `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local state automatically. |
+| `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local state automatically. |
 
 ---
 

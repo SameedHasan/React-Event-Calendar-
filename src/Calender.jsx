@@ -28,9 +28,24 @@ const Calendar = ({
     startOfWeek = 'monday',
     timeFormat = '12h',
     categories,
+    // CRUD:
     onAddEvent,
     onUpdateEvent,
     onDeleteEvent,
+    // Advanced NPM Props:
+    currentDate,
+    onDateChange,
+    onViewChange,
+    hideWeekends = false,
+    showWeekNumbers = false,
+    showToolbar = true,
+    showExportButton = true,
+    showAddEventButton = true,
+    allowDateClick = true,
+    eventColors = {},
+    theme = 'light',
+    onEventClick,
+    onDateClick,
 }) => {
     const {
         view,
@@ -40,6 +55,8 @@ const Calendar = ({
         setTimeFormat,
         setCallbacks,
         setCategories,
+        setConfigs,
+        setCurrentDate,
     } = useCalendarStore();
 
     // Activate keyboard shortcuts
@@ -62,6 +79,45 @@ const Calendar = ({
         }
     }, [categories, setCategories]);
 
+    // Sync other advanced configurations with the store
+    useEffect(() => {
+        setConfigs({
+            onDateChange,
+            onViewChange,
+            hideWeekends,
+            showWeekNumbers,
+            showToolbar,
+            showExportButton,
+            showAddEventButton,
+            allowDateClick,
+            eventColors,
+            theme,
+            onEventClick,
+            onDateClick,
+        });
+    }, [
+        onDateChange,
+        onViewChange,
+        hideWeekends,
+        showWeekNumbers,
+        showToolbar,
+        showExportButton,
+        showAddEventButton,
+        allowDateClick,
+        eventColors,
+        theme,
+        onEventClick,
+        onDateClick,
+        setConfigs,
+    ]);
+
+    // Sync currentDate explicitly when it changes from the parent
+    useEffect(() => {
+        if (currentDate) {
+            setCurrentDate(currentDate);
+        }
+    }, [currentDate, setCurrentDate]);
+
     // Sync startOfWeek and timeFormat configuration props with the store
     useEffect(() => {
         setStartOfWeek(startOfWeek);
@@ -80,14 +136,18 @@ const Calendar = ({
     }, []);
 
     return (
-        <div style={{
-            margin: '20px 16px',
-            padding: '20px',
-            height: 'calc(100vh - 104px)',
-            overflow: 'auto',
-            backgroundColor: 'var(--white-color)',
-        }}>
-            <CalenderHeader />
+        <div 
+            className={`calendar-root theme-${theme}`}
+            style={{
+                margin: '20px 16px',
+                padding: '20px',
+                height: 'calc(100vh - 104px)',
+                overflow: 'auto',
+                backgroundColor: 'var(--white-color)',
+                transition: 'background-color 0.25s ease, color 0.25s ease',
+            }}
+        >
+            {showToolbar && <CalenderHeader />}
             {view === 'month' && <CalenderMonthView />}
             {view === 'week'  && <DaysOfWeek />}
             {view === 'day'   && <CalenderDayView />}

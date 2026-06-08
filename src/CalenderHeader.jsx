@@ -45,6 +45,8 @@ function CalendarHeader() {
         goToToday,
         events,
         openCreateModal,
+        showExportButton,
+        showAddEventButton,
     } = useCalendarStore();
 
     // Navigation handlers per view
@@ -118,7 +120,7 @@ function CalendarHeader() {
                         padding: '6px 16px',
                         borderRadius: '8px',
                         border: '1.5px solid #1272bf',
-                        background: '#fff',
+                        background: 'var(--white-color)',
                         color: '#1272bf',
                         fontSize: '13px',
                         fontWeight: 700,
@@ -133,7 +135,7 @@ function CalendarHeader() {
                         e.currentTarget.style.color = '#fff';
                     }}
                     onMouseLeave={e => {
-                        e.currentTarget.style.background = '#fff';
+                        e.currentTarget.style.background = 'var(--white-color)';
                         e.currentTarget.style.color = '#1272bf';
                     }}
                 >
@@ -152,9 +154,9 @@ function CalendarHeader() {
                             style={{
                                 width: '32px', height: '32px',
                                 borderRadius: '8px',
-                                border: '1.5px solid #e2e8f0',
-                                background: '#fff',
-                                color: '#475569',
+                                border: '1.5px solid var(--border-color)',
+                                background: 'var(--white-color)',
+                                color: 'var(--text-secondary)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease',
@@ -163,12 +165,12 @@ function CalendarHeader() {
                             onMouseEnter={e => {
                                 e.currentTarget.style.borderColor = '#1272bf';
                                 e.currentTarget.style.color = '#1272bf';
-                                e.currentTarget.style.background = '#eff6ff';
+                                e.currentTarget.style.background = 'var(--color-active-menu-bg)';
                             }}
                             onMouseLeave={e => {
-                                e.currentTarget.style.borderColor = '#e2e8f0';
-                                e.currentTarget.style.color = '#475569';
-                                e.currentTarget.style.background = '#fff';
+                                e.currentTarget.style.borderColor = 'var(--border-color)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                                e.currentTarget.style.background = 'var(--white-color)';
                             }}
                         >
                             {icon}
@@ -206,75 +208,79 @@ function CalendarHeader() {
             {/* ── RIGHT: view switcher & export button ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                 {/* Add Event button */}
-                <button
-                    onClick={() => openCreateModal(null)}
-                    title="Add new event"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        borderRadius: '10px',
-                        border: '1.5px solid #1272bf',
-                        background: '#1272bf',
-                        color: '#fff',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.18s ease',
-                        lineHeight: '20px',
-                    }}
-                    onMouseEnter={e => {
-                        e.currentTarget.style.background = '#0e5c9b';
-                        e.currentTarget.style.borderColor = '#0e5c9b';
-                    }}
-                    onMouseLeave={e => {
-                        e.currentTarget.style.background = '#1272bf';
-                        e.currentTarget.style.borderColor = '#1272bf';
-                    }}
-                >
-                    <PlusOutlined style={{ fontSize: '14px' }} />
-                    <span>Add Event</span>
-                </button>
+                {showAddEventButton && (
+                    <button
+                        onClick={() => openCreateModal(null)}
+                        title="Add new event"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '10px',
+                            border: '1.5px solid #1272bf',
+                            background: '#1272bf',
+                            color: '#fff',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.18s ease',
+                            lineHeight: '20px',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = '#0e5c9b';
+                            e.currentTarget.style.borderColor = '#0e5c9b';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = '#1272bf';
+                            e.currentTarget.style.borderColor = '#1272bf';
+                        }}
+                    >
+                        <PlusOutlined style={{ fontSize: '14px' }} />
+                        <span>Add Event</span>
+                    </button>
+                )}
 
                 {/* Export button */}
-                <button
-                    onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}
-                    title="Export all events to iCal (.ics)"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
-                        background: '#fff',
-                        color: '#475569',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.18s ease',
-                        lineHeight: '20px',
-                    }}
-                    onMouseEnter={e => {
-                        e.currentTarget.style.borderColor = '#1272bf';
-                        e.currentTarget.style.color = '#1272bf';
-                        e.currentTarget.style.background = '#eff6ff';
-                    }}
-                    onMouseLeave={e => {
-                        e.currentTarget.style.borderColor = '#cbd5e1';
-                        e.currentTarget.style.color = '#475569';
-                        e.currentTarget.style.background = '#fff';
-                    }}
-                >
-                    <DownloadOutlined style={{ fontSize: '14px' }} />
-                    <span>Export</span>
-                </button>
+                {showExportButton && (
+                    <button
+                        onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}
+                        title="Export all events to iCal (.ics)"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '10px',
+                            border: '1.5px solid var(--border-color)',
+                            background: 'var(--white-color)',
+                            color: 'var(--text-secondary)',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.18s ease',
+                            lineHeight: '20px',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.borderColor = '#1272bf';
+                            e.currentTarget.style.color = '#1272bf';
+                            e.currentTarget.style.background = 'var(--color-active-menu-bg)';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.borderColor = 'var(--border-color)';
+                            e.currentTarget.style.color = 'var(--text-secondary)';
+                            e.currentTarget.style.background = 'var(--white-color)';
+                        }}
+                    >
+                        <DownloadOutlined style={{ fontSize: '14px' }} />
+                        <span>Export</span>
+                    </button>
+                )}
 
                 {/* View Switcher */}
                 <div style={{
                     display: 'flex',
-                    background: '#f1f5f9',
+                    background: 'var(--bg-color)',
                     borderRadius: '10px',
                     padding: '3px',
                     gap: '2px',
@@ -292,8 +298,8 @@ function CalendarHeader() {
                                     padding: '6px 13px',
                                     borderRadius: '8px',
                                     border: 'none',
-                                    background: isActive ? '#fff' : 'transparent',
-                                    color: isActive ? '#1272bf' : '#64748b',
+                                    background: isActive ? 'var(--white-color)' : 'transparent',
+                                    color: isActive ? '#1272bf' : 'var(--text-secondary)',
                                     fontSize: '13px',
                                     fontWeight: isActive ? 700 : 500,
                                     cursor: 'pointer',
@@ -303,14 +309,14 @@ function CalendarHeader() {
                                 }}
                                 onMouseEnter={e => {
                                     if (!isActive) {
-                                        e.currentTarget.style.background = '#e2e8f0';
-                                        e.currentTarget.style.color = '#334155';
+                                        e.currentTarget.style.background = 'var(--border-color)';
+                                        e.currentTarget.style.color = 'var(--text-primary)';
                                     }
                                 }}
                                 onMouseLeave={e => {
                                     if (!isActive) {
                                         e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#64748b';
+                                        e.currentTarget.style.color = 'var(--text-secondary)';
                                     }
                                 }}
                             >

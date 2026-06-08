@@ -16,6 +16,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const DayEventBlock = ({ event, currentDate, timeFormat }) => {
+    const { openEditModal } = useCalendarStore();
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, currentDate);
     if (!segment) return null;
@@ -31,6 +32,10 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
 
     return (
         <div
+            onClick={(e) => {
+                e.stopPropagation();
+                openEditModal(event);
+            }}
             style={{
                 position: 'absolute',
                 top: `${top}px`,
@@ -114,7 +119,7 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
 };
 
 const CalenderDayView = () => {
-    const { weekRange, currentWeek, currentDayIndex, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
+    const { weekRange, currentWeek, currentDayIndex, setWeekRange, events, startOfWeek, timeFormat, openCreateModal, openEditModal } = useCalendarStore();
     const containerRef = useRef(null);
 
     // Get the actual date for the current day in the week
@@ -238,16 +243,21 @@ const CalenderDayView = () => {
                     {allDayEvents.map(event => {
                         const style = getEventStyle(event);
                         return (
-                            <div key={event.id} style={{
-                                background: style.bg,
-                                border: `1px solid ${style.border}`,
-                                borderLeft: `4px solid ${style.color}`,
-                                borderRadius: '6px',
-                                padding: '6px 12px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}>
+                            <div
+                                key={event.id}
+                                onClick={() => openEditModal(event)}
+                                style={{
+                                    background: style.bg,
+                                    border: `1px solid ${style.border}`,
+                                    borderLeft: `4px solid ${style.color}`,
+                                    borderRadius: '6px',
+                                    padding: '6px 12px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                }}
+                            >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Text style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
                                         {event.title}
@@ -292,7 +302,20 @@ const CalenderDayView = () => {
                     </div>
 
                     {/* Main grid column */}
-                    <div style={{ flex: 1, position: 'relative', background: isToday ? '#fafeff' : '#fff' }}>
+                    <div
+                        onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const y = e.clientY - rect.top;
+                            const clickedHour = Math.max(0, Math.min(23, Math.floor(y / HOUR_HEIGHT)));
+                            const prepopulated = dayjs(currentDate).hour(clickedHour).minute(0);
+                            openCreateModal(prepopulated.toDate());
+                        }}
+                        style={{
+                            flex: 1, position: 'relative',
+                            background: isToday ? '#fafeff' : '#fff',
+                            cursor: 'pointer',
+                        }}
+                    >
                         {/* Hour grid lines */}
                         {Array.from({ length: TOTAL_HOURS }, (_, h) => (
                             <React.Fragment key={h}>

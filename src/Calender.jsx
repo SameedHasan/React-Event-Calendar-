@@ -20,8 +20,27 @@ import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
  * defaultView  {string}  Optional. Initial view: 'month'|'week'|'day'|'list'|'year'
  *                        Defaults to 'month'.
  */
-const Calendar = ({ events = [], defaultView = 'month', startOfWeek = 'monday', timeFormat = '12h' }) => {
-    const { view, setEvents, setView, setStartOfWeek, setTimeFormat } = useCalendarStore();
+import EventModal from './EventModal';
+
+const Calendar = ({
+    events = [],
+    defaultView = 'month',
+    startOfWeek = 'monday',
+    timeFormat = '12h',
+    categories,
+    onAddEvent,
+    onUpdateEvent,
+    onDeleteEvent,
+}) => {
+    const {
+        view,
+        setEvents,
+        setView,
+        setStartOfWeek,
+        setTimeFormat,
+        setCallbacks,
+        setCategories,
+    } = useCalendarStore();
 
     // Activate keyboard shortcuts
     useKeyboardShortcuts();
@@ -30,6 +49,18 @@ const Calendar = ({ events = [], defaultView = 'month', startOfWeek = 'monday', 
     useEffect(() => {
         setEvents(events);
     }, [events, setEvents]);
+
+    // Sync callbacks with the store
+    useEffect(() => {
+        setCallbacks({ onAddEvent, onUpdateEvent, onDeleteEvent });
+    }, [onAddEvent, onUpdateEvent, onDeleteEvent, setCallbacks]);
+
+    // Sync categories with the store
+    useEffect(() => {
+        if (categories) {
+            setCategories(categories);
+        }
+    }, [categories, setCategories]);
 
     // Sync startOfWeek and timeFormat configuration props with the store
     useEffect(() => {
@@ -62,6 +93,7 @@ const Calendar = ({ events = [], defaultView = 'month', startOfWeek = 'monday', 
             {view === 'day'   && <CalenderDayView />}
             {view === 'list'  && <CalenderListView />}
             {view === 'year'  && <CalenderYearView />}
+            <EventModal />
         </div>
     );
 };

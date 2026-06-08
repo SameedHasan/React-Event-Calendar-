@@ -16,6 +16,7 @@ const getDayEvents = (date, events) => {
 };
 
 const EventCard = ({ event, isFirst, date, timeFormat }) => {
+    const { openEditModal } = useCalendarStore();
     const config = getEventStyle(event);
     const dayStart = dayjs(date).startOf('day');
     const dayEnd = dayjs(date).endOf('day');
@@ -35,6 +36,7 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
     return (
         <div
             className="list-event-card"
+            onClick={() => openEditModal(event)}
             style={{
                 display: 'flex',
                 gap: '14px',

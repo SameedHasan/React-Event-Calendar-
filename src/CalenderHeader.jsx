@@ -9,6 +9,7 @@ import {
     FieldTimeOutlined,
     TableOutlined,
     DownloadOutlined,
+    PlusOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -43,6 +44,7 @@ function CalendarHeader() {
         handleNextandPrevDay,
         goToToday,
         events,
+        openCreateModal,
     } = useCalendarStore();
 
     // Navigation handlers per view
@@ -203,6 +205,38 @@ function CalendarHeader() {
 
             {/* ── RIGHT: view switcher & export button ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                {/* Add Event button */}
+                <button
+                    onClick={() => openCreateModal(null)}
+                    title="Add new event"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #1272bf',
+                        background: '#1272bf',
+                        color: '#fff',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.18s ease',
+                        lineHeight: '20px',
+                    }}
+                    onMouseEnter={e => {
+                        e.currentTarget.style.background = '#0e5c9b';
+                        e.currentTarget.style.borderColor = '#0e5c9b';
+                    }}
+                    onMouseLeave={e => {
+                        e.currentTarget.style.background = '#1272bf';
+                        e.currentTarget.style.borderColor = '#1272bf';
+                    }}
+                >
+                    <PlusOutlined style={{ fontSize: '14px' }} />
+                    <span>Add Event</span>
+                </button>
+
                 {/* Export button */}
                 <button
                     onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}

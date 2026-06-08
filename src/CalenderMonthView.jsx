@@ -37,7 +37,7 @@ const TooltipContent = ({ events, day, timeFormat }) => (
 );
 
 const CalenderMonthView = () => {
-    const { currentDate, events, startOfWeek, timeFormat } = useCalendarStore();
+    const { currentDate, events, startOfWeek, timeFormat, openCreateModal, openEditModal } = useCalendarStore();
     const today = dayjs();
     const current = dayjs(currentDate);
 
@@ -168,6 +168,7 @@ const CalenderMonthView = () => {
                                 return (
                                     <div
                                         key={day.toString()}
+                                        onClick={() => openCreateModal(day.toDate())}
                                         style={{
                                             flex: 1,
                                             minHeight: '115px',
@@ -185,6 +186,7 @@ const CalenderMonthView = () => {
                                             display: 'flex',
                                             flexDirection: 'column',
                                             boxSizing: 'border-box',
+                                            cursor: 'pointer',
                                         }}
                                     >
                                         {/* Day number */}
@@ -210,7 +212,10 @@ const CalenderMonthView = () => {
 
                                         {/* Tooltip "+X more" trigger at the bottom */}
                                         {hiddenCount > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'flex-start', height: '24px', alignItems: 'center' }}>
+                                            <div
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{ display: 'flex', justifyContent: 'flex-start', height: '24px', alignItems: 'center' }}
+                                            >
                                                 <Tooltip
                                                     title={<TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} />}
                                                     overlayInnerStyle={{ background: '#fff', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
@@ -259,21 +264,26 @@ const CalenderMonthView = () => {
                                             }}
                                         >
                                             {isMultiDay ? (
-                                                <div style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    background: style.bg,
-                                                    border: `1px solid ${style.border}`,
-                                                    borderLeft: `3px solid ${style.color}`,
-                                                    borderRadius: '4px',
-                                                    padding: '0 6px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between',
-                                                    cursor: 'pointer',
-                                                    boxSizing: 'border-box',
-                                                }}
-                                                title={`${event.title} (${event.type})`}
+                                                <div
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openEditModal(event);
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        background: style.bg,
+                                                        border: `1px solid ${style.border}`,
+                                                        borderLeft: `3px solid ${style.color}`,
+                                                        borderRadius: '4px',
+                                                        padding: '0 6px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between',
+                                                        cursor: 'pointer',
+                                                        boxSizing: 'border-box',
+                                                    }}
+                                                    title={`${event.title} (${event.type})`}
                                                 >
                                                     <Text style={{
                                                         fontSize: '11px',
@@ -291,18 +301,23 @@ const CalenderMonthView = () => {
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <div style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    padding: '0 4px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '4px',
-                                                    cursor: 'pointer',
-                                                    boxSizing: 'border-box',
-                                                    borderRadius: '4px',
-                                                    transition: 'background 0.15s',
-                                                }}
+                                                <div
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openEditModal(event);
+                                                    }}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        padding: '0 4px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        cursor: 'pointer',
+                                                        boxSizing: 'border-box',
+                                                        borderRadius: '4px',
+                                                        transition: 'background 0.15s',
+                                                    }}
                                                 onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                                 title={`${formatTime(event.start, timeFormat)} - ${event.title}`}

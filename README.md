@@ -107,13 +107,22 @@ const myEvents = [
 ];
 
 function App() {
+  const [events, setEvents] = React.useState(myEvents);
+
+  const handleAdd = (newEvent) => setEvents(prev => [...prev, newEvent]);
+  const handleUpdate = (updatedEvent) => setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+  const handleDelete = (eventId) => setEvents(prev => prev.filter(e => e.id !== eventId));
+
   return (
     <div style={{ height: '100vh', padding: '20px' }}>
       <Calendar 
-        events={myEvents} 
+        events={events} 
         defaultView="month" 
         startOfWeek="sunday" 
         timeFormat="12h" 
+        onAddEvent={handleAdd}
+        onUpdateEvent={handleUpdate}
+        onDeleteEvent={handleDelete}
       />
     </div>
   );
@@ -132,6 +141,10 @@ export default App;
 | `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts. |
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
+| `categories` | `string[]` | `['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference']` | Optional. List of event categories/types available in the dropdown selection for creating or editing events. |
+| `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local component/store state automatically. |
+| `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local component/store state automatically. |
+| `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local component/store state automatically. |
 
 ---
 

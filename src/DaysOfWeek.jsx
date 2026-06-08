@@ -15,6 +15,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
+    const { openEditModal } = useCalendarStore();
     const cfg = getEventStyle(event);
     const segment = getEventDaySegment(event, dayStart);
     if (!segment) return null;
@@ -39,6 +40,10 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
             zIndex: 2,
             transition: 'all 0.15s ease',
             boxSizing: 'border-box',
+        }}
+        onClick={(e) => {
+            e.stopPropagation();
+            openEditModal(event);
         }}
         onMouseEnter={e => {
             e.currentTarget.style.boxShadow = `0 2px 10px ${cfg.color}40`;
@@ -68,7 +73,7 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
 };
 
 const DaysOfWeek = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, openCreateModal, openEditModal } = useCalendarStore();
     const today = dayjs();
     const containerRef = useRef(null);
 
@@ -238,6 +243,7 @@ const DaysOfWeek = () => {
                             return (
                                 <div
                                     key={event.id}
+                                    onClick={() => openEditModal(event)}
                                     style={{
                                         position: 'absolute',
                                         top: `${track * 28 + 6}px`,
@@ -303,11 +309,22 @@ const DaysOfWeek = () => {
                         const isWeekend = day.isoWeekday() >= 6;
                         const dayEvents = getEventsForDay(day);
                         return (
-                            <div key={colIdx} style={{
-                                flex: 1, position: 'relative',
-                                borderRight: colIdx < 6 ? '1px solid #f1f5f9' : 'none',
-                                background: isToday ? '#fafeff' : isWeekend ? '#fdfcff' : '#fff',
-                            }}>
+                            <div
+                                key={colIdx}
+                                onClick={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const y = e.clientY - rect.top;
+                                    const clickedHour = Math.max(0, Math.min(23, Math.floor(y / HOUR_HEIGHT)));
+                                    const prepopulated = dayjs(day).hour(clickedHour).minute(0);
+                                    openCreateModal(prepopulated.toDate());
+                                }}
+                                style={{
+                                    flex: 1, position: 'relative',
+                                    borderRight: colIdx < 6 ? '1px solid #f1f5f9' : 'none',
+                                    background: isToday ? '#fafeff' : isWeekend ? '#fdfcff' : '#fff',
+                                    cursor: 'pointer',
+                                }}
+                            >
                                 {/* Hour grid lines */}
                                 {Array.from({ length: TOTAL_HOURS }, (_, h) => (
                                     <div key={h} style={{

@@ -20,6 +20,47 @@ const useCalendarStore = create((set, get) => ({
     currentWeek: new Date().toISOString(),
     currentDayIndex: getDayIndex(new Date(), "monday"),
     events: [], // Populated via setEvents — pass your own events array as a prop
+    categories: ['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference'],
+    
+    // Modal & CRUD state
+    isModalOpen: false,
+    selectedEvent: null,
+    prepopulatedStartDate: null,
+    callbacks: {
+        onAddEvent: null,
+        onUpdateEvent: null,
+        onDeleteEvent: null,
+    },
+
+    setCallbacks: (callbacks) => set({ callbacks }),
+    openCreateModal: (date) => set({ isModalOpen: true, selectedEvent: null, prepopulatedStartDate: date ? date.toISOString() : null }),
+    openEditModal: (event) => set({ isModalOpen: true, selectedEvent: event, prepopulatedStartDate: null }),
+    closeModal: () => set({ isModalOpen: false, selectedEvent: null, prepopulatedStartDate: null }),
+
+    addEvent: (newEvent) => {
+        const state = get();
+        if (state.callbacks.onAddEvent) {
+            state.callbacks.onAddEvent(newEvent);
+        } else {
+            set({ events: [...state.events, newEvent] });
+        }
+    },
+    updateEvent: (updatedEvent) => {
+        const state = get();
+        if (state.callbacks.onUpdateEvent) {
+            state.callbacks.onUpdateEvent(updatedEvent);
+        } else {
+            set({ events: state.events.map(e => e.id === updatedEvent.id ? updatedEvent : e) });
+        }
+    },
+    deleteEvent: (eventId) => {
+        const state = get();
+        if (state.callbacks.onDeleteEvent) {
+            state.callbacks.onDeleteEvent(eventId);
+        } else {
+            set({ events: state.events.filter(e => e.id !== eventId) });
+        }
+    },
 
     // Configuration Actions
     setStartOfWeek: (startOfWeek) => {
@@ -42,6 +83,12 @@ const useCalendarStore = create((set, get) => ({
 
     setTimeFormat: (timeFormat) => {
         set({ timeFormat: timeFormat === '24h' ? '24h' : '12h' });
+    },
+
+    setCategories: (categories) => {
+        if (Array.isArray(categories)) {
+            set({ categories });
+        }
     },
 
     // Actions

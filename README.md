@@ -84,7 +84,7 @@ Install the package via npm:
 npm install react-event-calendar-suite
 ```
 
-Ensure you have the required peer dependencies installed:
+Ensure you have the required peer dependencies installed (`antd` and `@ant-design/icons` v5 or v6):
 
 ```bash
 npm install react react-dom antd dayjs zustand @ant-design/icons

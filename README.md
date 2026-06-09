@@ -4,6 +4,8 @@ A premium, highly performant, and fully customizable React Event Calendar compon
 
 Ready to be dropped into any React application or published directly as a standalone npm package.
 
+![React Event Calendar Suite Screenshot](public/image.png)
+
 ---
 
 ## ✨ Features

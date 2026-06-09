@@ -4,7 +4,20 @@ A premium, highly performant, and fully customizable React Event Calendar compon
 
 Ready to be dropped into any React application or published directly as a standalone npm package.
 
+See [CHANGELOG.md](./CHANGELOG.md) for release history and versioning policy.
+
 ![React Event Calendar Suite Screenshot](https://raw.githubusercontent.com/SameedHasan/React-Event-Calendar-/main/public/image.png)
+
+---
+
+## 📁 Examples
+
+| Example | Description |
+| :--- | :--- |
+| [examples/minimal-vite](./examples/minimal-vite) | Smallest Vite + React setup |
+| [examples/nextjs-app-router](./examples/nextjs-app-router) | Next.js App Router with `"use client"` |
+
+The Vite example bundles from source (no pre-build needed). For npm installs, use `import Calendar from 'react-event-calendar-suite'` directly.
 
 ---
 
@@ -141,7 +154,9 @@ export default App;
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `events` | `Array` | `[]` | **Required.** Array of event objects following the schema below. |
-| `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts. |
+| `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts (uncontrolled mode only). |
+| `view` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `undefined` | Optional. Controlled active view. Pair with `onViewChange`. |
+| `readOnly` | `boolean` | `false` | Optional. Disables create, edit, delete, and day-click actions. `onEventClick` still fires. |
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
 | `categories` | `string[]` | `['Meeting', ...]` | Optional. List of event categories/types available for creating or editing events. |
@@ -192,6 +207,7 @@ interface CalendarEvent {
   type: string;               // Category string (e.g. 'Call', 'Lunch', 'Social')
   color?: string;             // Optional hex/CSS color override (e.g. '#10b981')
   description?: string;       // Optional descriptive text shown in details/tooltips
+  allDay?: boolean;           // Optional. Renders in the all-day / spanning row
 }
 ```
 

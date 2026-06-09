@@ -10,6 +10,9 @@ const external = [
   'antd',
   'dayjs',
   'zustand',
+  'zustand/react',
+  'zustand/vanilla',
+  'zustand/react/shallow',
   '@ant-design/icons',
 ]
 
@@ -21,6 +24,9 @@ const globals = {
   antd: 'antd',
   dayjs: 'dayjs',
   zustand: 'zustand',
+  'zustand/react': 'zustand',
+  'zustand/vanilla': 'zustand',
+  'zustand/react/shallow': 'zustand',
   '@ant-design/icons': 'icons',
 }
 

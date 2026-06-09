@@ -142,6 +142,7 @@ export default App;
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
 | `categories` | `string[]` | `['Meeting', ...]` | Optional. List of event categories/types available for creating or editing events. |
+| `primaryColor` | `string` | `'#1272bf'` | Optional. Configures the primary theme color dynamically across all views and components (including internal Ant Design components). |
 | `currentDate` | `Date \| string` | `undefined` | Optional. Controls the calendar's currently focused date from the parent. |
 | `onDateChange` | `(date: Date) => void` | `undefined` | Optional. Fires when the active calendar date/range changes. |
 | `onViewChange` | `(view: string) => void` | `undefined` | Optional. Fires when the active calendar view switches. |
@@ -181,7 +182,20 @@ interface CalendarEvent {
 
 ## 🎨 Theme Styling & Customization
 
-The calendar is designed with clean, premium vanilla CSS variables. You can easily adjust the theme colors by overriding these custom properties in your global stylesheet:
+The calendar is designed with clean, premium vanilla CSS variables and supports both prop-driven and style-driven overrides.
+
+### Dynamic Theme Customization (Prop)
+You can customize the accent color of the calendar dynamically by passing the `primaryColor` prop. This will style all buttons, select boxes, calendars, indicators, active highlights, and hover states to match:
+
+```jsx
+<Calendar 
+  events={events}
+  primaryColor="#e11d48" // A vibrant ruby red theme!
+/>
+```
+
+### CSS Overrides
+Alternatively, you can adjust theme colors globally by overriding these custom properties in your global stylesheet:
 
 ```css
 :root {

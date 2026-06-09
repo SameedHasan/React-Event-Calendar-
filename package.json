@@ -2,7 +2,38 @@
   "name": "react-event-calendar-suite",
   "private": false,
   "version": "1.1.0",
+  "description": "A premium, highly performant, and fully customizable React Event Calendar component suite.",
+  "keywords": [
+    "react",
+    "calendar",
+    "event",
+    "event-calendar",
+    "react-calendar",
+    "agenda",
+    "scheduler",
+    "ics-export",
+    "ical",
+    "month-view",
+    "week-view",
+    "day-view",
+    "year-view"
+  ],
+  "author": "Sameed Hasan",
+  "license": "MIT",
   "type": "module",
+  "main": "./dist/react-event-calendar-suite.umd.cjs",
+  "module": "./dist/react-event-calendar-suite.js",
+  "style": "./dist/react-event-calendar-suite.css",
+  "exports": {
+    ".": {
+      "import": "./dist/react-event-calendar-suite.js",
+      "require": "./dist/react-event-calendar-suite.umd.cjs"
+    },
+    "./dist/react-event-calendar-suite.css": "./dist/react-event-calendar-suite.css"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

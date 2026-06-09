@@ -10,13 +10,13 @@ dayjs.extend(isoWeek);
 
 const { Text } = Typography;
 
-const TooltipContent = ({ events, day, timeFormat }) => (
+const TooltipContent = ({ events, day, timeFormat, eventColors }) => (
     <div style={{ padding: '2px 0' }}>
         <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: '#1e293b' }}>
             All Events ({events.length})
         </div>
         {events.map(ev => {
-            const cfg = getEventStyle(ev);
+            const cfg = getEventStyle(ev, eventColors);
             const isStartDay = dayjs(ev.start).isSame(day, 'day');
             return (
                 <div key={ev.id} style={{
@@ -49,6 +49,7 @@ const CalenderMonthView = () => {
         onEventClick,
         onDateClick,
         allowDateClick,
+        eventColors,
     } = useCalendarStore();
     const today = dayjs();
     const current = dayjs(currentDate);
@@ -289,7 +290,7 @@ const CalenderMonthView = () => {
                                                 style={{ display: 'flex', justifyContent: 'flex-start', height: '24px', alignItems: 'center' }}
                                             >
                                                 <Tooltip
-                                                    title={<TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} />}
+                                                    title={<TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} eventColors={eventColors} />}
                                                     overlayInnerStyle={{ color: 'var(--text-primary)', background: 'var(--white-color)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
                                                     color="var(--white-color)"
                                                     placement="top"
@@ -315,7 +316,7 @@ const CalenderMonthView = () => {
                                 {weekEventsWithLayout.map(({ event, track, startCol, endCol }) => {
                                     if (track >= 2) return null;
 
-                                    const style = getEventStyle(event);
+                                    const style = getEventStyle(event, eventColors);
                                     const totalCols = filteredWeek.length;
                                     const leftPct = (startCol / totalCols) * 100;
                                     const widthPct = ((endCol - startCol + 1) / totalCols) * 100;

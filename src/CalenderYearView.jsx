@@ -19,7 +19,7 @@ const getMonthGridDays = (year, month, startOfWeek = 'monday') => {
     return Array.from({ length: 42 }, (_, i) => gridStart.add(i, 'day'));
 };
 
-const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear, startOfWeek, timeFormat }) => {
+const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear, startOfWeek, timeFormat, eventColors }) => {
     const today = dayjs();
     const days = useMemo(() => getMonthGridDays(year, monthNumber, startOfWeek), [year, monthNumber, startOfWeek]);
 
@@ -51,9 +51,9 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
         return Object.entries(counts).map(([type, count]) => ({
             type,
             count,
-            style: getEventStyle({ type })
+            style: getEventStyle({ type }, eventColors)
         }));
-    }, [eventMap]);
+    }, [eventMap, eventColors]);
 
     return (
         <div
@@ -199,7 +199,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                     justifyContent: 'center',
                                 }}>
                                     {dayEvs.slice(0, 3).map((ev, idx) => {
-                                        const style = getEventStyle(ev);
+                                        const style = getEventStyle(ev, eventColors);
                                         return (
                                             <div key={idx} style={{
                                                 width: '3.5px',
@@ -225,7 +225,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                             {day.format('MMM D, YYYY')}
                                         </div>
                                         {dayEvs.map(ev => {
-                                            const style = getEventStyle(ev);
+                                            const style = getEventStyle(ev, eventColors);
                                             return (
                                                 <div key={ev.id} style={{
                                                     display: 'flex',
@@ -295,7 +295,7 @@ const MONTHS = [
 ];
 
 const CalenderYearView = () => {
-    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat } = useCalendarStore();
+    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors } = useCalendarStore();
     const currentYear = dayjs(currentDate).year();
     const today = dayjs();
     const isCurrentYear = today.year() === currentYear;
@@ -328,11 +328,11 @@ const CalenderYearView = () => {
             .map(([type, count]) => ({
                 type,
                 count,
-                style: getEventStyle({ type }),
+                style: getEventStyle({ type }, eventColors),
             }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 3);
-    }, [eventsForYear]);
+    }, [eventsForYear, eventColors]);
 
     const busyMonths = useMemo(() => {
         return MONTHS
@@ -452,6 +452,7 @@ const CalenderYearView = () => {
                         eventsForYear={eventsForYear}
                         startOfWeek={startOfWeek}
                         timeFormat={timeFormat}
+                        eventColors={eventColors}
                     />
                 ))}
             </div>

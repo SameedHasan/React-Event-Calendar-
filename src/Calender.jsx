@@ -4,39 +4,25 @@ import { useShallow } from 'zustand/react/shallow';
 import './index.css';
 import CalenderHeader from './CalenderHeader';
 import CalenderMonthView from './CalenderMonthView';
-import useCalendarStore from './store/useCalendarStore';
+import { CalendarStoreProvider, useCalendarStore } from './store/useCalendarStore';
 import DaysOfWeek from './DaysOfWeek';
 import CalenderDayView from './CalenderDayView';
 import CalenderListView from './CalenderListView';
 import CalenderYearView from './CalenderYearView';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
-
-/**
- * <Calendar> — the main component.
- *
- * Props
- * ─────
- * events       {Array}   Required. Array of event objects. Each event:
- *                        { id, title, start (Date), end (Date),
- *                          type ('Video'|'Audio'|'Inperson'), description }
- *
- * defaultView  {string}  Optional. Initial view: 'month'|'week'|'day'|'list'|'year'
- *                        Defaults to 'month'.
- */
 import EventModal from './EventModal';
 
-const Calendar = ({
+const CalendarInner = ({
     events = [],
     defaultView = 'month',
+    view: controlledView,
     startOfWeek = 'monday',
     timeFormat = '12h',
     categories,
     primaryColor = '#1272bf',
-    // CRUD:
     onAddEvent,
     onUpdateEvent,
     onDeleteEvent,
-    // Advanced NPM Props:
     currentDate,
     onDateChange,
     onViewChange,
@@ -46,6 +32,7 @@ const Calendar = ({
     showExportButton = true,
     showAddEventButton = true,
     allowDateClick = true,
+    readOnly = false,
     eventColors = {},
     theme = 'light',
     onEventClick,
@@ -77,27 +64,22 @@ const Calendar = ({
         }))
     );
 
-    // Activate keyboard shortcuts
     useKeyboardShortcuts();
 
-    // Seed the store whenever the events prop changes
     useEffect(() => {
         setEvents(events);
     }, [events, setEvents]);
 
-    // Sync callbacks with the store
     useEffect(() => {
         setCallbacks({ onAddEvent, onUpdateEvent, onDeleteEvent });
     }, [onAddEvent, onUpdateEvent, onDeleteEvent, setCallbacks]);
 
-    // Sync categories with the store
     useEffect(() => {
         if (categories) {
             setCategories(categories);
         }
     }, [categories, setCategories]);
 
-    // Sync other advanced configurations with the store
     useEffect(() => {
         setConfigs({
             onDateChange,
@@ -106,8 +88,9 @@ const Calendar = ({
             showWeekNumbers,
             showToolbar,
             showExportButton,
-            showAddEventButton,
-            allowDateClick,
+            showAddEventButton: readOnly ? false : showAddEventButton,
+            allowDateClick: readOnly ? false : allowDateClick,
+            readOnly,
             eventColors,
             theme,
             onEventClick,
@@ -122,6 +105,7 @@ const Calendar = ({
         showExportButton,
         showAddEventButton,
         allowDateClick,
+        readOnly,
         eventColors,
         theme,
         onEventClick,
@@ -129,14 +113,12 @@ const Calendar = ({
         setConfigs,
     ]);
 
-    // Sync currentDate explicitly when it changes from the parent
     useEffect(() => {
         if (currentDate) {
             setCurrentDate(currentDate);
         }
     }, [currentDate, setCurrentDate]);
 
-    // Sync startOfWeek and timeFormat configuration props with the store
     useEffect(() => {
         setStartOfWeek(startOfWeek);
     }, [startOfWeek, setStartOfWeek]);
@@ -145,13 +127,20 @@ const Calendar = ({
         setTimeFormat(timeFormat);
     }, [timeFormat, setTimeFormat]);
 
-    // Apply defaultView only on first mount
     useEffect(() => {
-        if (defaultView && defaultView !== 'month') {
-            setView(defaultView);
+        if (controlledView !== undefined) {
+            setView(controlledView, { notify: false });
+        }
+    }, [controlledView, setView]);
+
+    useEffect(() => {
+        if (controlledView === undefined && defaultView) {
+            setView(defaultView, { notify: false });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const activeView = controlledView ?? view;
 
     return (
         <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
@@ -168,15 +157,24 @@ const Calendar = ({
                 }}
             >
                 {showToolbar && <CalenderHeader />}
-                {view === 'month' && <CalenderMonthView />}
-                {view === 'week' && <DaysOfWeek />}
-                {view === 'day' && <CalenderDayView />}
-                {view === 'list' && <CalenderListView />}
-                {view === 'year' && <CalenderYearView />}
-                <EventModal />
+                {activeView === 'month' && <CalenderMonthView />}
+                {activeView === 'week' && <DaysOfWeek />}
+                {activeView === 'day' && <CalenderDayView />}
+                {activeView === 'list' && <CalenderListView />}
+                {activeView === 'year' && <CalenderYearView />}
+                {!readOnly && <EventModal />}
             </div>
         </ConfigProvider>
     );
 };
+
+const Calendar = ({
+    defaultView = 'month',
+    ...props
+}) => (
+    <CalendarStoreProvider defaultView={defaultView}>
+        <CalendarInner defaultView={defaultView} {...props} />
+    </CalendarStoreProvider>
+);
 
 export default Calendar;

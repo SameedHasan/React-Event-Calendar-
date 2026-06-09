@@ -24,11 +24,13 @@ export interface CalendarEvent {
   color?: string;
   description?: string;
   location?: string;
+  allDay?: boolean;
 }
 
 export interface CalendarProps {
   events?: CalendarEvent[];
   defaultView?: CalendarView;
+  view?: CalendarView;
   startOfWeek?: WeekStartDay;
   timeFormat?: TimeFormat;
   categories?: string[];
@@ -42,6 +44,7 @@ export interface CalendarProps {
   showExportButton?: boolean;
   showAddEventButton?: boolean;
   allowDateClick?: boolean;
+  readOnly?: boolean;
   eventColors?: Record<string, string>;
   theme?: CalendarTheme;
   onEventClick?: (event: CalendarEvent) => void | boolean;

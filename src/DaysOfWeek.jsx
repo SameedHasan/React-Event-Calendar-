@@ -4,7 +4,7 @@ import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
 
 dayjs.extend(isoWeek);
 
@@ -15,8 +15,8 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
-    const { openEditModal, onEventClick } = useCalendarStore();
-    const cfg = getEventStyle(event);
+    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const cfg = getEventStyle(event, eventColors);
     const segment = getEventDaySegment(event, dayStart);
     if (!segment) return null;
 
@@ -78,7 +78,6 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
 
 const DaysOfWeek = () => {
     const {
-        weekRange,
         currentWeek,
         setWeekRange,
         events,
@@ -90,6 +89,7 @@ const DaysOfWeek = () => {
         onEventClick,
         onDateClick,
         allowDateClick,
+        eventColors,
     } = useCalendarStore();
     const today = dayjs();
     const containerRef = useRef(null);
@@ -197,8 +197,6 @@ const DaysOfWeek = () => {
     // Current time indicator
     const now = dayjs();
     const currentTimeTop = (now.hour() + now.minute() / 60 - START_HOUR) * HOUR_HEIGHT;
-    const isCurrentWeek = weekDays.some(d => d.isSame(today, 'day'));
-    const todayColIndex = weekDays.findIndex(d => d.isSame(today, 'day'));
 
     const TIME_GUTTER = 56; // width of time column in px
 
@@ -268,7 +266,7 @@ const DaysOfWeek = () => {
 
                         {/* Spanning Event Bars */}
                         {allDayEventsWithLayout.map(({ event, track, startCol, endCol }) => {
-                            const style = getEventStyle(event);
+                            const style = getEventStyle(event, eventColors);
                             const leftPct = (startCol / weekDays.length) * 100;
                             const widthPct = ((endCol - startCol + 1) / weekDays.length) * 100;
 

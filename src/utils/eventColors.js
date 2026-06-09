@@ -4,15 +4,13 @@
  * Assigns a consistent color to any event type string — no fixed types required.
  *
  * Priority:
- *   1. event.color  — if the event carries its own hex/css color
- *   2. palette[hash(event.type)]  — deterministic color based on the type string
+ *   1. eventColors[type] from calendar config
+ *   2. event.color — if the event carries its own hex/css color
+ *   3. palette[hash(event.type)] — deterministic color based on the type string
  *
  * Usage:
- *   import { getEventStyle } from '../utils/eventColors';
- *   const { color, bg, border } = getEventStyle(event);
+ *   const { color, bg, border } = getEventStyle(event, eventColors);
  */
-
-import useCalendarStore from '../store/useCalendarStore';
 
 const PALETTE = [
     { color: '#3b82f6', bg: '#eff6ff',  border: '#bfdbfe' }, // blue
@@ -35,43 +33,36 @@ const hashType = (str = '') => {
     return h % PALETTE.length;
 };
 
-export const getEventStyle = (event = {}) => {
-    try {
-        const store = useCalendarStore.getState();
-        if (store && store.eventColors && store.eventColors[event.type]) {
-            const hex = store.eventColors[event.type];
-            return {
-                color: hex,
-                bg: `color-mix(in srgb, ${hex} 9.4%, var(--white-color))`,
-                border: `color-mix(in srgb, ${hex} 31%, var(--white-color))`,
-            };
-        }
-    } catch (e) {
-        // Fallback
+export const getEventStyle = (event = {}, eventColors = {}) => {
+    if (eventColors && eventColors[event.type]) {
+        const hex = eventColors[event.type];
+        return {
+            color: hex,
+            bg: `color-mix(in srgb, ${hex} 9.4%, var(--white-color))`,
+            border: `color-mix(in srgb, ${hex} 31%, var(--white-color))`,
+        };
     }
 
     if (event.color) {
         return {
-            color:  event.color,
-            bg:     `color-mix(in srgb, ${event.color} 9.4%, var(--white-color))`,
+            color: event.color,
+            bg: `color-mix(in srgb, ${event.color} 9.4%, var(--white-color))`,
             border: `color-mix(in srgb, ${event.color} 31%, var(--white-color))`,
         };
     }
+
     return PALETTE[hashType(event.type)];
 };
 
 /**
  * Returns all unique types found in an events array,
  * each paired with its resolved style.
- *
- * @param {object[]} events
- * @returns {{ type: string, style: object, count: number }[]}
  */
-export const getEventTypeLegend = (events = []) => {
+export const getEventTypeLegend = (events = [], eventColors = {}) => {
     const map = new Map();
     events.forEach(ev => {
         if (!map.has(ev.type)) {
-            map.set(ev.type, { type: ev.type, style: getEventStyle(ev), count: 0 });
+            map.set(ev.type, { type: ev.type, style: getEventStyle(ev, eventColors), count: 0 });
         }
         map.get(ev.type).count++;
     });

@@ -12,6 +12,9 @@ function App() {
     const [showExportButton, setShowExportButton] = useState(true);
     const [showAddEventButton, setShowAddEventButton] = useState(true);
     const [allowDateClick, setAllowDateClick] = useState(true);
+    const [readOnly, setReadOnly] = useState(false);
+    const [showDualCalendars, setShowDualCalendars] = useState(false);
+    const [controlledView, setControlledView] = useState('month');
 
     const handleAddEvent = (newEvent) => {
         setEvents(prev => [...prev, newEvent]);
@@ -104,32 +107,92 @@ function App() {
                         <span style={{ fontWeight: 600, color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>Allow Day Click:</span>
                         <Switch checked={allowDateClick} onChange={setAllowDateClick} />
                     </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 600, color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>Read Only:</span>
+                        <Switch checked={readOnly} onChange={setReadOnly} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 600, color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>Dual Calendars:</span>
+                        <Switch checked={showDualCalendars} onChange={setShowDualCalendars} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 600, color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>Controlled View:</span>
+                        <Select
+                            value={controlledView}
+                            onChange={setControlledView}
+                            options={[
+                                { value: 'month', label: 'Month' },
+                                { value: 'week', label: 'Week' },
+                                { value: 'day', label: 'Day' },
+                                { value: 'list', label: 'List' },
+                                { value: 'year', label: 'Year' },
+                            ]}
+                            style={{ width: '120px' }}
+                        />
+                    </div>
                 </div>
             </Card>
 
-            <CalenderView
-                events={events}
-                theme={theme}
-                startOfWeek="sunday"
-                timeFormat="12h"
-                hideWeekends={hideWeekends}
-                showWeekNumbers={showWeekNumbers}
-                showExportButton={showExportButton}
-                showAddEventButton={showAddEventButton}
-                allowDateClick={allowDateClick}
-                eventColors={eventColorsMap}
-                categories={['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference']}
-                onAddEvent={handleAddEvent}
-                onUpdateEvent={handleUpdateEvent}
-                onDeleteEvent={handleDeleteEvent}
-                onDateChange={(date) => {
-                    console.log('Active calendar date changed to:', date);
-                }}
-                onViewChange={(view) => {
-                    console.log('Calendar view changed to:', view);
-                }}
-
-            />
+            {showDualCalendars ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', minHeight: '520px' }}>
+                    <CalenderView
+                        events={events}
+                        theme={theme}
+                        defaultView="month"
+                        startOfWeek="sunday"
+                        timeFormat="12h"
+                        hideWeekends={hideWeekends}
+                        showWeekNumbers={showWeekNumbers}
+                        eventColors={eventColorsMap}
+                        categories={['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference']}
+                        onAddEvent={handleAddEvent}
+                        onUpdateEvent={handleUpdateEvent}
+                        onDeleteEvent={handleDeleteEvent}
+                    />
+                    <CalenderView
+                        events={events}
+                        theme={theme}
+                        defaultView="list"
+                        readOnly
+                        startOfWeek="monday"
+                        timeFormat="24h"
+                        hideWeekends={hideWeekends}
+                        showAddEventButton={false}
+                        allowDateClick={false}
+                        eventColors={eventColorsMap}
+                        onEventClick={(event) => {
+                            message.info(`Read-only preview: ${event.title}`);
+                            return false;
+                        }}
+                    />
+                </div>
+            ) : (
+                <CalenderView
+                    events={events}
+                    theme={theme}
+                    view={controlledView}
+                    onViewChange={setControlledView}
+                    startOfWeek="sunday"
+                    timeFormat="12h"
+                    hideWeekends={hideWeekends}
+                    showWeekNumbers={showWeekNumbers}
+                    showExportButton={showExportButton}
+                    showAddEventButton={showAddEventButton}
+                    allowDateClick={allowDateClick}
+                    readOnly={readOnly}
+                    eventColors={eventColorsMap}
+                    categories={['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference']}
+                    onAddEvent={handleAddEvent}
+                    onUpdateEvent={handleUpdateEvent}
+                    onDeleteEvent={handleDeleteEvent}
+                    onDateChange={(date) => {
+                        console.log('Active calendar date changed to:', date);
+                    }}
+                />
+            )}
         </div>
     );
 }

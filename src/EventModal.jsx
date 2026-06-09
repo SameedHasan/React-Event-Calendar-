@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Modal, Form, Input, DatePicker, Select, Button, Space, message } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
-
-
-// Premium preset colors for manual color overrides.
 const PRESET_COLORS = [
     { name: 'Default HSL Hash', value: '' },
     { name: 'Rose Red', value: '#e11d48' },
@@ -28,11 +25,18 @@ export default function EventModal() {
         updateEvent,
         deleteEvent,
         categories,
+        timeFormat,
+        readOnly,
     } = useCalendarStore();
 
-    // Reset or populate form when modal state changes
+    const is12h = timeFormat !== '24h';
+    const pickerConfig = useMemo(() => ({
+        showTime: { format: is12h ? 'hh:mm A' : 'HH:mm', use12Hours: is12h },
+        format: is12h ? 'YYYY-MM-DD hh:mm A' : 'YYYY-MM-DD HH:mm',
+    }), [is12h]);
+
     useEffect(() => {
-        if (!isModalOpen) return;
+        if (!isModalOpen || readOnly) return;
 
         if (selectedEvent) {
             form.setFieldsValue({
@@ -44,7 +48,6 @@ export default function EventModal() {
             });
         } else {
             const start = prepopulatedStartDate ? dayjs(prepopulatedStartDate) : dayjs();
-            // Default duration: 1 hour
             const end = start.add(1, 'hour');
 
             form.setFieldsValue({
@@ -55,7 +58,7 @@ export default function EventModal() {
                 range: [start, end],
             });
         }
-    }, [isModalOpen, selectedEvent, prepopulatedStartDate, form]);
+    }, [isModalOpen, selectedEvent, prepopulatedStartDate, form, categories, readOnly]);
 
     const handleCancel = () => {
         closeModal();
@@ -101,14 +104,12 @@ export default function EventModal() {
         };
 
         if (selectedEvent) {
-            // Edit existing event
             updateEvent({
                 ...selectedEvent,
                 ...eventPayload,
             });
             message.success('Event updated successfully');
         } else {
-            // Create new event
             addEvent({
                 id: `evt-${Date.now()}`,
                 ...eventPayload,
@@ -118,6 +119,8 @@ export default function EventModal() {
 
         closeModal();
     };
+
+    if (readOnly) return null;
 
     return (
         <Modal
@@ -191,8 +194,8 @@ export default function EventModal() {
                     rules={[{ required: true, message: 'Please select a duration' }]}
                 >
                     <DatePicker.RangePicker
-                        showTime={{ format: 'hh:mm A', use12Hours: true }}
-                        format="YYYY-MM-DD hh:mm A"
+                        showTime={pickerConfig.showTime}
+                        format={pickerConfig.format}
                         style={{ width: '100%' }}
                     />
                 </Form.Item>

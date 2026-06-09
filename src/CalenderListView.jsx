@@ -15,9 +15,9 @@ const getDayEvents = (date, events) => {
     return events.filter(event => isEventOnDay(event, date));
 };
 
-const EventCard = ({ event, isFirst, date, timeFormat }) => {
-    const { openEditModal, onEventClick } = useCalendarStore();
-    const config = getEventStyle(event);
+const EventCard = ({ event, date, timeFormat }) => {
+    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const config = getEventStyle(event, eventColors);
     const dayStart = dayjs(date).startOf('day');
     const dayEnd = dayjs(date).endOf('day');
     const eventStart = dayjs(event.start);
@@ -204,8 +204,8 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
             <div style={{ paddingLeft: '4px' }}>
                 {dayEvents
                     .sort((a, b) => new Date(a.start) - new Date(b.start))
-                    .map((event, i) => (
-                        <EventCard key={event.id} event={event} isFirst={i === 0} date={date} timeFormat={timeFormat} />
+                    .map((event) => (
+                        <EventCard key={event.id} event={event} date={date} timeFormat={timeFormat} />
                     ))}
             </div>
         </div>
@@ -213,7 +213,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
 };
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors } = useCalendarStore();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
@@ -250,9 +250,9 @@ const CalenderListView = () => {
         return Object.entries(counts).map(([type, count]) => ({
             type,
             count,
-            style: getEventStyle({ type })
+            style: getEventStyle({ type }, eventColors)
         }));
-    }, [weekEvents]);
+    }, [weekEvents, eventColors]);
 
     return (
         <div style={{ maxWidth: '760px', margin: '0 auto', padding: '8px 0 24px' }}>

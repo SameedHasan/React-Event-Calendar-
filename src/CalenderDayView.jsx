@@ -16,8 +16,8 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const DayEventBlock = ({ event, currentDate, timeFormat }) => {
-    const { openEditModal, onEventClick } = useCalendarStore();
-    const cfg = getEventStyle(event);
+    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const cfg = getEventStyle(event, eventColors);
     const segment = getEventDaySegment(event, currentDate);
     if (!segment) return null;
 
@@ -124,7 +124,6 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
 
 const CalenderDayView = () => {
     const {
-        weekRange,
         currentWeek,
         currentDayIndex,
         setWeekRange,
@@ -136,6 +135,7 @@ const CalenderDayView = () => {
         onEventClick,
         onDateClick,
         allowDateClick,
+        eventColors,
     } = useCalendarStore();
     const containerRef = useRef(null);
 
@@ -258,7 +258,7 @@ const CalenderDayView = () => {
                         All-day & Spanning Events
                     </Text>
                     {allDayEvents.map(event => {
-                        const style = getEventStyle(event);
+                        const style = getEventStyle(event, eventColors);
                         return (
                             <div
                                 key={event.id}

@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+
+dayjs.extend(isoWeek);
 
 /**
  * Returns whether an event overlaps with a given day.
@@ -12,15 +15,24 @@ export const isEventOnDay = (event, day) => {
 };
 
 /**
- * Checks if an event is a "multi-day" or "all-day" event.
- * Definition: spans 24 hours or more, OR spans across distinct calendar days
- * where the duration is long enough to warrant putting it in the top header.
- * Here we define it as any event spanning 24 hours or more.
+ * Checks if an event should render in the all-day / spanning header row.
+ * Explicit `allDay: true`, crosses a calendar-day boundary, or lasts 24+ hours.
  */
 export const isAllDayOrMultiDay = (event) => {
-    const duration = dayjs(event.end).diff(dayjs(event.start), 'hour');
-    return duration >= 24;
+    if (event?.allDay === true) return true;
+
+    const start = dayjs(event.start);
+    const end = dayjs(event.end);
+
+    if (!start.isSame(end, 'day')) return true;
+
+    return end.diff(start, 'hour') >= 24;
 };
+
+/**
+ * ISO week number for a date (consistent with dayjs isoWeek in views).
+ */
+export const getIsoWeekNumber = (date) => dayjs(date).isoWeek();
 
 /**
  * Gets the portion of an event that falls within a specific day.
@@ -109,4 +121,3 @@ export const getShiftedSingleDOW = (startOfWeek = "monday") => {
     const base = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return [...base.slice(s), ...base.slice(0, s)];
 };
-

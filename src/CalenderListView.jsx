@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Typography, Badge, Empty, Tag } from 'antd';
+import { Typography, Empty, Tag } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -77,7 +77,7 @@ const EventCard = ({ event, isFirst, date, timeFormat }) => {
                 </Text>
                 {(isSpanningFromPrev || isSpanningToNext) && (
                     <Text style={{ fontSize: '9px', color: '#e11d48', fontWeight: 700, textTransform: 'uppercase', marginTop: '2px' }}>
-                        Spanning
+                        SPANNING
                     </Text>
                 )}
             </div>

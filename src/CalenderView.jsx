@@ -7,6 +7,8 @@ import Calender from './Calender';
  */
 export default function CalenderView(props) {
     return (
-        <Calender {...props} />
+        <div style={{ height: 'calc(100vh - 220px)', minHeight: '480px' }}>
+            <Calender {...props} />
+        </div>
     );
 }

@@ -86,6 +86,7 @@ Import the calendar component and pass in your array of events:
 ```jsx
 import React from 'react';
 import Calendar from 'react-event-calendar-suite';
+import 'react-event-calendar-suite/style.css';
 
 // Sample events data
 const myEvents = [
@@ -161,6 +162,20 @@ export default App;
 | `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local state automatically. |
 | `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local state automatically. |
 | `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local state automatically. |
+| `className` | `string` | `undefined` | Optional. Additional CSS class names for the calendar root element. |
+| `style` | `React.CSSProperties` | `undefined` | Optional. Inline styles for the calendar root element. The root uses `height: 100%`, so wrap it in a sized container. |
+
+---
+
+## 🎨 Styles
+
+The calendar ships with a separate stylesheet. Import it once in your app entry or page:
+
+```javascript
+import 'react-event-calendar-suite/style.css';
+// or
+import 'react-event-calendar-suite/dist/react-event-calendar-suite.css';
+```
 
 ---
 

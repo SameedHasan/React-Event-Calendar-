@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Typography, Badge, Tooltip } from 'antd';
+import { Typography, Tooltip } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';

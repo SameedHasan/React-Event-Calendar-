@@ -50,6 +50,8 @@ const Calendar = ({
     theme = 'light',
     onEventClick,
     onDateClick,
+    className,
+    style,
 }) => {
     const {
         view,
@@ -154,14 +156,15 @@ const Calendar = ({
     return (
         <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
             <div
-                className={`calendar-root theme-${theme}`}
+                className={['calendar-root', `theme-${theme}`, className].filter(Boolean).join(' ')}
                 style={{
-                    padding: '20px',
-                    height: 'calc(100vh - 104px)',
+                    height: '100%',
+                    minHeight: 0,
                     overflow: 'auto',
                     backgroundColor: 'var(--white-color)',
                     transition: 'background-color 0.25s ease, color 0.25s ease',
                     '--primary-color': primaryColor,
+                    ...style,
                 }}
             >
                 {showToolbar && <CalenderHeader />}

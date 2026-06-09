@@ -46,7 +46,7 @@ function App() {
             padding: '16px'
         }}>
             {/* Package Capabilities Controller */}
-            <Card 
+            <Card
                 title={<span style={{ color: theme === 'dark' ? '#fff' : '#1e293b', fontWeight: 700 }}>Package Customization Dashboard</span>}
                 style={{
                     marginBottom: '16px',
@@ -128,6 +128,7 @@ function App() {
                 onViewChange={(view) => {
                     console.log('Calendar view changed to:', view);
                 }}
+
             />
         </div>
     );

@@ -202,11 +202,11 @@ const CalenderDayView = () => {
                 {/* Date circle */}
                 <div style={{
                     width: '52px', height: '52px', borderRadius: '14px',
-                    background: isToday ? '#1272bf' : 'var(--white-color)',
+                    background: isToday ? 'var(--primary-color)' : 'var(--white-color)',
                     border: isToday ? 'none' : '1px solid var(--border-color)',
                     display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center',
-                    boxShadow: isToday ? '0 4px 12px rgba(18,114,191,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
+                    boxShadow: isToday ? '0 4px 12px color-mix(in srgb, var(--primary-color) 30%, transparent)' : '0 1px 4px rgba(0,0,0,0.08)',
                     flexShrink: 0,
                 }}>
                     <Text style={{ fontSize: '20px', fontWeight: 800, color: isToday ? '#fff' : 'var(--text-primary)', lineHeight: 1.1 }}>
@@ -224,9 +224,9 @@ const CalenderDayView = () => {
                         </Text>
                         {isToday && (
                             <span style={{
-                                fontSize: '11px', fontWeight: 700, color: '#1272bf',
+                                fontSize: '11px', fontWeight: 700, color: 'var(--primary-color)',
                                 background: 'var(--white-color)', padding: '2px 10px',
-                                borderRadius: '20px', border: '1.5px solid #bfdbfe',
+                                borderRadius: '20px', border: '1.5px solid color-mix(in srgb, var(--primary-color) 25%, var(--white-color))',
                             }}>
                                 Today
                             </span>
@@ -235,7 +235,7 @@ const CalenderDayView = () => {
                     <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                         {currentDate.format('MMMM D, YYYY')}
                         {(dayEvents.length + allDayEvents.length) > 0 && (
-                            <span style={{ marginLeft: '8px', color: '#1272bf', fontWeight: 600 }}>
+                            <span style={{ marginLeft: '8px', color: 'var(--primary-color)', fontWeight: 600 }}>
                                 · {dayEvents.length + allDayEvents.length} event{(dayEvents.length + allDayEvents.length) !== 1 ? 's' : ''}
                             </span>
                         )}

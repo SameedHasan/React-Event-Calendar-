@@ -225,13 +225,13 @@ const DaysOfWeek = () => {
                             <Text style={{
                                 fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
                                 letterSpacing: '0.4px', display: 'block',
-                                color: isToday ? '#1272bf' : isWeekend ? 'var(--text-secondary)' : 'var(--text-primary)',
+                                color: isToday ? 'var(--primary-color)' : isWeekend ? 'var(--text-secondary)' : 'var(--text-primary)',
                             }}>
                                 {day.format('ddd')}
                             </Text>
                             <div style={{
                                 width: '32px', height: '32px', borderRadius: '50%', margin: '4px auto 0',
-                                background: isToday ? '#1272bf' : 'transparent',
+                                background: isToday ? 'var(--primary-color)' : 'transparent',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                             }}>
                                 <Text style={{
@@ -241,7 +241,7 @@ const DaysOfWeek = () => {
                                     {day.format('D')}
                                 </Text>
                             </div>
-                            <Text style={{ fontSize: '10px', color: isToday ? '#1272bf' : 'var(--text-secondary)', display: 'block', marginTop: '1px' }}>
+                            <Text style={{ fontSize: '10px', color: isToday ? 'var(--primary-color)' : 'var(--text-secondary)', display: 'block', marginTop: '1px' }}>
                                 {day.format('MMM')}
                             </Text>
                         </div>

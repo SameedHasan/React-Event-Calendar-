@@ -1,5 +1,4 @@
 :root {
-    --color-active-menu-bg: #e8f3fd;
     --primary-color: #1272bf;
     --white-color: #ffffff;
     --bg-color: #f8fafc;
@@ -7,6 +6,14 @@
     --text-primary: #1e293b;
     --text-secondary: #64748b;
     --tag-bg: #f1f5f9;
+
+    /* Dynamic relative colors using CSS color-mix */
+    --color-active-menu-bg: color-mix(in srgb, var(--primary-color) 10%, var(--white-color));
+
+    /* Legacy mapping fallback tokens */
+    --color-primary: var(--primary-color);
+    --color-text-base: var(--text-primary);
+    --color-bg-primary: var(--white-color);
 }
 
 /* Dark Mode overrides for the premium calendar container */
@@ -16,7 +23,7 @@
     --border-color: #334155;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --color-active-menu-bg: #334155;
+    --color-active-menu-bg: color-mix(in srgb, var(--primary-color) 15%, var(--white-color));
     --tag-bg: #334155;
 }
 
@@ -76,13 +83,13 @@
 }
 
 .calender-filter-li a {
-  color: #343434;
+  color: var(--text-primary);
 }
 
 .calender-filter-li:hover,
 .calender-filter-li a:hover {
-  background-color: #2263a712;
-  color: #2263a7;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
 }
 
 .calendar-header {
@@ -114,7 +121,7 @@
   font-weight: 600;
   line-height: 20px;
   cursor: pointer;
-  border: 1px solid #d0e8fb;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 25%, var(--white-color));
   margin-inline: 8px;
 }
 .listStyleSession {
@@ -232,7 +239,7 @@
 .calendar-tooltip.ant-tooltip .ant-tooltip-inner ul li {
   color: var(--color-primary);
   background: var(--color-active-menu-bg);
-  border: 1px solid #d0e8fb;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 25%, var(--white-color));
   padding: 4px 8px;
   border-radius: 4px;
  margin-bottom: 6px;

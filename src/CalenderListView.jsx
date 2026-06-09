@@ -163,7 +163,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                     width: '44px',
                     height: '44px',
                     borderRadius: '10px',
-                    background: isToday ? '#1272bf' : 'var(--bg-color)',
+                    background: isToday ? 'var(--primary-color)' : 'var(--bg-color)',
                     border: isToday ? 'none' : '1px solid var(--border-color)',
                     display: 'flex',
                     flexDirection: 'column',
@@ -270,7 +270,7 @@ const CalenderListView = () => {
                 gap: '12px',
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <CalendarOutlined style={{ fontSize: '18px', color: '#1272bf' }} />
+                    <CalendarOutlined style={{ fontSize: '18px', color: 'var(--primary-color)' }} />
                     <div>
                         <Text style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>
                             Week {weekRange.count}

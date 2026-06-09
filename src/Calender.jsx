@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { ConfigProvider } from 'antd';
+import './index.css';
 import CalenderHeader from './CalenderHeader';
 import CalenderMonthView from './CalenderMonthView';
 import useCalendarStore from './store/useCalendarStore';
@@ -28,6 +30,7 @@ const Calendar = ({
     startOfWeek = 'monday',
     timeFormat = '12h',
     categories,
+    primaryColor = '#1272bf',
     // CRUD:
     onAddEvent,
     onUpdateEvent,
@@ -136,25 +139,28 @@ const Calendar = ({
     }, []);
 
     return (
-        <div 
-            className={`calendar-root theme-${theme}`}
-            style={{
-                margin: '20px 16px',
-                padding: '20px',
-                height: 'calc(100vh - 104px)',
-                overflow: 'auto',
-                backgroundColor: 'var(--white-color)',
-                transition: 'background-color 0.25s ease, color 0.25s ease',
-            }}
-        >
-            {showToolbar && <CalenderHeader />}
-            {view === 'month' && <CalenderMonthView />}
-            {view === 'week'  && <DaysOfWeek />}
-            {view === 'day'   && <CalenderDayView />}
-            {view === 'list'  && <CalenderListView />}
-            {view === 'year'  && <CalenderYearView />}
-            <EventModal />
-        </div>
+        <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
+            <div 
+                className={`calendar-root theme-${theme}`}
+                style={{
+                    margin: '20px 16px',
+                    padding: '20px',
+                    height: 'calc(100vh - 104px)',
+                    overflow: 'auto',
+                    backgroundColor: 'var(--white-color)',
+                    transition: 'background-color 0.25s ease, color 0.25s ease',
+                    '--primary-color': primaryColor,
+                }}
+            >
+                {showToolbar && <CalenderHeader />}
+                {view === 'month' && <CalenderMonthView />}
+                {view === 'week'  && <DaysOfWeek />}
+                {view === 'day'   && <CalenderDayView />}
+                {view === 'list'  && <CalenderListView />}
+                {view === 'year'  && <CalenderYearView />}
+                <EventModal />
+            </div>
+        </ConfigProvider>
     );
 };
 

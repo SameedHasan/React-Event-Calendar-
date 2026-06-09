@@ -62,26 +62,26 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
             style={{
                 background: 'var(--white-color)',
                 borderRadius: '14px',
-                border: isCurrentMonth ? '2px solid #1272bf' : '1px solid var(--border-color)',
+                border: isCurrentMonth ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
                 padding: '16px',
                 cursor: 'pointer',
                 transition: 'all 0.22s ease',
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: isCurrentMonth
-                    ? '0 4px 20px rgba(18,114,191,0.18)'
+                    ? '0 4px 20px color-mix(in srgb, var(--primary-color) 18%, transparent)'
                     : '0 1px 4px rgba(0,0,0,0.06)',
             }}
             onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-3px)';
                 e.currentTarget.style.boxShadow = isCurrentMonth
-                    ? '0 8px 28px rgba(18,114,191,0.25)'
+                    ? '0 8px 28px color-mix(in srgb, var(--primary-color) 25%, transparent)'
                     : '0 6px 20px rgba(0,0,0,0.12)';
             }}
             onMouseLeave={e => {
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = isCurrentMonth
-                    ? '0 4px 20px rgba(18,114,191,0.18)'
+                    ? '0 4px 20px color-mix(in srgb, var(--primary-color) 18%, transparent)'
                     : '0 1px 4px rgba(0,0,0,0.06)';
             }}
         >
@@ -91,7 +91,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                     position: 'absolute',
                     top: 0, left: 0, right: 0,
                     height: '3px',
-                    background: 'linear-gradient(90deg, #1272bf, #38bdf8)',
+                    background: 'linear-gradient(90deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 40%, #fff))',
                     borderRadius: '14px 14px 0 0',
                 }} />
             )}
@@ -102,7 +102,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                     <Text style={{
                         fontSize: '14px',
                         fontWeight: 700,
-                        color: isCurrentMonth ? '#1272bf' : 'var(--text-primary)',
+                        color: isCurrentMonth ? 'var(--primary-color)' : 'var(--text-primary)',
                         display: 'block',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
@@ -119,11 +119,11 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                     <span style={{
                         fontSize: '10px',
                         fontWeight: 700,
-                        color: '#1272bf',
+                        color: 'var(--primary-color)',
                         background: 'var(--color-active-menu-bg)',
                         padding: '2px 7px',
                         borderRadius: '20px',
-                        border: '1px solid #bfdbfe',
+                        border: '1px solid color-mix(in srgb, var(--primary-color) 25%, var(--white-color))',
                     }}>
                         NOW
                     </span>
@@ -169,7 +169,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 borderRadius: '5px',
                                 position: 'relative',
                                 background: isTodayCell
-                                    ? '#1272bf'
+                                    ? 'var(--primary-color)'
                                     : hasEvents && isThisMonth
                                         ? 'var(--color-active-menu-bg)'
                                         : 'transparent',
@@ -182,7 +182,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                 color: isTodayCell
                                     ? '#fff'
                                     : isThisMonth
-                                        ? (hasEvents ? '#1272bf' : 'var(--text-primary)')
+                                        ? (hasEvents ? 'var(--primary-color)' : 'var(--text-primary)')
                                         : 'var(--text-secondary)',
                                 lineHeight: 1,
                              }}>
@@ -357,11 +357,11 @@ const CalenderYearView = () => {
                 {/* Total events */}
                 <div style={{
                     flex: '1 1 180px',
-                    background: 'linear-gradient(135deg, #1272bf 0%, #0ea5e9 100%)',
+                    background: 'linear-gradient(135deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 60%, #fff) 100%)',
                     borderRadius: '14px',
                     padding: '18px 20px',
                     color: '#fff',
-                    boxShadow: '0 4px 16px rgba(18,114,191,0.25)',
+                    boxShadow: '0 4px 16px color-mix(in srgb, var(--primary-color) 25%, transparent)',
                 }}>
                     <Text style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
                         {currentYear} Total
@@ -424,7 +424,7 @@ const CalenderYearView = () => {
                                 </Text>
                                 <span style={{
                                     fontSize: '11px', fontWeight: 700,
-                                    color: '#1272bf', background: 'var(--color-active-menu-bg)',
+                                    color: 'var(--primary-color)', background: 'var(--color-active-menu-bg)',
                                     padding: '1px 8px', borderRadius: '20px',
                                 }}>
                                     {m.count}

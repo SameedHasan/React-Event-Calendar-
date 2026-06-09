@@ -266,7 +266,7 @@ const CalenderMonthView = () => {
                                             <div style={{
                                                 width: '26px', height: '26px',
                                                 borderRadius: '50%',
-                                                background: isToday ? '#1272bf' : 'transparent',
+                                                background: isToday ? 'var(--primary-color)' : 'transparent',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}>
                                                 <Text style={{
@@ -296,10 +296,10 @@ const CalenderMonthView = () => {
                                                 >
                                                     <div style={{
                                                         fontSize: '11px', fontWeight: 600,
-                                                        color: '#1272bf', background: '#eff6ff',
+                                                        color: 'var(--primary-color)', background: 'var(--color-active-menu-bg)',
                                                         padding: '2px 6px', borderRadius: '5px',
                                                         cursor: 'pointer', display: 'inline-block',
-                                                        border: '1px solid #bfdbfe',
+                                                        border: '1px solid color-mix(in srgb, var(--primary-color) 25%, var(--white-color))',
                                                     }}>
                                                         +{hiddenCount} more
                                                     </div>

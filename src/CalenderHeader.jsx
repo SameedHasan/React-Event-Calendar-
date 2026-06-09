@@ -119,9 +119,9 @@ function CalendarHeader() {
                     style={{
                         padding: '6px 16px',
                         borderRadius: '8px',
-                        border: '1.5px solid #1272bf',
+                        border: '1.5px solid var(--primary-color)',
                         background: 'var(--white-color)',
-                        color: '#1272bf',
+                        color: 'var(--primary-color)',
                         fontSize: '13px',
                         fontWeight: 700,
                         cursor: 'pointer',
@@ -131,12 +131,12 @@ function CalendarHeader() {
                         lineHeight: '20px',
                     }}
                     onMouseEnter={e => {
-                        e.currentTarget.style.background = '#1272bf';
+                        e.currentTarget.style.background = 'var(--primary-color)';
                         e.currentTarget.style.color = '#fff';
                     }}
                     onMouseLeave={e => {
                         e.currentTarget.style.background = 'var(--white-color)';
-                        e.currentTarget.style.color = '#1272bf';
+                        e.currentTarget.style.color = 'var(--primary-color)';
                     }}
                 >
                     Today
@@ -163,8 +163,8 @@ function CalendarHeader() {
                                 flexShrink: 0,
                             }}
                             onMouseEnter={e => {
-                                e.currentTarget.style.borderColor = '#1272bf';
-                                e.currentTarget.style.color = '#1272bf';
+                                e.currentTarget.style.borderColor = 'var(--primary-color)';
+                                e.currentTarget.style.color = 'var(--primary-color)';
                                 e.currentTarget.style.background = 'var(--color-active-menu-bg)';
                             }}
                             onMouseLeave={e => {
@@ -218,8 +218,8 @@ function CalendarHeader() {
                             gap: '6px',
                             padding: '6px 14px',
                             borderRadius: '10px',
-                            border: '1.5px solid #1272bf',
-                            background: '#1272bf',
+                            border: '1.5px solid var(--primary-color)',
+                            background: 'var(--primary-color)',
                             color: '#fff',
                             fontSize: '13px',
                             fontWeight: 600,
@@ -228,12 +228,12 @@ function CalendarHeader() {
                             lineHeight: '20px',
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.background = '#0e5c9b';
-                            e.currentTarget.style.borderColor = '#0e5c9b';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--primary-color) 85%, #000)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--primary-color) 85%, #000)';
                         }}
                         onMouseLeave={e => {
-                            e.currentTarget.style.background = '#1272bf';
-                            e.currentTarget.style.borderColor = '#1272bf';
+                            e.currentTarget.style.background = 'var(--primary-color)';
+                            e.currentTarget.style.borderColor = 'var(--primary-color)';
                         }}
                     >
                         <PlusOutlined style={{ fontSize: '14px' }} />
@@ -262,8 +262,8 @@ function CalendarHeader() {
                             lineHeight: '20px',
                         }}
                         onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = '#1272bf';
-                            e.currentTarget.style.color = '#1272bf';
+                            e.currentTarget.style.borderColor = 'var(--primary-color)';
+                            e.currentTarget.style.color = 'var(--primary-color)';
                             e.currentTarget.style.background = 'var(--color-active-menu-bg)';
                         }}
                         onMouseLeave={e => {
@@ -299,7 +299,7 @@ function CalendarHeader() {
                                     borderRadius: '8px',
                                     border: 'none',
                                     background: isActive ? 'var(--white-color)' : 'transparent',
-                                    color: isActive ? '#1272bf' : 'var(--text-secondary)',
+                                    color: isActive ? 'var(--primary-color)' : 'var(--text-secondary)',
                                     fontSize: '13px',
                                     fontWeight: isActive ? 700 : 500,
                                     cursor: 'pointer',

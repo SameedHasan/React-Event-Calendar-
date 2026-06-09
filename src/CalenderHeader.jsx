@@ -62,14 +62,7 @@ function CalendarHeader() {
                 ? handleNextandPrevDay(currentDayIndex + 1)
                 : (handleNextandPrevDay(0), incrementWeek()),
         },
-        list: {
-            prev: () => currentDayIndex > 0
-                ? handleNextandPrevDay(currentDayIndex - 1)
-                : (handleNextandPrevDay(6), decrementWeek()),
-            next: () => currentDayIndex < 6
-                ? handleNextandPrevDay(currentDayIndex + 1)
-                : (handleNextandPrevDay(0), incrementWeek()),
-        },
+        list:  { prev: decrementWeek,  next: incrementWeek },
     }), [currentDayIndex, previousMonth, nextMonth, previousYear, nextYear, decrementWeek, incrementWeek, handleNextandPrevDay]);
 
     // Title text shown in the header centre-left
@@ -80,9 +73,9 @@ function CalendarHeader() {
             case 'year':
                 return dayjs(currentDate).format('YYYY');
             case 'week':
+            case 'list':
                 return weekRange.range || '';
-            case 'day':
-            case 'list': {
+            case 'day': {
                 if (!weekRange.range) return '';
                 const monday = dayjs(weekRange.range.split(' - ')[0], 'MMM D, YYYY');
                 const day = monday.add(currentDayIndex, 'day');

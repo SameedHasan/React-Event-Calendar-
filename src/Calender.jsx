@@ -153,10 +153,9 @@ const Calendar = ({
 
     return (
         <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
-            <div 
+            <div
                 className={`calendar-root theme-${theme}`}
                 style={{
-                    margin: '20px 16px',
                     padding: '20px',
                     height: 'calc(100vh - 104px)',
                     overflow: 'auto',
@@ -167,10 +166,10 @@ const Calendar = ({
             >
                 {showToolbar && <CalenderHeader />}
                 {view === 'month' && <CalenderMonthView />}
-                {view === 'week'  && <DaysOfWeek />}
-                {view === 'day'   && <CalenderDayView />}
-                {view === 'list'  && <CalenderListView />}
-                {view === 'year'  && <CalenderYearView />}
+                {view === 'week' && <DaysOfWeek />}
+                {view === 'day' && <CalenderDayView />}
+                {view === 'list' && <CalenderListView />}
+                {view === 'year' && <CalenderYearView />}
                 <EventModal />
             </div>
         </ConfigProvider>

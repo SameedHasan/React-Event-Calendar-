@@ -123,15 +123,15 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
 };
 
 const CalenderDayView = () => {
-    const { 
-        weekRange, 
-        currentWeek, 
-        currentDayIndex, 
-        setWeekRange, 
-        events, 
-        startOfWeek, 
-        timeFormat, 
-        openCreateModal, 
+    const {
+        weekRange,
+        currentWeek,
+        currentDayIndex,
+        setWeekRange,
+        events,
+        startOfWeek,
+        timeFormat,
+        openCreateModal,
         openEditModal,
         onEventClick,
         onDateClick,
@@ -391,19 +391,6 @@ const CalenderDayView = () => {
                             </div>
                         )}
 
-                        {/* Empty state */}
-                        {dayEvents.length === 0 && allDayEvents.length === 0 && (
-                            <div style={{
-                                position: 'absolute', top: '50%', left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                textAlign: 'center', pointerEvents: 'none',
-                            }}>
-                                <div style={{ fontSize: '32px', marginBottom: '8px' }}>📅</div>
-                                <Text style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                                    No events scheduled
-                                </Text>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

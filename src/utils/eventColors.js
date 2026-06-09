@@ -42,8 +42,8 @@ export const getEventStyle = (event = {}) => {
             const hex = store.eventColors[event.type];
             return {
                 color: hex,
-                bg: `${hex}18`,
-                border: `${hex}50`,
+                bg: `color-mix(in srgb, ${hex} 9.4%, var(--white-color))`,
+                border: `color-mix(in srgb, ${hex} 31%, var(--white-color))`,
             };
         }
     } catch (e) {
@@ -53,8 +53,8 @@ export const getEventStyle = (event = {}) => {
     if (event.color) {
         return {
             color:  event.color,
-            bg:     `${event.color}18`,
-            border: `${event.color}50`,
+            bg:     `color-mix(in srgb, ${event.color} 9.4%, var(--white-color))`,
+            border: `color-mix(in srgb, ${event.color} 31%, var(--white-color))`,
         };
     }
     return PALETTE[hashType(event.type)];

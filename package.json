@@ -1,7 +1,7 @@
 {
   "name": "react-event-calendar-suite",
   "private": false,
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A premium, highly performant, and fully customizable React Event Calendar component suite.",
   "keywords": [
     "react",
@@ -20,6 +20,14 @@
   ],
   "author": "Sameed Hasan",
   "license": "MIT",
+  "homepage": "https://github.com/SameedHasan/React-Event-Calendar-#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SameedHasan/React-Event-Calendar-.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SameedHasan/React-Event-Calendar-/issues"
+  },
   "type": "module",
   "main": "./dist/react-event-calendar-suite.umd.cjs",
   "module": "./dist/react-event-calendar-suite.js",

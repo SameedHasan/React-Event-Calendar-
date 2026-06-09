@@ -125,9 +125,9 @@ export default function EventModal() {
             title={selectedEvent ? 'Edit Event' : 'Create Event'}
             onCancel={handleCancel}
             footer={null}
-            destroyOnClose
+            destroyOnHidden
             centered
-            bodyStyle={{ paddingTop: '12px' }}
+            styles={{ body: { paddingTop: '12px' } }}
         >
             <Form
                 form={form}

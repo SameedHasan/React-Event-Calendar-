@@ -46,8 +46,46 @@ const useCalendarStore = create((set, get) => ({
         onDeleteEvent: null,
     },
 
-    setConfigs: (configs) => set(configs),
-    setCallbacks: (callbacks) => set({ callbacks }),
+    setConfigs: (configs) => {
+        const state = get();
+        const updates = {};
+        let changed = false;
+
+        for (const key in configs) {
+            const val1 = state[key];
+            const val2 = configs[key];
+
+            if (val1 && val2 && typeof val1 === 'object' && typeof val2 === 'object') {
+                if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+                    updates[key] = val2;
+                    changed = true;
+                }
+            } else if (val1 !== val2) {
+                updates[key] = val2;
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            set(updates);
+        }
+    },
+    setCallbacks: (callbacks) => {
+        const state = get();
+        const updates = {};
+        let changed = false;
+
+        for (const key in callbacks) {
+            if (state.callbacks[key] !== callbacks[key]) {
+                updates[key] = callbacks[key];
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            set({ callbacks: { ...state.callbacks, ...updates } });
+        }
+    },
     openCreateModal: (date) => set({ isModalOpen: true, selectedEvent: null, prepopulatedStartDate: date ? date.toISOString() : null }),
     openEditModal: (event) => set({ isModalOpen: true, selectedEvent: event, prepopulatedStartDate: null }),
     closeModal: () => set({ isModalOpen: false, selectedEvent: null, prepopulatedStartDate: null }),

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ConfigProvider } from 'antd';
+import { useShallow } from 'zustand/react/shallow';
 import './index.css';
 import CalenderHeader from './CalenderHeader';
 import CalenderMonthView from './CalenderMonthView';
@@ -60,7 +61,19 @@ const Calendar = ({
         setCategories,
         setConfigs,
         setCurrentDate,
-    } = useCalendarStore();
+    } = useCalendarStore(
+        useShallow((state) => ({
+            view: state.view,
+            setEvents: state.setEvents,
+            setView: state.setView,
+            setStartOfWeek: state.setStartOfWeek,
+            setTimeFormat: state.setTimeFormat,
+            setCallbacks: state.setCallbacks,
+            setCategories: state.setCategories,
+            setConfigs: state.setConfigs,
+            setCurrentDate: state.setCurrentDate,
+        }))
+    );
 
     // Activate keyboard shortcuts
     useKeyboardShortcuts();

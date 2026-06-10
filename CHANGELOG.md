@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.1.0] - 2026-06-10
+
+### Changed
+
+- `showExportButton` default changed from `true` to `false` — export is now opt-in (`showExportButton={true}`)
+- Storybook stories reorganised: **Default** is now a minimal read-only display; new **Interactive** story demonstrates full CRUD opt-in
+
+### Philosophy
+
+The calendar is now a display component by default. Every interactive feature (CRUD, export, drag-and-drop, date-click) requires an explicit opt-in prop or handler.
+
+---
+
 ## [2.0.0] - 2026-06-10
 
 ### Added

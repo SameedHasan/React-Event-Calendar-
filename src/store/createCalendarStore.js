@@ -35,7 +35,7 @@ export const createCalendarStore = (initialState = {}) => {
         hideWeekends: false,
         showWeekNumbers: false,
         showToolbar: true,
-        showExportButton: true,
+        showExportButton: false,
         showAddEventButton: true,
         allowDateClick: true,
         readOnly: false,

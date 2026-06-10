@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { fn } from 'storybook/test';
 import Calendar from '../src/Calender.jsx';
 import { sampleEvents, storyDate } from './fixtures/sampleEvents';
 
 const VIEW_OPTIONS = ['month', 'week', 'day', 'list', 'year'];
 
+// ---------------------------------------------------------------------------
+// Meta — shared controls only, NO handlers so Default is clean by default
+// ---------------------------------------------------------------------------
 export default {
   title: 'Calendar',
   component: Calendar,
@@ -19,19 +21,10 @@ export default {
     timeFormat: '12h',
     primaryColor: '#1272bf',
     theme: 'light',
-    showToolbar: true,
-    showExportButton: true,
-    showAddEventButton: true,
-    allowDateClick: true,
-    readOnly: false,
     loading: false,
     hideWeekends: false,
     showWeekNumbers: false,
-    onEventClick: fn(),
-    onDateClick: fn(),
-    onAddEvent: fn(),
-    onUpdateEvent: fn(),
-    onDeleteEvent: fn(),
+    showToolbar: true,
   },
   argTypes: {
     defaultView: {
@@ -57,24 +50,74 @@ export default {
   },
 };
 
-/** Basic month view with sample events. */
-export const Default = {};
+// ---------------------------------------------------------------------------
+// 1. Default — minimal read-only display
+//    Just pass `events`. No add button, no export, no edit modal.
+// ---------------------------------------------------------------------------
+/** Minimal display calendar. Pass only `events` — no CRUD or DnD enabled. */
+export const Default = {
+  args: {
+    readOnly: true,
+  },
+};
 
-/** Switch views via the toolbar or the `defaultView` control. */
+// ---------------------------------------------------------------------------
+// 2. Interactive — opt-in CRUD (add / edit / delete + export)
+// ---------------------------------------------------------------------------
+function InteractiveDemo() {
+  const [events, setEvents] = useState(sampleEvents);
+
+  return (
+    <div style={{ height: '100vh' }}>
+      <Calendar
+        events={events}
+        defaultView="month"
+        currentDate={storyDate}
+        startOfWeek="monday"
+        showAddEventButton
+        showExportButton
+        allowDateClick
+        onAddEvent={(ev) => setEvents((prev) => [...prev, ev])}
+        onUpdateEvent={(ev) => setEvents((prev) => prev.map((e) => (e.id === ev.id ? ev : e)))}
+        onDeleteEvent={(id) => setEvents((prev) => prev.filter((e) => e.id !== id))}
+      />
+    </div>
+  );
+}
+
+/**
+ * Opt-in CRUD — enable editing by passing `onAddEvent`, `onUpdateEvent`, `onDeleteEvent`.
+ * `showAddEventButton` and `showExportButton` must also be set to `true`.
+ */
+export const Interactive = {
+  render: () => <InteractiveDemo />,
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 3. All Views — explore all five views via the toolbar or the control
+// ---------------------------------------------------------------------------
+/** Switch between all five views with the toolbar or the `defaultView` control. */
 export const AllViews = {
   args: {
     defaultView: 'week',
+    readOnly: true,
   },
   argTypes: {
     defaultView: {
       control: 'select',
       options: VIEW_OPTIONS,
-      description: 'Initial view — use toolbar tabs to explore all five views.',
+      description: 'Pick a view — or use the toolbar tabs to navigate.',
     },
   },
 };
 
-function ControlledCalendarDemo() {
+// ---------------------------------------------------------------------------
+// 4. Controlled — parent owns `view` + `currentDate`
+// ---------------------------------------------------------------------------
+function ControlledDemo() {
   const [view, setView] = useState('month');
   const [date, setDate] = useState(storyDate);
 
@@ -91,6 +134,7 @@ function ControlledCalendarDemo() {
           onViewChange={setView}
           currentDate={date}
           onDateChange={setDate}
+          readOnly
         />
       </div>
     </div>
@@ -99,45 +143,50 @@ function ControlledCalendarDemo() {
 
 /** `currentDate` and `view` driven by parent React state. */
 export const Controlled = {
-  render: () => <ControlledCalendarDemo />,
+  render: () => <ControlledDemo />,
   parameters: {
     controls: { disable: true },
   },
 };
 
-/** Read-only mode: editing disabled; `onEventClick` still fires. */
+// ---------------------------------------------------------------------------
+// 5. Read Only — explicit readOnly prop + click-to-inspect pattern
+// ---------------------------------------------------------------------------
+/** `readOnly={true}` disables all editing; `onEventClick` still fires. */
 export const ReadOnly = {
   args: {
     readOnly: true,
     showAddEventButton: false,
-    onEventClick: fn((event) => {
-      window.alert(`Clicked: ${event.title}`);
-    }),
+    onEventClick: (event) => window.alert(`${event.title}\n${event.type}`),
   },
 };
 
-/** `primaryColor`, `theme`, and CSS variable overrides. */
+// ---------------------------------------------------------------------------
+// 6. Theming — primaryColor, dark mode, CSS variables
+// ---------------------------------------------------------------------------
+/** `primaryColor`, `theme="dark"`, and CSS variable overrides. */
 export const Theming = {
   args: {
     primaryColor: '#7c3aed',
     theme: 'dark',
-    style: {
-      '--calendar-border-color': '#3f3f46',
-      '--calendar-surface': '#18181b',
-    },
+    readOnly: true,
   },
   decorators: [
     (_Story) => (
-      <div style={{ '--calendar-story-bg': '#09090b' }}>
+      <div style={{ background: '#09090b', minHeight: '100vh' }}>
         <_Story />
       </div>
     ),
   ],
 };
 
-/** Replace default event chips with a custom renderer. */
+// ---------------------------------------------------------------------------
+// 7. Custom Render — replace event chips with your own component
+// ---------------------------------------------------------------------------
+/** Replace default event chips with a custom `renderEvent` renderer. */
 export const CustomRender = {
   args: {
+    readOnly: true,
     renderEvent: (event, { view }) => (
       <span
         style={{
@@ -158,6 +207,87 @@ export const CustomRender = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// 8. Drag And Drop — opt-in via onEventDrop + onEventResize
+// ---------------------------------------------------------------------------
+function DragAndDropDemo() {
+  const [events, setEvents] = useState(sampleEvents);
+  const [view, setView] = useState('month');
+
+  const reschedule = ({ event, start, end }) =>
+    setEvents((prev) => prev.map((e) => (e.id === event.id ? { ...e, start, end } : e)));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 24,
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: 13,
+          color: '#475569',
+        }}
+      >
+        <span>
+          <strong>Move</strong> — drag event to a new slot
+        </span>
+        <span>
+          <strong>Extend</strong> — drag left/right edge of a bar to change its span
+        </span>
+        <span>
+          <strong>Resize</strong> — drag bottom edge of timed event
+        </span>
+        <span style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          {['month', 'week', 'day'].map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              style={{
+                padding: '3px 10px',
+                borderRadius: 6,
+                border: '1px solid #e2e8f0',
+                background: view === v ? '#1272bf' : '#fff',
+                color: view === v ? '#fff' : '#334155',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 12,
+              }}
+            >
+              {v.charAt(0).toUpperCase() + v.slice(1)}
+            </button>
+          ))}
+        </span>
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Calendar
+          events={events}
+          view={view}
+          onViewChange={setView}
+          currentDate={storyDate}
+          onEventDrop={reschedule}
+          onEventResize={reschedule}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Drag-and-drop is opt-in — pass `onEventDrop` and/or `onEventResize` to enable.
+ * `disableDrag` / `disableResize` let you turn off one interaction independently.
+ */
+export const DragAndDrop = {
+  render: () => <DragAndDropDemo />,
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
+// ---------------------------------------------------------------------------
+// 9. Two Calendars — per-instance store isolation
+// ---------------------------------------------------------------------------
 function TwoCalendarsDemo() {
   const [leftDate, setLeftDate] = useState(new Date(2026, 5, 9));
   const [rightDate, setRightDate] = useState(new Date(2026, 11, 1));
@@ -177,6 +307,7 @@ function TwoCalendarsDemo() {
         currentDate={leftDate}
         onDateChange={setLeftDate}
         primaryColor="#1272bf"
+        readOnly
       />
       <Calendar
         events={[]}
@@ -184,9 +315,10 @@ function TwoCalendarsDemo() {
         currentDate={rightDate}
         onDateChange={setRightDate}
         primaryColor="#dc2626"
+        readOnly
         renderEmpty={() => (
           <p style={{ textAlign: 'center', padding: 24, opacity: 0.7 }}>
-            No events on this calendar instance
+            No events on this calendar
           </p>
         )}
       />
@@ -194,49 +326,7 @@ function TwoCalendarsDemo() {
   );
 }
 
-function DragAndDropDemo() {
-  const [events, setEvents] = useState(sampleEvents);
-
-  const updateEventSchedule = (payload) => {
-    setEvents((prev) =>
-      prev.map((item) =>
-        item.id === payload.event.id
-          ? { ...item, start: payload.start, end: payload.end }
-          : item
-      )
-    );
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
-      <p style={{ margin: 0, fontFamily: 'system-ui, sans-serif', fontSize: 14 }}>
-        Month & week all-day: drag to move, or drag the left/right edge onto another day to extend or
-        shrink the span (live stretch preview). Week/day timed grid: drag vertically or across columns;
-        bottom edge resizes duration. Use <code>disableDrag</code> or <code>disableResize</code> to turn
-        off one interaction.
-      </p>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <Calendar
-          events={events}
-          defaultView="week"
-          currentDate={storyDate}
-          onEventDrop={updateEventSchedule}
-          onEventResize={updateEventSchedule}
-        />
-      </div>
-    </div>
-  );
-}
-
-/** Drag-and-drop move + resize across month, week, and day views (`onEventDrop`, `onEventResize`). */
-export const DragAndDrop = {
-  render: () => <DragAndDropDemo />,
-  parameters: {
-    controls: { disable: true },
-  },
-};
-
-/** Two instances on one page — each has its own Zustand store (Phase 1). */
+/** Two independent `<Calendar />` instances on one page — each has its own Zustand store. */
 export const TwoCalendars = {
   render: () => <TwoCalendarsDemo />,
   parameters: {

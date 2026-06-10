@@ -38,6 +38,20 @@ Additional guides: [docs/installation.md](./docs/installation.md) · [docs/ssr-n
 
 ---
 
+## 🎯 Design philosophy
+
+The calendar is a **display component by default** — pass `events` and it renders. Every interactive feature requires an explicit opt-in:
+
+| Feature | Default | Enable with |
+| :--- | :--- | :--- |
+| Add / edit / delete | off (no modal) | `onAddEvent` + `onUpdateEvent` + `onDeleteEvent` |
+| Export button | off | `showExportButton={true}` |
+| Drag-and-drop | off | `onEventDrop` handler |
+| Event resize / extend | off | `onEventResize` handler |
+| Date click to create | on | `allowDateClick={false}` to turn off |
+
+---
+
 ## ✨ Features
 
 - 📅 **5 Interactive Views**: Standard Month, Time-Grid Week, Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
@@ -203,7 +217,7 @@ export default App;
 | `hideWeekends` | `boolean` | `false` | Optional. Hides Saturday and Sunday columns in Month, Week, and List views. |
 | `showWeekNumbers` | `boolean` | `false` | Optional. Shows the week number column on Month and Week views. |
 | `showToolbar` | `boolean` | `true` | Optional. Renders the main header navigation toolbar. |
-| `showExportButton` | `boolean` | `true` | Optional. Renders the toolbar "Export" iCal button. |
+| `showExportButton` | `boolean` | `false` | Optional. Renders the toolbar "Export" iCal button. Opt-in. |
 | `showAddEventButton` | `boolean` | `true` | Optional. Renders the toolbar "+ Add Event" button. |
 | `allowDateClick` | `boolean` | `true` | Optional. Enables/disables the click-to-add event action on empty day slots. |
 | `eventColors` | `object` | `{}` | Optional. Custom color overrides per category (e.g. `{ Meeting: '#ef4444' }`). |

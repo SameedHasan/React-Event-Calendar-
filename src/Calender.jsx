@@ -64,6 +64,10 @@ const CalendarInner = ({
 
     const {
         view,
+        currentDate: storeCurrentDate,
+        currentWeek,
+        currentDayIndex,
+        storeStartOfWeek,
         setEvents,
         setView,
         setStartOfWeek,
@@ -74,9 +78,14 @@ const CalendarInner = ({
         setCurrentDate,
         setLocaleReady,
         rebuildWeekRange,
+        recomputeExpandedEvents,
     } = useCalendarStore(
         useShallow((state) => ({
             view: state.view,
+            currentDate: state.currentDate,
+            currentWeek: state.currentWeek,
+            currentDayIndex: state.currentDayIndex,
+            storeStartOfWeek: state.startOfWeek,
             setEvents: state.setEvents,
             setView: state.setView,
             setStartOfWeek: state.setStartOfWeek,
@@ -87,6 +96,7 @@ const CalendarInner = ({
             setCurrentDate: state.setCurrentDate,
             setLocaleReady: state.setLocaleReady,
             rebuildWeekRange: state.rebuildWeekRange,
+            recomputeExpandedEvents: state.recomputeExpandedEvents,
         }))
     );
 
@@ -137,6 +147,17 @@ const CalendarInner = ({
     useEffect(() => {
         setEvents(events);
     }, [events, setEvents]);
+
+    useEffect(() => {
+        recomputeExpandedEvents();
+    }, [
+        view,
+        storeCurrentDate,
+        currentWeek,
+        currentDayIndex,
+        storeStartOfWeek,
+        recomputeExpandedEvents,
+    ]);
 
     useEffect(() => {
         setCallbacks({ onAddEvent, onUpdateEvent, onDeleteEvent });

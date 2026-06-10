@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import dayjs from 'dayjs';
 import { useShallow } from 'zustand/react/shallow';
 import useCalendarStore from '../store/useCalendarStore';
+import { isRecurringInstance } from '../utils/recurrence';
 import {
     isCalendarDnDEnabled,
     computeSpanEndResize,
@@ -163,7 +164,8 @@ export default function DraggableSpanEvent({
         }))
     );
 
-    const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent });
+    const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent })
+        && !isRecurringInstance(event);
     const canMove = enabled && !disableDrag && Boolean(onEventDrop || onUpdateEvent);
     const canResize = enabled && !disableResize && Boolean(onEventResize || onUpdateEvent);
     const dayKey = dayjs(anchorDay).format('YYYY-MM-DD');

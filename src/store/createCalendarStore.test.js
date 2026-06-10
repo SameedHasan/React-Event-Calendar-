@@ -109,6 +109,26 @@ describe('createCalendarStore', () => {
     expect(onDateChange).not.toHaveBeenCalled();
   });
 
+  it('expands recurring events into display instances for the visible range', () => {
+    const store = createCalendarStore({ defaultView: 'month' });
+    store.getState().setCurrentDate(new Date(2026, 5, 9), { notify: false });
+
+    store.getState().setEvents([
+      {
+        id: 'daily',
+        title: 'Daily standup',
+        type: 'Meeting',
+        start: new Date(2026, 5, 9, 9, 0),
+        end: new Date(2026, 5, 9, 9, 30),
+        recurrence: 'FREQ=DAILY;COUNT=5',
+      },
+    ]);
+
+    expect(store.getState().sourceEvents).toHaveLength(1);
+    expect(store.getState().events.length).toBeGreaterThan(1);
+    expect(store.getState().events.every((e) => e.recurrenceMasterId === 'daily')).toBe(true);
+  });
+
   it('navigates months and calls onDateChange', () => {
     const onDateChange = vi.fn();
     const store = createCalendarStore();

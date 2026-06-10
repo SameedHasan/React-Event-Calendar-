@@ -117,6 +117,10 @@ export const eventsToICS = (events, calendarName = 'My Calendar', timezone = nul
             lines.push(foldLine(`LOCATION:${escapeICSText(event.location)}`));
         }
 
+        if (event.recurrence) {
+            lines.push(`RRULE:${event.recurrence}`);
+        }
+
         lines.push('END:VEVENT');
     });
 

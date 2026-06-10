@@ -70,6 +70,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 - 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
 - 🖱️ **Drag-and-drop scheduling** *(v2.0)*: Move and resize events in month, week, and day views — with 15-minute snap on timed grids, both-edge span resize on month/week all-day bars, and optional `disableDrag` / `disableResize` flags.
 - 🌍 **Locale / i18n** *(v2.3)*: Pass any BCP-47 tag (e.g. `'de'`, `'zh-cn'`, `'ja'`) via the `locale` prop to translate month names, weekday abbreviations, and Ant Design UI (date picker, modals). `startOfWeek` auto-derives from the locale when not set explicitly.
+- 🔁 **Recurring events** *(v2.4)*: Add `recurrence` (RRULE) on events for daily, weekly, or monthly repeats. Instances expand for the visible range only; modal picker + ICS `RRULE` export included.
 
 ---
 
@@ -429,9 +430,28 @@ interface CalendarEvent {
   description?: string;       // Optional descriptive text shown in details/tooltips
   location?: string;          // Optional. Included in ICS export
   allDay?: boolean;           // Optional. Renders in the all-day / spanning row
+  recurrence?: string;        // Optional. RRULE body (e.g. 'FREQ=WEEKLY;BYDAY=MO;COUNT=10')
+  recurrenceMasterId?: string | number; // Set on expanded instances (read-only, internal)
   metadata?: Record<string, unknown>; // Optional. App-specific data (not rendered by default)
 }
 ```
+
+### Recurring events
+
+Add an RRULE string to the master event, or use the **Repeats** field in the event modal:
+
+```jsx
+{
+  id: 'standup',
+  title: 'Daily Standup',
+  type: 'Meeting',
+  start: new Date(2026, 5, 9, 9, 0),
+  end: new Date(2026, 5, 9, 9, 30),
+  recurrence: 'FREQ=DAILY;COUNT=10',
+}
+```
+
+The calendar expands occurrences for the **visible date range** only (not an infinite pre-computed list). ICS export writes the master event with `RRULE:`. Drag-and-drop is disabled on expanded instances — edit the series via the modal.
 
 ---
 

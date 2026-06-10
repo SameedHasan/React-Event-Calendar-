@@ -468,3 +468,54 @@ export const Locale = {
   render: () => <LocaleDemo />,
   parameters: { controls: { disable: true } },
 };
+
+// ---------------------------------------------------------------------------
+// 12. Recurring events — RRULE expansion in visible range
+// ---------------------------------------------------------------------------
+const recurringSampleEvents = [
+  {
+    id: 'daily-standup',
+    title: 'Daily Standup',
+    type: 'Meeting',
+    start: new Date(2026, 5, 9, 9, 0),
+    end: new Date(2026, 5, 9, 9, 30),
+    recurrence: 'FREQ=DAILY;COUNT=10',
+  },
+  {
+    id: 'weekly-review',
+    title: 'Weekly Review',
+    type: 'Review',
+    start: new Date(2026, 5, 10, 14, 0),
+    end: new Date(2026, 5, 10, 15, 0),
+    recurrence: 'FREQ=WEEKLY;BYDAY=TU;COUNT=6',
+  },
+  ...sampleEvents.filter((e) => e.id !== 1),
+];
+
+function RecurringEventsDemo() {
+  const [events, setEvents] = React.useState(recurringSampleEvents);
+
+  return (
+    <div style={{ height: '100vh' }}>
+      <Calendar
+        events={events}
+        defaultView="month"
+        currentDate={storyDate}
+        showAddEventButton
+        allowDateClick
+        onAddEvent={(ev) => setEvents((prev) => [...prev, ev])}
+        onUpdateEvent={(ev) => setEvents((prev) => prev.map((e) => (e.id === ev.id ? ev : e)))}
+        onDeleteEvent={(id) => setEvents((prev) => prev.filter((e) => e.id !== id))}
+      />
+    </div>
+  );
+}
+
+/**
+ * Recurring events use an RRULE string on the master event. The calendar expands
+ * occurrences for the visible date range only. Set repeats in the event modal.
+ */
+export const RecurringEvents = {
+  render: () => <RecurringEventsDemo />,
+  parameters: { controls: { disable: true } },
+};

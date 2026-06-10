@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { useShallow } from 'zustand/react/shallow';
 import useCalendarStore from '../store/useCalendarStore';
 import { isCalendarDnDEnabled } from '../utils/eventDnD';
+import { isRecurringInstance } from '../utils/recurrence';
 
 /**
  * Drag + resize shell for timed events in week/day grids.
@@ -27,7 +28,8 @@ export default function DraggableTimedEvent({
             disableResize: state.disableResize,
         }))
     );
-    const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent });
+    const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent })
+        && !isRecurringInstance(event);
     const canMove = enabled && !disableDrag && Boolean(onEventDrop || onUpdateEvent);
     const canResize = enabled && !disableResize && Boolean(onEventResize || onUpdateEvent);
     const dayKey = dayjs(anchorDay).format('YYYY-MM-DD');

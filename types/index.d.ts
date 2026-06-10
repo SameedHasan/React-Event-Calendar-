@@ -25,6 +25,13 @@ export interface CalendarEvent {
   description?: string;
   location?: string;
   allDay?: boolean;
+  /**
+   * RFC 5545 RRULE body (without the `RRULE:` prefix), e.g. `FREQ=WEEKLY;BYDAY=MO`.
+   * The calendar expands occurrences for the visible date range only.
+   */
+  recurrence?: string;
+  /** Present on expanded instances — id of the master recurring event. */
+  recurrenceMasterId?: string | number;
   metadata?: Record<string, unknown>;
 }
 

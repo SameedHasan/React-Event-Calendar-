@@ -10,6 +10,7 @@ export function useToolbarApi() {
         weekRange,
         currentDayIndex,
         events,
+        sourceEvents,
         setView,
         goToToday,
         previousMonth,
@@ -52,8 +53,8 @@ export function useToolbarApi() {
     }, [view, currentDayIndex, navActions]);
 
     const exportEvents = useCallback(() => {
-        exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' });
-    }, [events]);
+        exportEventsToICS(sourceEvents, { calendarName: 'React Event Calendar Suite' });
+    }, [sourceEvents]);
 
     return useMemo(() => ({
         view,

@@ -26,6 +26,20 @@ describe('eventsToICS', () => {
     expect(ics).toContain('DESCRIPTION:Line one\\nLine two');
   });
 
+  it('includes RRULE when event has recurrence', () => {
+    const ics = eventsToICS([
+      {
+        id: 1,
+        title: 'Weekly sync',
+        start: new Date('2026-06-10T10:00:00'),
+        end: new Date('2026-06-10T11:00:00'),
+        recurrence: 'FREQ=WEEKLY;BYDAY=TU;COUNT=8',
+      },
+    ]);
+
+    expect(ics).toContain('RRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=8');
+  });
+
   it('outputs UTC datetimes ending with Z', () => {
     const ics = eventsToICS([
       {

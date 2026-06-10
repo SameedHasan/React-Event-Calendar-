@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `2.3.0`  
+**Current version:** `2.4.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -369,17 +369,19 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 **Release:** `2.3.0`  
 **Shipped in:** `v2.3.0` (June 10, 2026)
 
-### 6.4 Recurring events
+### 6.4 Recurring events ✅ COMPLETE
 
 | Task | Details |
 |------|---------|
-| Schema | `recurrence?: string` (RRULE) or structured object |
-| Expansion | Generate instances for visible date range only |
-| UI | Recurrence picker in `EventModal` (presets: daily, weekly, monthly) |
-| ICS | Emit `RRULE` in `eventsToICS` |
+| Schema | `recurrence?: string` (RRULE body without prefix) on `CalendarEvent` |
+| Expansion | `expandRecurringEvents()` via `rrule` — visible date range only |
+| UI | Recurrence picker in `EventModal` (daily, weekly, monthly + optional COUNT) |
+| ICS | `RRULE:` emitted in `eventsToICS`; export uses `sourceEvents` masters |
+| DnD | Disabled on expanded instances (`recurrenceMasterId`); edit opens master |
 
-**Effort:** ~7–10 days  
-**Release:** `2.1.0`
+**Effort:** ~2 days  
+**Release:** `2.4.0`  
+**Shipped in:** `v2.4.0` (June 10, 2026)
 
 ### 6.5 ICS import
 

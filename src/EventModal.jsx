@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
-import { Modal, Form, Input, DatePicker, Select, Button, Space, message } from 'antd';
+import { Modal, Form, Input, DatePicker, Select, Button, Space, message, InputNumber } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import { toDayjs, nowInTz } from './utils/tz';
+import {
+    RECURRENCE_PRESETS,
+    buildRecurrenceRule,
+    parseRecurrencePreset,
+    parseRecurrenceCount,
+} from './utils/recurrence';
 
 const { TextArea } = Input;
 
@@ -16,6 +22,7 @@ const PRESET_COLORS = [
 
 export default function EventModal() {
     const [form] = Form.useForm();
+    const recurrencePreset = Form.useWatch('recurrencePreset', form);
     const {
         isModalOpen,
         selectedEvent,
@@ -46,6 +53,8 @@ export default function EventModal() {
                 description: selectedEvent.description || '',
                 color: selectedEvent.color || '',
                 range: [toDayjs(selectedEvent.start, timezone), toDayjs(selectedEvent.end, timezone)],
+                recurrencePreset: parseRecurrencePreset(selectedEvent.recurrence),
+                recurrenceCount: parseRecurrenceCount(selectedEvent.recurrence),
             });
         } else {
             const start = prepopulatedStartDate ? toDayjs(prepopulatedStartDate, timezone) : nowInTz(timezone);
@@ -57,6 +66,8 @@ export default function EventModal() {
                 description: '',
                 color: '',
                 range: [start, end],
+                recurrencePreset: 'none',
+                recurrenceCount: undefined,
             });
         }
     }, [isModalOpen, selectedEvent, prepopulatedStartDate, form, categories, readOnly, timezone]);
@@ -69,7 +80,9 @@ export default function EventModal() {
         if (selectedEvent) {
             Modal.confirm({
                 title: 'Delete Event',
-                content: `Are you sure you want to delete "${selectedEvent.title}"?`,
+                content: selectedEvent.recurrence
+                    ? `Delete the entire recurring series "${selectedEvent.title}"?`
+                    : `Are you sure you want to delete "${selectedEvent.title}"?`,
                 okText: 'Delete',
                 okType: 'danger',
                 cancelText: 'Cancel',
@@ -95,6 +108,12 @@ export default function EventModal() {
             return;
         }
 
+        const recurrence = buildRecurrenceRule(
+            values.recurrencePreset,
+            startVal.toDate(),
+            values.recurrenceCount ? { count: values.recurrenceCount } : {}
+        );
+
         const eventPayload = {
             title: values.title.trim(),
             type: values.type,
@@ -102,6 +121,7 @@ export default function EventModal() {
             color: values.color || undefined,
             start: startVal.toDate(),
             end: endVal.toDate(),
+            recurrence,
         };
 
         if (selectedEvent) {
@@ -137,7 +157,11 @@ export default function EventModal() {
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                initialValues={{ type: categories[0] || 'Meeting', color: '' }}
+                initialValues={{
+                    type: categories[0] || 'Meeting',
+                    color: '',
+                    recurrencePreset: 'none',
+                }}
             >
                 <Form.Item
                     name="title"
@@ -200,6 +224,25 @@ export default function EventModal() {
                         style={{ width: '100%' }}
                     />
                 </Form.Item>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <Form.Item
+                        name="recurrencePreset"
+                        label="Repeats"
+                    >
+                        <Select options={RECURRENCE_PRESETS} />
+                    </Form.Item>
+
+                    {recurrencePreset && recurrencePreset !== 'none' && (
+                        <Form.Item
+                            name="recurrenceCount"
+                            label="Occurrences (optional)"
+                            tooltip="Leave empty for no end date. Instances are generated for the visible range only."
+                        >
+                            <InputNumber min={2} max={999} placeholder="e.g. 10" style={{ width: '100%' }} />
+                        </Form.Item>
+                    )}
+                </div>
 
                 <Form.Item
                     name="description"

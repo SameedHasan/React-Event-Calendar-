@@ -48,7 +48,7 @@ function CalendarHeader() {
         incrementWeek,
         handleNextandPrevDay,
         goToToday,
-        events,
+        sourceEvents,
         openCreateModal,
         showExportButton,
         showAddEventButton,
@@ -285,7 +285,7 @@ function CalendarHeader() {
                 {showExportButton && (
                     <button
                         type="button"
-                        onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite', timezone })}
+                        onClick={() => exportEventsToICS(sourceEvents, { calendarName: 'React Event Calendar Suite', timezone })}
                         title="Export all events to iCal (.ics)"
                         aria-label="Export all events to iCal"
                         style={{

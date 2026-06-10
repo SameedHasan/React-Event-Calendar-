@@ -1,5 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import { getDayIndex, calculateWeekRange, getIsoWeekNumber } from '../utils/dateHelpers';
+import { getVisibleDateRange } from '../utils/getVisibleDateRange';
+import { expandRecurringEvents } from '../utils/recurrence';
 
 const buildWeekRangeState = (date, startOfWeek) => {
     const weekNumber = getIsoWeekNumber(date);
@@ -25,6 +27,9 @@ export const createCalendarStore = (initialState = {}) => {
         weekRange: buildWeekRangeState(today, startOfWeek),
         currentWeek: today.toISOString(),
         currentDayIndex: getDayIndex(today, startOfWeek),
+        /** Raw events from props / CRUD (masters with RRULE). */
+        sourceEvents: [],
+        /** Expanded instances for the active visible range (includes recurring occurrences). */
         events: [],
         categories: ['Meeting', 'Workshop', 'Call', 'Social', 'Review', 'Planning', 'Conference'],
 
@@ -120,7 +125,11 @@ export const createCalendarStore = (initialState = {}) => {
 
         openEditModal: (event) => {
             if (get().readOnly) return;
-            set({ isModalOpen: true, selectedEvent: event, prepopulatedStartDate: null });
+            const state = get();
+            const master = event?.recurrenceMasterId
+                ? state.sourceEvents.find((e) => e.id === event.recurrenceMasterId) || event
+                : event;
+            set({ isModalOpen: true, selectedEvent: master, prepopulatedStartDate: null });
         },
 
         closeModal: () => set({ isModalOpen: false, selectedEvent: null, prepopulatedStartDate: null }),
@@ -131,7 +140,8 @@ export const createCalendarStore = (initialState = {}) => {
             if (state.callbacks.onAddEvent) {
                 state.callbacks.onAddEvent(newEvent);
             } else {
-                set({ events: [...state.events, newEvent] });
+                set({ sourceEvents: [...state.sourceEvents, newEvent] });
+                get().recomputeExpandedEvents();
             }
         },
 
@@ -141,7 +151,12 @@ export const createCalendarStore = (initialState = {}) => {
             if (state.callbacks.onUpdateEvent) {
                 state.callbacks.onUpdateEvent(updatedEvent);
             } else {
-                set({ events: state.events.map(e => e.id === updatedEvent.id ? updatedEvent : e) });
+                set({
+                    sourceEvents: state.sourceEvents.map((e) =>
+                        e.id === updatedEvent.id ? updatedEvent : e
+                    ),
+                });
+                get().recomputeExpandedEvents();
             }
         },
 
@@ -151,7 +166,8 @@ export const createCalendarStore = (initialState = {}) => {
             if (state.callbacks.onDeleteEvent) {
                 state.callbacks.onDeleteEvent(eventId);
             } else {
-                set({ events: state.events.filter(e => e.id !== eventId) });
+                set({ sourceEvents: state.sourceEvents.filter((e) => e.id !== eventId) });
+                get().recomputeExpandedEvents();
             }
         },
 
@@ -250,7 +266,15 @@ export const createCalendarStore = (initialState = {}) => {
         },
 
         setEvents: (events) => {
-            set({ events: Array.isArray(events) ? events : [] });
+            set({ sourceEvents: Array.isArray(events) ? events : [] });
+            get().recomputeExpandedEvents();
+        },
+
+        recomputeExpandedEvents: () => {
+            const state = get();
+            const { start, end } = getVisibleDateRange(state);
+            const expanded = expandRecurringEvents(state.sourceEvents, start, end);
+            set({ events: expanded });
         },
 
         setWeekRange: (weekRange) => {

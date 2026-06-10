@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.4.0] - 2026-06-10
+
+### Added
+
+- **Recurring events** — `recurrence` field on `CalendarEvent` (RFC 5545 RRULE body, e.g. `FREQ=WEEKLY;BYDAY=MO`)
+- Instance expansion for the **visible date range only** via `rrule` (month grid, week, day, list, year)
+- **Event modal** recurrence picker: Does not repeat, Daily, Weekly, Monthly + optional occurrence count
+- ICS export emits `RRULE:` for master events; export uses master `sourceEvents` (not expanded instances)
+- Expanded instances carry `recurrenceMasterId`; clicking edit opens the master series
+- Drag-and-drop disabled on expanded instances (edit the series via the modal)
+- New **Recurring Events** Storybook story
+- Dependency: `rrule`
+
+---
+
 ## [2.3.0] - 2026-06-10
 
 ### Added

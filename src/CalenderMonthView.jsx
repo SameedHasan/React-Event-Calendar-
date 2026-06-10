@@ -4,13 +4,14 @@ import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW, nowInTz } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW, getLocalizedShortDOW, DAY_INDEX_MAP, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import RovingTabIndexGroup from './components/RovingTabIndexGroup';
 import CalendarDndProvider from './components/CalendarDndProvider';
 import DroppableDayColumn from './components/DroppableDayColumn';
 import DraggableSpanEvent from './components/DraggableSpanEvent';
+import useLocaleAware from './hooks/useLocaleAware';
 
 const buildEventAriaLabel = (event, timeFormat, tz) => {
     const timeLabel = formatTime(event.start, timeFormat, tz);
@@ -62,6 +63,7 @@ const CalenderMonthView = () => {
         renderEventTooltip,
         timezone,
     } = useCalendarStore();
+    const { localeReady } = useLocaleAware();
     const today = nowInTz(timezone);
     const current = dayjs(currentDate);
 
@@ -99,12 +101,16 @@ const CalenderMonthView = () => {
     }, [gridDays]);
 
     const dow = useMemo(() => {
-        const baseDOW = getShiftedShortDOW(startOfWeek);
+        const baseDOW = getLocalizedShortDOW(startOfWeek);
         if (hideWeekends) {
-            return baseDOW.filter(d => d !== 'Sat' && d !== 'Sun');
+            // Filter out Sat/Sun — we need their English names as reference, then filter
+            // by day-of-week index: positions 5/6 in a Mon-first layout (or 0/6 Sun-first)
+            const sunIndex = ((0 - DAY_INDEX_MAP[String(startOfWeek).toLowerCase()]) + 7) % 7;
+            const satIndex = ((6 - DAY_INDEX_MAP[String(startOfWeek).toLowerCase()]) + 7) % 7;
+            return baseDOW.filter((_, i) => i !== satIndex && i !== sunIndex);
         }
         return baseDOW;
-    }, [startOfWeek, hideWeekends]);
+    }, [startOfWeek, hideWeekends, localeReady]);
 
     return (
         <CalendarDndProvider>

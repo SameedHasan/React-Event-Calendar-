@@ -33,9 +33,8 @@ export function buildCalendarTitle(view, { currentDate, weekRange, currentDayInd
         case 'list':
             return weekRange?.range || '';
         case 'day': {
-            if (!weekRange?.range) return '';
-            const monday = dayjs(weekRange.range.split(' - ')[0], 'MMM D, YYYY');
-            return monday.add(currentDayIndex, 'day').format('dddd, MMMM D YYYY');
+            if (!weekRange?.startDate) return '';
+            return dayjs(weekRange.startDate).add(currentDayIndex, 'day').format('dddd, MMMM D YYYY');
         }
         default:
             return '';

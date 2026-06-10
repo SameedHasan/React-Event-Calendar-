@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `2.2.0`  
+**Current version:** `2.3.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -357,16 +357,17 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 **Release:** `2.2.0`  
 **Shipped in:** `v2.2.0` (June 10, 2026)
 
-### 6.3 Locale / i18n
+### 6.3 Locale / i18n ✅ COMPLETE
 
 | Task | Details |
 |------|---------|
-| `locale` prop | Pass to antd `ConfigProvider` + dayjs locale |
-| `startOfWeek` | Already supported — add locale-driven default |
-| Labels | Month names, day abbreviations from dayjs locale |
+| `locale` prop | BCP-47 tag passed to Ant Design `ConfigProvider` + dayjs locale |
+| `startOfWeek` | Locale-driven default when `startOfWeek` is not explicitly set |
+| Labels | Month names, day abbreviations from dayjs localeData |
 
 **Effort:** ~2–3 days  
-**Release:** `2.0.0`
+**Release:** `2.3.0`  
+**Shipped in:** `v2.3.0` (June 10, 2026)
 
 ### 6.4 Recurring events
 
@@ -455,6 +456,7 @@ gantt
 | `2.0.0` | Drag-and-drop, timezone, locale; internal `Calender` → `Calendar` rename |
 | `2.1.0` | Recurring events |
 | `2.2.0` | ICS import |
+| `2.3.0` | Locale / i18n |
 
 ### Semver rules
 

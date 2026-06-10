@@ -397,3 +397,74 @@ export const TwoCalendars = {
     controls: { disable: true },
   },
 };
+
+// ---------------------------------------------------------------------------
+// 11. Locale / i18n — switch between locales at runtime
+// ---------------------------------------------------------------------------
+const LOCALE_OPTIONS = [
+  { label: 'English (default)', value: '' },
+  { label: 'Deutsch (German)', value: 'de' },
+  { label: 'Français (French)', value: 'fr' },
+  { label: 'Español (Spanish)', value: 'es' },
+  { label: 'Italiano (Italian)', value: 'it' },
+  { label: '日本語 (Japanese)', value: 'ja' },
+  { label: '中文 – 简体 (Simplified Chinese)', value: 'zh-cn' },
+  { label: '中文 – 繁體 (Traditional Chinese)', value: 'zh-tw' },
+  { label: 'العربية (Arabic)', value: 'ar' },
+  { label: 'Português – Brasil (Brazilian Portuguese)', value: 'pt-br' },
+  { label: 'Русский (Russian)', value: 'ru' },
+  { label: '한국어 (Korean)', value: 'ko' },
+  { label: 'Nederlands (Dutch)', value: 'nl' },
+  { label: 'Polski (Polish)', value: 'pl' },
+  { label: 'Türkçe (Turkish)', value: 'tr' },
+  { label: 'Svenska (Swedish)', value: 'sv' },
+];
+
+function LocaleDemo() {
+  const [locale, setLocale] = React.useState('de');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'system-ui, sans-serif', fontSize: 13 }}>
+        <label htmlFor="locale-select" style={{ fontWeight: 600, color: '#475569' }}>
+          Locale:
+        </label>
+        <select
+          id="locale-select"
+          value={locale}
+          onChange={(e) => setLocale(e.target.value)}
+          style={{
+            padding: '4px 10px', borderRadius: 6, border: '1px solid #e2e8f0',
+            fontSize: 13, background: '#fff', cursor: 'pointer',
+          }}
+        >
+          {LOCALE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <span style={{ color: '#94a3b8', fontSize: 12 }}>
+          Month names, day labels, and date-picker language all update automatically
+        </span>
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Calendar
+          events={sampleEvents}
+          defaultView="month"
+          currentDate={storyDate}
+          locale={locale || null}
+          readOnly
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Pass a BCP-47 locale tag via the `locale` prop to translate month names,
+ * weekday abbreviations, and Ant Design UI elements (modals, date pickers).
+ * The `startOfWeek` day is also derived from the locale automatically.
+ */
+export const Locale = {
+  render: () => <LocaleDemo />,
+  parameters: { controls: { disable: true } },
+};

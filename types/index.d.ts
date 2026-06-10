@@ -85,6 +85,20 @@ export interface CalendarProps {
    * Default: `null` (browser local time).
    */
   timezone?: string | null;
+  /**
+   * BCP-47 locale tag, e.g. `'de'`, `'fr'`, `'zh-cn'`, `'ja'`, `'ar'`.
+   * When set:
+   * - All date / time labels (month names, weekday abbreviations, formatted dates) are
+   *   rendered in that locale via dayjs locale bundles.
+   * - Ant Design UI elements (date picker, modals) are rendered in the matching antd locale.
+   * - `startOfWeek` defaults to the locale's natural week-start day (Mon vs Sun) unless
+   *   you explicitly pass the `startOfWeek` prop to override it.
+   *
+   * Locale bundles are loaded asynchronously on first use; the calendar renders in English
+   * during the brief load period and re-renders once the bundle is ready.
+   * Default: `null` (browser / English).
+   */
+  locale?: string | null;
   eventColors?: Record<string, string>;
   theme?: CalendarTheme;
   onEventClick?: (event: CalendarEvent) => void | boolean;

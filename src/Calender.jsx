@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ConfigProvider } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
+import dayjs from 'dayjs';
 import './index.css';
 import CalenderMonthView from './CalenderMonthView';
 import { CalendarStoreProvider, useCalendarStore } from './store/useCalendarStore';
@@ -15,12 +16,13 @@ import CalendarLoadingOverlay from './components/CalendarLoadingOverlay';
 import CalendarLiveRegion from './components/CalendarLiveRegion';
 import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp';
 import { CALENDAR_KEYSHORTCUTS_ATTR } from './utils/a11y';
+import { loadDayjsLocale, loadAntdLocale, getLocaleWeekStart } from './utils/locale';
 
 const CalendarInner = ({
     events = [],
     defaultView = 'month',
     view: controlledView,
-    startOfWeek = 'monday',
+    startOfWeek,          // undefined = auto-derive from locale
     timeFormat = '12h',
     categories,
     primaryColor = '#1272bf',
@@ -47,6 +49,7 @@ const CalendarInner = ({
     disableResize = false,
     loading = false,
     timezone = null,
+    locale = null,
     renderEvent,
     renderEventTooltip,
     renderToolbar,
@@ -54,6 +57,11 @@ const CalendarInner = ({
     className,
     style,
 }) => {
+    // ── Locale state ──────────────────────────────────────────────────────────
+    const [antdLocale, setAntdLocale] = useState(null);
+    const [localeStartOfWeek, setLocaleStartOfWeek] = useState('monday');
+    const prevLocale = useRef(null);
+
     const {
         view,
         setEvents,
@@ -64,6 +72,8 @@ const CalendarInner = ({
         setCategories,
         setConfigs,
         setCurrentDate,
+        setLocaleReady,
+        rebuildWeekRange,
     } = useCalendarStore(
         useShallow((state) => ({
             view: state.view,
@@ -75,8 +85,52 @@ const CalendarInner = ({
             setCategories: state.setCategories,
             setConfigs: state.setConfigs,
             setCurrentDate: state.setCurrentDate,
+            setLocaleReady: state.setLocaleReady,
+            rebuildWeekRange: state.rebuildWeekRange,
         }))
     );
+
+    // Keep a stable ref to setLocaleReady so the locale effect closure is never stale
+    const setLocaleReadyRef = useRef(setLocaleReady);
+    const rebuildWeekRangeRef = useRef(rebuildWeekRange);
+    setLocaleReadyRef.current = setLocaleReady;
+    rebuildWeekRangeRef.current = rebuildWeekRange;
+
+    useEffect(() => {
+        const code = locale || null;
+        if (code === prevLocale.current) return;
+        prevLocale.current = code;
+
+        if (!code) {
+            setAntdLocale(null);
+            setLocaleStartOfWeek('monday');
+            setLocaleReadyRef.current(null);
+            dayjs.locale('en');
+            rebuildWeekRangeRef.current();
+            return;
+        }
+
+        let cancelled = false;
+        (async () => {
+            const [resolvedDayjs, resolvedAntd] = await Promise.all([
+                loadDayjsLocale(code),
+                loadAntdLocale(code),
+            ]);
+            if (cancelled) return;
+            // loadDayjsLocale already calls dayjs.locale() internally
+            setAntdLocale(resolvedAntd);
+            setLocaleStartOfWeek(getLocaleWeekStart(resolvedDayjs));
+            // Signal child hooks (useLocaleMonths etc.) that the bundle is ready
+            setLocaleReadyRef.current(resolvedDayjs);
+            // Re-format week range / headers with the new locale
+            rebuildWeekRangeRef.current();
+        })();
+
+        return () => { cancelled = true; };
+    }, [locale]);
+
+    // Effective start-of-week: explicit prop wins, locale-derived is the fallback.
+    const effectiveStartOfWeek = startOfWeek ?? localeStartOfWeek;
 
     useKeyboardShortcuts();
 
@@ -115,6 +169,7 @@ const CalendarInner = ({
             disableResize,
             loading,
             timezone,
+            locale,
             renderEvent,
             renderEventTooltip,
             renderToolbar,
@@ -140,6 +195,7 @@ const CalendarInner = ({
         disableResize,
         loading,
         timezone,
+        locale,
         renderEvent,
         renderEventTooltip,
         renderToolbar,
@@ -156,8 +212,8 @@ const CalendarInner = ({
     }, [currentDate, currentDateTime, setCurrentDate]);
 
     useEffect(() => {
-        setStartOfWeek(startOfWeek);
-    }, [startOfWeek, setStartOfWeek]);
+        setStartOfWeek(effectiveStartOfWeek);
+    }, [effectiveStartOfWeek, setStartOfWeek]);
 
     useEffect(() => {
         setTimeFormat(timeFormat);
@@ -179,7 +235,10 @@ const CalendarInner = ({
     const activeView = controlledView ?? view;
 
     return (
-        <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
+        <ConfigProvider
+            locale={antdLocale || undefined}
+            theme={{ token: { colorPrimary: primaryColor } }}
+        >
             <div
                 className={['calendar-root', `theme-${theme}`, className].filter(Boolean).join(' ')}
                 role="application"

@@ -12,6 +12,7 @@ import CalendarViewEmpty from './components/CalendarViewEmpty';
 import DraggableTimedEvent from './components/DraggableTimedEvent';
 import DroppableDayColumn from './components/DroppableDayColumn';
 import CalendarDndProvider from './components/CalendarDndProvider';
+import useLocaleAware from './hooks/useLocaleAware';
 
 dayjs.extend(isoWeek);
 
@@ -160,6 +161,7 @@ const CalenderDayView = () => {
         eventColors,
         timezone,
     } = useCalendarStore();
+    const { localeReady } = useLocaleAware();
     const containerRef = useRef(null);
 
     // Get the actual date for the current day in the week
@@ -173,8 +175,15 @@ const CalenderDayView = () => {
         const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
         const start = startDay.format('MMM D, YYYY');
         const end = startDay.add(6, 'day').format('MMM D, YYYY');
-        setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
-    }, [setWeekRange, currentWeek, startOfWeek]);
+        const weekStart = startDay;
+        const weekEnd = startDay.add(6, 'day');
+        setWeekRange({
+            count: weekNumber,
+            range: `${start} - ${end}`,
+            startDate: weekStart.startOf('day').toISOString(),
+            endDate: weekEnd.endOf('day').toISOString(),
+        });
+    }, [setWeekRange, currentWeek, startOfWeek, localeReady]);
 
     // Scroll to 7 AM
     useEffect(() => {

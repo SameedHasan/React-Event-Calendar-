@@ -3,11 +3,13 @@ import { getDayIndex, calculateWeekRange, getIsoWeekNumber } from '../utils/date
 
 const buildWeekRangeState = (date, startOfWeek) => {
     const weekNumber = getIsoWeekNumber(date);
-    const { start, end } = calculateWeekRange(date, startOfWeek);
+    const { start, end, startDate, endDate } = calculateWeekRange(date, startOfWeek);
 
     return {
         count: weekNumber,
         range: `${start} - ${end}`,
+        startDate,
+        endDate,
     };
 };
 
@@ -45,6 +47,10 @@ export const createCalendarStore = (initialState = {}) => {
         onDateClick: null,
         loading: false,
         timezone: null,
+        locale: null,
+        antdLocale: null,
+        /** Set to the resolved dayjs locale code once the async bundle is loaded. */
+        localeReady: null,
         renderEvent: null,
         renderEventTooltip: null,
         renderToolbar: null,
@@ -58,6 +64,8 @@ export const createCalendarStore = (initialState = {}) => {
             onUpdateEvent: null,
             onDeleteEvent: null,
         },
+
+        setLocaleReady: (code) => set({ localeReady: code }),
 
         setConfigs: (configs) => {
             const state = get();
@@ -247,6 +255,14 @@ export const createCalendarStore = (initialState = {}) => {
 
         setWeekRange: (weekRange) => {
             set({ weekRange });
+        },
+
+        /** Rebuilds the display `range` string using the active dayjs locale. */
+        rebuildWeekRange: () => {
+            const state = get();
+            set({
+                weekRange: buildWeekRangeState(new Date(state.currentWeek), state.startOfWeek),
+            });
         },
 
         setCurrentWeek: (currentWeek) => {

@@ -69,6 +69,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 - ⌨️ **Keyboard Shortcuts**: Built-in keyboard navigation for fast, mouse-free control — switch views, navigate periods, and jump to today instantly.
 - 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
 - 🖱️ **Drag-and-drop scheduling** *(v2.0)*: Move and resize events in month, week, and day views — with 15-minute snap on timed grids, both-edge span resize on month/week all-day bars, and optional `disableDrag` / `disableResize` flags.
+- 🌍 **Locale / i18n** *(v2.3)*: Pass any BCP-47 tag (e.g. `'de'`, `'zh-cn'`, `'ja'`) via the `locale` prop to translate month names, weekday abbreviations, and Ant Design UI (date picker, modals). `startOfWeek` auto-derives from the locale when not set explicitly.
 
 ---
 
@@ -235,6 +236,7 @@ export default App;
 | `style` | `React.CSSProperties` | `undefined` | Optional. Inline styles for the calendar root element. The root uses `height: 100%`, so wrap it in a sized container. |
 | `loading` | `boolean` | `false` | Optional. Shows a spinner overlay on the active view while async data loads. |
 | `timezone` | `string \| null` | `null` | Optional. IANA timezone string (e.g. `'America/New_York'`). Displays all event times in this zone. ICS exports use `DTSTART;TZID=...`. |
+| `locale` | `string \| null` | `null` | Optional. BCP-47 locale tag (e.g. `'de'`, `'fr'`, `'zh-cn'`, `'ja'`). Translates month names, weekday labels, and Ant Design UI components. `startOfWeek` defaults to the locale's natural week-start when not explicitly set. Bundles load asynchronously; the calendar renders in English for a brief moment. |
 | `renderEvent` | `(event, context) => ReactNode` | `undefined` | Optional. Custom event chip/card renderer for month, week, day, and list views. |
 | `renderEventTooltip` | `(events, date) => ReactNode` | `undefined` | Optional. Custom tooltip for month view "+X more" overflow. |
 | `renderToolbar` | `(api) => ReactNode` | `undefined` | Optional. Replace the default header toolbar entirely. |
@@ -287,6 +289,93 @@ Provide `onEventDrop` and/or `onEventResize` to enable drag-and-drop. If omitted
 In **month** and **week all-day** views, drag an event onto another day to move it, or drag the **left or right edge** onto a day to extend or shorten the span (the bar stretches live from the anchored edge). In **week/day timed** grids, drag vertically to change time (15-min snap) and use the **bottom edge** to resize duration.
 
 See the Storybook **Drag And Drop** story (`npm run storybook`) for a live demo.
+
+---
+
+## 🌍 Locale / i18n
+
+Pass a **BCP-47 locale tag** via the `locale` prop to translate the entire calendar into any of the supported languages.
+
+### What gets translated
+
+| Element | Behaviour |
+| :--- | :--- |
+| Month names | Derived from the dayjs locale bundle (e.g. January → Januar in `'de'`) |
+| Weekday abbreviations | Mon/Tue/… → Mo/Di/… (all 5 views) |
+| Ant Design components | Date picker, confirmation modals, and other antd UI elements |
+| `startOfWeek` default | Auto-derived from the locale (e.g. Sunday for `'en'`, Monday for most European locales) |
+
+### Basic usage
+
+```jsx
+<Calendar events={events} locale="de" />
+<Calendar events={events} locale="zh-cn" />
+<Calendar events={events} locale="ja" />
+<Calendar events={events} locale="ar" />
+```
+
+### Override auto week start
+
+```jsx
+{/* German locale, but force Monday (already the default for 'de') */}
+<Calendar events={events} locale="de" startOfWeek="monday" />
+```
+
+### Compose with timezone
+
+```jsx
+<Calendar
+  events={events}
+  locale="zh-cn"
+  timezone="Asia/Shanghai"
+/>
+```
+
+### Supported locales
+
+| BCP-47 tag | Language |
+| :--- | :--- |
+| `ar` | Arabic |
+| `bg` | Bulgarian |
+| `cs` | Czech |
+| `da` | Danish |
+| `de` | German |
+| `el` | Greek |
+| `es` | Spanish |
+| `fi` | Finnish |
+| `fr` | French |
+| `he` | Hebrew |
+| `hi` | Hindi |
+| `hr` | Croatian |
+| `hu` | Hungarian |
+| `id` | Indonesian |
+| `it` | Italian |
+| `ja` | Japanese |
+| `ko` | Korean |
+| `lt` | Lithuanian |
+| `lv` | Latvian |
+| `ms` | Malay |
+| `nb` | Norwegian Bokmål |
+| `nl` | Dutch |
+| `pl` | Polish |
+| `pt` | Portuguese |
+| `pt-br` | Portuguese (Brazil) |
+| `ro` | Romanian |
+| `ru` | Russian |
+| `sk` | Slovak |
+| `sl` | Slovenian |
+| `sr` | Serbian |
+| `sv` | Swedish |
+| `th` | Thai |
+| `tr` | Turkish |
+| `uk` | Ukrainian |
+| `vi` | Vietnamese |
+| `zh-cn` | Chinese (Simplified) |
+| `zh-tw` | Chinese (Traditional) |
+
+> **Note:** Locale bundles load asynchronously. The calendar briefly renders in English, then re-renders once the bundle is ready. If you pass an unsupported code, the calendar falls back to English and logs a warning.
+
+---
 
 ### Customization examples
 

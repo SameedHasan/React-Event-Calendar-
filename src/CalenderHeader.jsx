@@ -16,18 +16,22 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { tzLabel } from './utils/tz';
 import useCalendarStore from './store/useCalendarStore';
 import { exportEventsToICS } from './utils/icsExport';
+import useLocaleAware from './hooks/useLocaleAware';
+import { getViewLabel, formatWeekLabel } from './utils/locale';
 
 dayjs.extend(isoWeek);
 
 const { Text } = Typography;
 
-const VIEWS = [
-    { value: 'month',  label: 'Month',  icon: <CalendarOutlined /> },
-    { value: 'week',   label: 'Week',   icon: <TableOutlined /> },
-    { value: 'day',    label: 'Day',    icon: <FieldTimeOutlined /> },
-    { value: 'list',   label: 'List',   icon: <UnorderedListOutlined /> },
-    { value: 'year',   label: 'Year',   icon: <AppstoreOutlined /> },
-];
+const VIEW_ICONS = {
+    month: <CalendarOutlined />,
+    week: <TableOutlined />,
+    day: <FieldTimeOutlined />,
+    list: <UnorderedListOutlined />,
+    year: <AppstoreOutlined />,
+};
+
+const VIEW_VALUES = ['month', 'week', 'day', 'list', 'year'];
 
 function CalendarHeader() {
     const {
@@ -50,6 +54,17 @@ function CalendarHeader() {
         showAddEventButton,
         timezone,
     } = useCalendarStore();
+
+    const { localeReady, locale } = useLocaleAware();
+
+    const views = useMemo(
+        () => VIEW_VALUES.map((value) => ({
+            value,
+            label: getViewLabel(value, locale),
+            icon: VIEW_ICONS[value],
+        })),
+        [locale, localeReady]
+    );
 
     // Navigation handlers per view
     const handlers = useMemo(() => ({
@@ -78,22 +93,22 @@ function CalendarHeader() {
             case 'list':
                 return weekRange.range || '';
             case 'day': {
-                if (!weekRange.range) return '';
-                const monday = dayjs(weekRange.range.split(' - ')[0], 'MMM D, YYYY');
-                const day = monday.add(currentDayIndex, 'day');
+                if (!weekRange.startDate) return '';
+                const day = dayjs(weekRange.startDate).add(currentDayIndex, 'day');
                 return day.format('dddd, MMMM D YYYY');
             }
             default:
                 return '';
         }
-    }, [view, currentDate, weekRange.range, currentDayIndex]);
+    }, [view, currentDate, weekRange.range, weekRange.startDate, currentDayIndex, localeReady]);
 
     // Sub-label (e.g. "Week 23")
     const subLabel = useMemo(() => {
-        if (view === 'week' || view === 'list') return `Week ${weekRange.count}`;
-        if (view === 'day') return `Week ${weekRange.count}`;
+        if (view === 'week' || view === 'list' || view === 'day') {
+            return formatWeekLabel(weekRange.count, locale);
+        }
         return null;
-    }, [view, weekRange.count]);
+    }, [view, weekRange.count, locale, localeReady]);
 
     const nav = handlers[view];
 
@@ -311,7 +326,7 @@ function CalendarHeader() {
                     gap: '2px',
                 }}
                 >
-                    {VIEWS.map(({ value, label, icon }) => {
+                    {views.map(({ value, label, icon }) => {
                         const isActive = view === value;
                         const shortcut = value === 'month' ? 'M' : value === 'week' ? 'W' : value === 'day' ? 'D' : value === 'list' ? 'L' : 'Y';
                         return (

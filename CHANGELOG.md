@@ -13,6 +13,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.3.0] - 2026-06-10
+
+### Added
+
+- **`locale` prop** — pass any BCP-47 tag (e.g. `'de'`, `'fr'`, `'zh-cn'`, `'ja'`, `'ar'`) to translate the entire calendar UI:
+  - Month names and weekday abbreviations in all five views automatically switch to the target language via dayjs locale bundles (loaded asynchronously on first use).
+  - Ant Design components (modals, date picker, confirm dialogs) render in the matching antd locale.
+  - `startOfWeek` automatically defaults to the locale's natural week-start day (Mon vs Sun) when `locale` is set and `startOfWeek` is not explicitly provided.
+- New **Locale** Storybook story with an interactive locale picker covering 16 languages.
+
+### Notes
+
+- Locale bundles load asynchronously; the calendar renders in English during the brief initial load, then re-renders once the bundle is ready.
+- Pass `startOfWeek` explicitly to override the locale-derived default.
+- The `locale` and `timezone` props compose independently.
+
+---
+
+## [2.3.1] - 2026-06-10
+
+### Fixed
+
+- Locale labels (weekday headers, month titles, week/day headers) now re-render after the async dayjs locale bundle loads — components subscribe to `localeReady` instead of showing English forever.
+- Day view title no longer parses the localized `weekRange.range` string with English-only format tokens (broke under `locale="zh-cn"` etc.); week boundaries are stored as ISO `startDate` / `endDate`.
+- Week range display strings refresh when the locale changes (`rebuildWeekRange`).
+- Toolbar view tabs and "Week N" sub-label use localized strings for common locales (de, fr, zh-cn, ja, …).
+
+---
+
 ## [2.2.0] - 2026-06-10
 
 ### Added

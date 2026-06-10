@@ -12,6 +12,7 @@ import DraggableTimedEvent from './components/DraggableTimedEvent';
 import DraggableSpanEvent from './components/DraggableSpanEvent';
 import DroppableDayColumn from './components/DroppableDayColumn';
 import CalendarDndProvider from './components/CalendarDndProvider';
+import useLocaleAware from './hooks/useLocaleAware';
 
 dayjs.extend(isoWeek);
 
@@ -116,6 +117,7 @@ const DaysOfWeek = () => {
         eventColors,
         timezone,
     } = useCalendarStore();
+    const { localeReady } = useLocaleAware();
     const today = nowInTz(timezone);
     const containerRef = useRef(null);
 
@@ -132,8 +134,13 @@ const DaysOfWeek = () => {
         const weekNumber = dayjs(currentWeek).isoWeek();
         const start = weekDays[0].format('MMM D, YYYY');
         const end = weekDays[weekDays.length - 1].format('MMM D, YYYY');
-        setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
-    }, [currentWeek, setWeekRange, weekDays]);
+        setWeekRange({
+            count: weekNumber,
+            range: `${start} - ${end}`,
+            startDate: weekDays[0].startOf('day').toISOString(),
+            endDate: weekDays[weekDays.length - 1].endOf('day').toISOString(),
+        });
+    }, [currentWeek, setWeekRange, weekDays, localeReady]);
 
     // Scroll to 7 AM on mount
     useEffect(() => {

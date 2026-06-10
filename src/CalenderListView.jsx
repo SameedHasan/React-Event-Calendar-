@@ -8,6 +8,8 @@ import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, formatTime, getDayIndex, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
+import useLocaleAware from './hooks/useLocaleAware';
+import { formatWeekLabel } from './utils/locale';
 
 dayjs.extend(isoWeek);
 
@@ -222,14 +224,21 @@ const DaySection = ({ date, events, isToday, timeFormat, timezone }) => {
 
 const CalenderListView = () => {
     const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors, renderEmpty, timezone } = useCalendarStore();
+    const { localeReady, locale } = useLocaleAware();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
         const startDay = dayjs(currentWeek).subtract(getDayIndex(dayjs(currentWeek).toDate(), startOfWeek), 'day');
+        const endDay = startDay.add(6, 'day');
         const start = startDay.format('MMM D, YYYY');
-        const end = startDay.add(6, 'day').format('MMM D, YYYY');
-        setWeekRange({ count: weekNumber, range: `${start} - ${end}` });
-    }, [setWeekRange, currentWeek, startOfWeek]);
+        const end = endDay.format('MMM D, YYYY');
+        setWeekRange({
+            count: weekNumber,
+            range: `${start} - ${end}`,
+            startDate: startDay.startOf('day').toISOString(),
+            endDate: endDay.endOf('day').toISOString(),
+        });
+    }, [setWeekRange, currentWeek, startOfWeek, localeReady]);
 
     // Build the days of the current week starting on startOfWeek
     const weekDays = useMemo(() => {
@@ -281,7 +290,7 @@ const CalenderListView = () => {
                     <CalendarOutlined style={{ fontSize: '18px', color: 'var(--primary-color)' }} />
                     <div>
                         <Text style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'block' }}>
-                            Week {weekRange.count}
+                            {formatWeekLabel(weekRange.count, locale)}
                         </Text>
                         <Text style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
                             {weekRange.range}

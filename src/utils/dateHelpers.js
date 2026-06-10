@@ -1,8 +1,10 @@
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import localeData from 'dayjs/plugin/localeData';
 import { toDayjs, nowInTz } from './tz';
 
 dayjs.extend(isoWeek);
+dayjs.extend(localeData);
 
 /**
  * Returns whether an event overlaps with a given day.
@@ -110,7 +112,10 @@ export const calculateWeekRange = (date, startOfWeek = 'monday') => {
 
     return {
         start: start.format('MMM D, YYYY'),
-        end: end.format('MMM D, YYYY')
+        end: end.format('MMM D, YYYY'),
+        /** ISO strings for logic — never parse the localized `range` display string. */
+        startDate: start.startOf('day').toISOString(),
+        endDate: end.endOf('day').toISOString(),
     };
 };
 
@@ -130,3 +135,45 @@ export const getShiftedSingleDOW = (startOfWeek = 'monday') => {
  * Re-exported for convenience — timezone-aware "now".
  */
 export { nowInTz };
+
+/**
+ * Returns the day-of-week abbreviations (e.g. 'Mon', 'Tue') shifted so that
+ * the calendar's chosen `startOfWeek` day comes first.
+ * Uses dayjs localeData to produce locale-aware abbreviations.
+ *
+ * @param {string} startOfWeek  e.g. 'monday', 'sunday'
+ * @returns {string[]}
+ */
+export const getLocalizedShortDOW = (startOfWeek = 'monday') => {
+    const s = DAY_INDEX_MAP[String(startOfWeek).toLowerCase()] ?? 1;
+    try {
+        // dayjs.weekdaysShort() returns ['Sun', 'Mon', ...] (Sun-first) in current locale
+        const base = dayjs.weekdaysShort();
+        if (Array.isArray(base) && base.length === 7) {
+            return [...base.slice(s), ...base.slice(0, s)];
+        }
+    } catch {/* ignore */}
+    // Fallback to hardcoded English
+    return getShiftedShortDOW(startOfWeek);
+};
+
+/**
+ * Returns single-letter day abbreviations shifted so that the calendar's
+ * chosen `startOfWeek` day comes first.
+ * Uses dayjs localeData to produce locale-aware abbreviations.
+ *
+ * @param {string} startOfWeek  e.g. 'monday', 'sunday'
+ * @returns {string[]}
+ */
+export const getLocalizedSingleDOW = (startOfWeek = 'monday') => {
+    const s = DAY_INDEX_MAP[String(startOfWeek).toLowerCase()] ?? 1;
+    try {
+        // dayjs.weekdaysMin() returns single-letter or very short abbreviations per locale
+        const base = dayjs.weekdaysMin();
+        if (Array.isArray(base) && base.length === 7) {
+            return [...base.slice(s), ...base.slice(0, s)];
+        }
+    } catch {/* ignore */}
+    // Fallback to hardcoded English
+    return getShiftedSingleDOW(startOfWeek);
+};

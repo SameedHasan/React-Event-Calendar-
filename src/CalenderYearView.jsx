@@ -3,12 +3,52 @@ import { Typography, Tooltip } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import localeData from 'dayjs/plugin/localeData';
 import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW, nowInTz } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW, getLocalizedSingleDOW, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
 
 dayjs.extend(isoWeek);
+dayjs.extend(localeData);
+
+/**
+ * Returns the 12 localized full month names for the currently active dayjs locale.
+ * Falls back to the English names if localeData is unavailable.
+ *
+ * IMPORTANT: depends on `localeReady` (the resolved code written to the store
+ * AFTER the async bundle loads), NOT on `locale` (the raw prop, which is set
+ * before the bundle is ready). This ensures dayjs.months() returns the right names.
+ */
+function useLocaleMonths() {
+    const localeReady = useCalendarStore((s) => s.localeReady);
+    // No useMemo — dayjs.months() is O(1) and must be fresh after each locale load
+    try {
+        const months = dayjs.months();
+        if (Array.isArray(months) && months.length === 12) return months;
+    } catch {/* ignore */}
+    return [
+        'January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December',
+    ];
+}
+
+/**
+ * Returns single-letter / short weekday labels for the current dayjs locale.
+ * Also depends on localeReady for the same reason as useLocaleMonths.
+ */
+function useLocaleMonthsShort() {
+    useCalendarStore((s) => s.localeReady); // subscribe so we re-render when locale changes
+    try {
+        const months = dayjs.monthsShort();
+        if (Array.isArray(months) && months.length === 12) return months;
+    } catch {/* ignore */}
+    return [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+}
 
 const { Text, Title } = Typography;
 
@@ -133,7 +173,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
 
             {/* Day-of-week labels */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', marginBottom: '4px' }}>
-                {getShiftedSingleDOW(startOfWeek).map((d, i) => (
+                {getLocalizedSingleDOW(startOfWeek).map((d, i) => (
                     <div key={i} style={{
                         textAlign: 'center',
                         fontSize: '9px',
@@ -289,14 +329,9 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
     );
 };
 
-const MONTHS = [
-    'January', 'February', 'March', 'April',
-    'May', 'June', 'July', 'August',
-    'September', 'October', 'November', 'December',
-];
-
 const CalenderYearView = () => {
     const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors, renderEmpty, timezone } = useCalendarStore();
+    const months = useLocaleMonths();
     const currentYear = dayjs(currentDate).year();
     const today = nowInTz(timezone);
     const isCurrentYear = today.year() === currentYear;
@@ -336,7 +371,7 @@ const CalenderYearView = () => {
     }, [eventsForYear, eventColors]);
 
     const busyMonths = useMemo(() => {
-        return MONTHS
+        return months
             .map((name, i) => ({
                 name,
                 count: eventsForYear.filter(e => dayjs(e.start).month() === i).length,
@@ -344,7 +379,7 @@ const CalenderYearView = () => {
             .filter(m => m.count > 0)
             .sort((a, b) => b.count - a.count)
             .slice(0, 3);
-    }, [eventsForYear]);
+    }, [eventsForYear, months]);
 
     return (
         <div style={{ padding: '4px 0 32px' }}>
@@ -448,7 +483,7 @@ const CalenderYearView = () => {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
                 gap: '16px',
             }}>
-                {MONTHS.map((name, i) => (
+                {months.map((name, i) => (
                     <MiniMonthCalendar
                         key={i}
                         year={currentYear}

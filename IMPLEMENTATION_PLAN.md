@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `1.5.0`  
+**Current version:** `1.6.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -263,11 +263,12 @@ Update `types/index.d.ts` and README event schema section.
 
 ---
 
-## Phase 4 — Accessibility
+## Phase 4 — Accessibility ✅ COMPLETE
 
 **Duration:** 2–3 days  
 **Target release:** `1.6.0`  
-**Breaking changes:** None
+**Breaking changes:** None  
+**Shipped in:** `v1.6.0` (June 10, 2026)
 
 | Task | Details |
 |------|---------|

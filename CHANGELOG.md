@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [1.6.0] - 2026-06-10
+
+### Added
+
+- Toolbar ARIA: `role="toolbar"`, labeled nav buttons, `role="tablist"` view switcher
+- Month/week grids: `role="grid"`, `aria-selected` on today, event `aria-label`s
+- Roving keyboard focus on month-view event chips (arrow keys, Home/End)
+- Polite `aria-live` region for view/date announcements
+- `?` keyboard shortcuts help modal
+- README Accessibility section
+
+### Changed
+
+- Default event type palette uses darker accent hues for improved contrast on light backgrounds
+
 ## [1.5.0] - 2026-06-10
 
 ### Added
@@ -85,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial published feature set: 5 views, keyboard shortcuts, ICS export, theming
 
+[1.6.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.0...v1.3.1

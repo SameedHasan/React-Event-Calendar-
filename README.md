@@ -57,6 +57,24 @@ The calendar includes built-in keyboard shortcuts for efficient navigation. Shor
 | `Y` | Switch to Year view |
 | `←` | Navigate to previous period (month/week/day depending on current view) |
 | `→` | Navigate to next period |
+| `?` | Open keyboard shortcuts help |
+
+Shortcuts are disabled while focus is inside inputs. Press `?` anywhere on the calendar to open the help dialog.
+
+---
+
+## ♿ Accessibility
+
+The calendar targets **WCAG 2.1 AA** on the toolbar and month view (more views in follow-up releases).
+
+| Feature | Behavior |
+| :--- | :--- |
+| Landmarks | Root `role="application"`; toolbar `role="toolbar"` |
+| View switcher | `role="tablist"` with `aria-selected` on the active tab |
+| Month / week grids | `role="grid"` with `gridcell` days; today uses `aria-selected="true"` |
+| Event chips (month) | Roving `tabindex` with arrow-key focus; `aria-label` includes title, type, and time |
+| Screen reader updates | Polite `aria-live` region announces view and date changes |
+| Keyboard hints | `aria-keyshortcuts` on toolbar controls; press `?` for the full list |
 
 ---
 

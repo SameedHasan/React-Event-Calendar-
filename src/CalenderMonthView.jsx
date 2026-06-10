@@ -6,6 +6,12 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
 import EventRenderer from './components/EventRenderer';
+import RovingTabIndexGroup from './components/RovingTabIndexGroup';
+
+const buildEventAriaLabel = (event, timeFormat) => {
+    const timeLabel = formatTime(event.start, timeFormat);
+    return `${event.title}, ${event.type || 'Event'}, ${timeLabel}`;
+};
 
 dayjs.extend(isoWeek);
 
@@ -96,9 +102,15 @@ const CalenderMonthView = () => {
     }, [startOfWeek, hideWeekends]);
 
     return (
-        <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <div
+            role="grid"
+            aria-label="Month calendar"
+            style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+        >
             {/* Day-of-week header */}
-            <div style={{
+            <div
+                role="row"
+                style={{
                 display: 'grid',
                 gridTemplateColumns: showWeekNumbers 
                     ? `40px repeat(${dow.length}, 1fr)` 
@@ -107,16 +119,20 @@ const CalenderMonthView = () => {
                 borderBottom: '1px solid var(--border-color)',
             }}>
                 {showWeekNumbers && (
-                    <div style={{
+                    <div
+                        role="columnheader"
+                        aria-label="Week number"
+                        style={{
                         padding: '12px 0', textAlign: 'center',
                         borderRight: '1px solid var(--border-color)',
                         background: 'var(--bg-color)',
-                    }}>
+                    }}
+                    >
                         <Text style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Wk</Text>
                     </div>
                 )}
                 {dow.map((d, i) => (
-                    <div key={d} style={{
+                    <div key={d} role="columnheader" aria-label={d} style={{
                         padding: '12px 0', textAlign: 'center',
                         borderRight: i < dow.length - 1 ? '1px solid var(--border-color)' : 'none',
                     }}>
@@ -197,11 +213,13 @@ const CalenderMonthView = () => {
                         };
                     }).filter(Boolean);
 
+                    const visibleWeekEvents = weekEventsWithLayout.filter((item) => item.track < 2);
+
                     return (
-                        <div key={weekIdx} style={{ display: 'flex', position: 'relative', borderBottom: '1px solid var(--border-color)' }}>
+                        <div key={weekIdx} role="row" style={{ display: 'flex', position: 'relative', borderBottom: '1px solid var(--border-color)' }}>
                             {/* Week number column if enabled */}
                             {showWeekNumbers && (
-                                <div style={{
+                                <div role="rowheader" style={{
                                     width: '40px',
                                     minHeight: '115px',
                                     display: 'flex',
@@ -233,6 +251,9 @@ const CalenderMonthView = () => {
                                 return (
                                     <div
                                         key={day.toString()}
+                                        role="gridcell"
+                                        aria-selected={isToday}
+                                        aria-label={day.format('dddd, MMMM D, YYYY')}
                                         onClick={() => {
                                             if (onDateClick) {
                                                 const res = onDateClick(day.toDate());
@@ -317,9 +338,8 @@ const CalenderMonthView = () => {
 
                             {/* Spanning Event Bars overlay */}
                             <div style={{ position: 'absolute', top: 0, left: showWeekNumbers ? '40px' : 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
-                                {weekEventsWithLayout.map(({ event, track, startCol, endCol }) => {
-                                    if (track >= 2) return null;
-
+                                <RovingTabIndexGroup itemCount={visibleWeekEvents.length}>
+                                    {({ getTabIndex, registerRef, onKeyDown, onFocus }) => visibleWeekEvents.map(({ event, track, startCol, endCol }, eventIndex) => {
                                     const style = getEventStyle(event, eventColors);
                                     const totalCols = filteredWeek.length;
                                     const leftPct = (startCol / totalCols) * 100;
@@ -356,7 +376,20 @@ const CalenderMonthView = () => {
                                                 {({ onClick }) => (
                                                     isMultiDay ? (
                                                         <div
+                                                            role="button"
+                                                            tabIndex={getTabIndex(eventIndex)}
+                                                            ref={(node) => registerRef(eventIndex, node)}
+                                                            aria-label={buildEventAriaLabel(event, timeFormat)}
                                                             onClick={onClick}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    onClick(e);
+                                                                } else {
+                                                                    onKeyDown(e, eventIndex);
+                                                                }
+                                                            }}
+                                                            onFocus={() => onFocus(eventIndex)}
                                                             style={{
                                                                 width: '100%',
                                                                 height: '100%',
@@ -376,7 +409,7 @@ const CalenderMonthView = () => {
                                                             <Text style={{
                                                                 fontSize: '11px',
                                                                 fontWeight: 700,
-                                                                color: '#1e293b',
+                                                                color: 'var(--text-primary)',
                                                                 overflow: 'hidden',
                                                                 textOverflow: 'ellipsis',
                                                                 whiteSpace: 'nowrap',
@@ -390,7 +423,20 @@ const CalenderMonthView = () => {
                                                         </div>
                                                     ) : (
                                                         <div
+                                                            role="button"
+                                                            tabIndex={getTabIndex(eventIndex)}
+                                                            ref={(node) => registerRef(eventIndex, node)}
+                                                            aria-label={buildEventAriaLabel(event, timeFormat)}
                                                             onClick={onClick}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    e.preventDefault();
+                                                                    onClick(e);
+                                                                } else {
+                                                                    onKeyDown(e, eventIndex);
+                                                                }
+                                                            }}
+                                                            onFocus={() => onFocus(eventIndex)}
                                                             style={{
                                                                 width: '100%',
                                                                 height: '100%',
@@ -403,7 +449,7 @@ const CalenderMonthView = () => {
                                                                 borderRadius: '4px',
                                                                 transition: 'background 0.15s',
                                                             }}
-                                                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+                                                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-color)'; }}
                                                             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                                                             title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
                                                         >
@@ -419,7 +465,7 @@ const CalenderMonthView = () => {
                                                             <Text style={{
                                                                 fontSize: '11px',
                                                                 fontWeight: 600,
-                                                                color: '#1e293b',
+                                                                color: 'var(--text-primary)',
                                                                 overflow: 'hidden',
                                                                 textOverflow: 'ellipsis',
                                                                 whiteSpace: 'nowrap',
@@ -434,6 +480,7 @@ const CalenderMonthView = () => {
                                         </div>
                                     );
                                 })}
+                                </RovingTabIndexGroup>
                             </div>
                         </div>
                     );

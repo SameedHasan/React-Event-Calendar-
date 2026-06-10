@@ -212,21 +212,33 @@ const DaysOfWeek = () => {
     const TIME_GUTTER = 56; // width of time column in px
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <div
+            role="grid"
+            aria-label="Week calendar"
+            style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 180px)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+        >
             {/* Sticky header row */}
-            <div style={{
+            <div
+                role="row"
+                style={{
                 display: 'flex', flexShrink: 0,
                 background: 'linear-gradient(135deg, var(--bg-color) 0%, var(--tag-bg) 100%)',
                 borderBottom: '2px solid var(--border-color)',
-            }}>
+            }}
+            >
                 {/* Gutter */}
-                <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, borderRight: '1px solid var(--border-color)' }} />
+                <div role="columnheader" aria-hidden="true" style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, borderRight: '1px solid var(--border-color)' }} />
                 {/* Day columns */}
                 {weekDays.map((day, i) => {
                     const isToday = day.isSame(today, 'day');
                     const isWeekend = day.day() === 0 || day.day() === 6;
                     return (
-                        <div key={i} style={{
+                        <div
+                            key={i}
+                            role="columnheader"
+                            aria-selected={isToday}
+                            aria-label={day.format('dddd, MMMM D, YYYY')}
+                            style={{
                             flex: 1, padding: '10px 4px', textAlign: 'center',
                             borderRight: i < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none',
                             background: isToday ? 'var(--color-active-menu-bg)' : 'transparent',
@@ -340,9 +352,9 @@ const DaysOfWeek = () => {
             )}
 
             {/* Scrollable grid body */}
-            <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: 'var(--white-color)' }}>
+            <div ref={containerRef} role="rowgroup" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: 'var(--white-color)' }}>
                 <CalendarViewEmpty view="week" isEmpty={!weekHasEvents} />
-                <div style={{ display: 'flex', position: 'relative', height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}>
+                <div role="row" style={{ display: 'flex', position: 'relative', height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}>
                     {/* Time gutter */}
                     <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, position: 'relative', borderRight: '1px solid var(--border-color)' }}>
                         {Array.from({ length: TOTAL_HOURS }, (_, h) => (
@@ -365,6 +377,9 @@ const DaysOfWeek = () => {
                         return (
                             <div
                                 key={colIdx}
+                                role="gridcell"
+                                aria-selected={isToday}
+                                aria-label={day.format('dddd, MMMM D, YYYY')}
                                 onClick={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const y = e.clientY - rect.top;

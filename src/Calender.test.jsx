@@ -23,7 +23,7 @@ describe('Calendar', () => {
     render(<Calendar events={sampleEvents} currentDate={new Date(2026, 5, 9)} />);
 
     expect(document.querySelector('.calendar-root')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Month/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /month view/i })).toBeInTheDocument();
     expect(screen.getByText('Sprint Planning')).toBeInTheDocument();
   });
 
@@ -48,7 +48,7 @@ describe('Calendar', () => {
       />
     );
 
-    expect(screen.getByText(/Tuesday, June 9 2026/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Tuesday, June 9 2026/i).length).toBeGreaterThan(0);
   });
 
   it('renders list view content when defaultView is list', () => {
@@ -79,14 +79,14 @@ describe('Calendar', () => {
   it('hides add-event controls when readOnly is true', () => {
     render(<Calendar events={sampleEvents} readOnly currentDate={new Date(2026, 5, 9)} />);
 
-    expect(screen.queryByRole('button', { name: /Add Event/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /add new event/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('shows add-event button when not readOnly', () => {
     render(<Calendar events={sampleEvents} currentDate={new Date(2026, 5, 9)} />);
 
-    expect(screen.getByRole('button', { name: /Add Event/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add new event/i })).toBeInTheDocument();
   });
 
   it('respects controlled view prop', () => {
@@ -116,7 +116,7 @@ describe('Calendar', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: /Week/i }));
+    await user.click(screen.getByRole('tab', { name: /week view/i }));
 
     expect(onViewChange).toHaveBeenCalledWith('week');
     expect(screen.getByText(/Week \d+/)).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('Calendar', () => {
     expect(within(calendarA).getByText('Sprint Planning')).toBeInTheDocument();
     expect(within(calendarB).getByText('January')).toBeInTheDocument();
 
-    await user.click(within(calendarA).getByRole('button', { name: /Week/i }));
+    await user.click(within(calendarA).getByRole('tab', { name: /week view/i }));
 
     expect(within(calendarA).getByText(/Week \d+/)).toBeInTheDocument();
     expect(within(calendarB).getByText('January')).toBeInTheDocument();

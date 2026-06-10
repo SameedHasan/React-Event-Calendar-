@@ -96,19 +96,26 @@ function CalendarHeader() {
     const nav = handlers[view];
 
     return (
-        <div style={{
+        <div
+            role="toolbar"
+            aria-label="Calendar navigation"
+            style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '16px',
             padding: '10px 0 18px',
             flexWrap: 'wrap',
-        }}>
+        }}
+        >
             {/* ── LEFT: title + today ── */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
                 {/* Today button */}
                 <button
+                    type="button"
                     onClick={goToToday}
+                    aria-label="Go to today"
+                    aria-keyshortcuts="T"
                     style={{
                         padding: '6px 16px',
                         borderRadius: '8px',
@@ -138,12 +145,15 @@ function CalendarHeader() {
                 {/* Prev / Next */}
                 <div style={{ display: 'flex', gap: '4px' }}>
                     {[
-                        { handler: nav?.prev, icon: <LeftOutlined style={{ fontSize: '11px' }} /> },
-                        { handler: nav?.next, icon: <RightOutlined style={{ fontSize: '11px' }} /> },
-                    ].map(({ handler, icon }, i) => (
+                        { handler: nav?.prev, icon: <LeftOutlined style={{ fontSize: '11px' }} />, label: 'Previous period', shortcut: 'ArrowLeft' },
+                        { handler: nav?.next, icon: <RightOutlined style={{ fontSize: '11px' }} />, label: 'Next period', shortcut: 'ArrowRight' },
+                    ].map(({ handler, icon, label, shortcut }, i) => (
                         <button
                             key={i}
+                            type="button"
                             onClick={handler}
+                            aria-label={label}
+                            aria-keyshortcuts={shortcut}
                             style={{
                                 width: '32px', height: '32px',
                                 borderRadius: '8px',
@@ -172,8 +182,10 @@ function CalendarHeader() {
                 </div>
 
                 {/* Title */}
-                <div style={{ minWidth: 0 }}>
-                    <div style={{
+                <div style={{ minWidth: 0 }} aria-live="off">
+                    <div
+                        aria-current="date"
+                        style={{
                         fontSize: view === 'week' ? '18px' : '22px',
                         fontWeight: 800,
                         color: '#0f172a',
@@ -203,8 +215,10 @@ function CalendarHeader() {
                 {/* Add Event button */}
                 {showAddEventButton && (
                     <button
+                        type="button"
                         onClick={() => openCreateModal(null)}
                         title="Add new event"
+                        aria-label="Add new event"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -237,8 +251,10 @@ function CalendarHeader() {
                 {/* Export button */}
                 {showExportButton && (
                     <button
+                        type="button"
                         onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}
                         title="Export all events to iCal (.ics)"
+                        aria-label="Export all events to iCal"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -271,18 +287,28 @@ function CalendarHeader() {
                 )}
 
                 {/* View Switcher */}
-                <div style={{
+                <div
+                    role="tablist"
+                    aria-label="Calendar views"
+                    style={{
                     display: 'flex',
                     background: 'var(--bg-color)',
                     borderRadius: '10px',
                     padding: '3px',
                     gap: '2px',
-                }}>
+                }}
+                >
                     {VIEWS.map(({ value, label, icon }) => {
                         const isActive = view === value;
+                        const shortcut = value === 'month' ? 'M' : value === 'week' ? 'W' : value === 'day' ? 'D' : value === 'list' ? 'L' : 'Y';
                         return (
                             <button
                                 key={value}
+                                type="button"
+                                role="tab"
+                                aria-selected={isActive}
+                                aria-label={`${label} view`}
+                                aria-keyshortcuts={shortcut}
                                 onClick={() => setView(value)}
                                 style={{
                                     display: 'flex',

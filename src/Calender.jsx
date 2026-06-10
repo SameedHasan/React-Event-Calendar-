@@ -12,6 +12,9 @@ import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import EventModal from './EventModal';
 import CalendarToolbar from './components/CalendarToolbar';
 import CalendarLoadingOverlay from './components/CalendarLoadingOverlay';
+import CalendarLiveRegion from './components/CalendarLiveRegion';
+import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp';
+import { CALENDAR_KEYSHORTCUTS_ATTR } from './utils/a11y';
 
 const CalendarInner = ({
     events = [],
@@ -162,6 +165,9 @@ const CalendarInner = ({
         <ConfigProvider theme={{ token: { colorPrimary: primaryColor } }}>
             <div
                 className={['calendar-root', `theme-${theme}`, className].filter(Boolean).join(' ')}
+                role="application"
+                aria-label="Event calendar"
+                aria-keyshortcuts={CALENDAR_KEYSHORTCUTS_ATTR}
                 style={{
                     height: '100%',
                     minHeight: 0,
@@ -181,6 +187,8 @@ const CalendarInner = ({
                     {activeView === 'year' && <CalenderYearView />}
                 </CalendarLoadingOverlay>
                 {!readOnly && <EventModal />}
+                <CalendarLiveRegion />
+                <KeyboardShortcutsHelp />
             </div>
         </ConfigProvider>
     );

@@ -1,7 +1,7 @@
 {
   "name": "react-event-calendar-suite",
   "private": false,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "A premium, highly performant, and fully customizable React Event Calendar component suite.",
   "keywords": [
     "react",

@@ -7,6 +7,9 @@ import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
 import EventRenderer from './components/EventRenderer';
 import RovingTabIndexGroup from './components/RovingTabIndexGroup';
+import CalendarDndProvider from './components/CalendarDndProvider';
+import DroppableDayColumn from './components/DroppableDayColumn';
+import DraggableSpanEvent from './components/DraggableSpanEvent';
 
 const buildEventAriaLabel = (event, timeFormat) => {
     const timeLabel = formatTime(event.start, timeFormat);
@@ -102,6 +105,7 @@ const CalenderMonthView = () => {
     }, [startOfWeek, hideWeekends]);
 
     return (
+        <CalendarDndProvider>
         <div
             role="grid"
             aria-label="Month calendar"
@@ -249,8 +253,9 @@ const CalenderMonthView = () => {
                                 const hiddenCount = dayEvents.length - visibleEvents.length;
 
                                 return (
-                                    <div
+                                    <DroppableDayColumn
                                         key={day.toString()}
+                                        day={day}
                                         role="gridcell"
                                         aria-selected={isToday}
                                         aria-label={day.format('dddd, MMMM D, YYYY')}
@@ -332,7 +337,7 @@ const CalenderMonthView = () => {
                                                 </Tooltip>
                                             </div>
                                         )}
-                                    </div>
+                                    </DroppableDayColumn>
                                 );
                             })}
 
@@ -348,19 +353,24 @@ const CalenderMonthView = () => {
                                     const isMultiDay = dayjs(event.end).diff(dayjs(event.start), 'day') > 0 || isAllDayOrMultiDay(event);
                                     const contextDay = filteredWeek[startCol] || filteredWeek[0];
 
+                                    const shellStyle = {
+                                        position: 'absolute',
+                                        top: `${track * 24 + 38}px`,
+                                        left: `calc(${leftPct}% + 4px)`,
+                                        width: `calc(${widthPct}% - 8px)`,
+                                        height: '20px',
+                                        boxSizing: 'border-box',
+                                        zIndex: 10,
+                                        pointerEvents: 'auto',
+                                    };
+
                                     return (
-                                        <div
-                                            key={event.id}
-                                            style={{
-                                                position: 'absolute',
-                                                top: `${track * 24 + 38}px`,
-                                                left: `calc(${leftPct}% + 4px)`,
-                                                width: `calc(${widthPct}% - 8px)`,
-                                                height: '20px',
-                                                boxSizing: 'border-box',
-                                                zIndex: 10,
-                                                pointerEvents: 'auto',
-                                            }}
+                                        <DraggableSpanEvent
+                                            key={`${event.id}-${weekIdx}-${startCol}`}
+                                            event={event}
+                                            anchorDay={contextDay}
+                                            instanceKey={`m${weekIdx}-${startCol}`}
+                                            style={shellStyle}
                                         >
                                             <EventRenderer
                                                 event={event}
@@ -477,7 +487,7 @@ const CalenderMonthView = () => {
                                                     )
                                                 )}
                                             </EventRenderer>
-                                        </div>
+                                        </DraggableSpanEvent>
                                     );
                                 })}
                                 </RovingTabIndexGroup>
@@ -487,6 +497,7 @@ const CalenderMonthView = () => {
                 })}
             </div>
         </div>
+        </CalendarDndProvider>
     );
 };
 

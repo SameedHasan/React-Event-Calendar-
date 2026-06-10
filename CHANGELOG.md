@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.0.0] - 2026-06-10
+
+### Added
+
+- Drag-and-drop event reschedule in **week** and **day** views (`@dnd-kit/core`)
+- `onEventDrop({ event, start, end })` — fired after dragging a timed event (15-minute snap)
+- `onEventResize({ event, start, end })` — fired after resizing the bottom edge
+- Week view supports dropping events onto adjacent day columns
+- Month view supports dragging events onto another day cell (whole-day shift)
+- Month & week all-day bars: **both-edge** resize — drag the right edge to change the end day or the left edge to change the start day (extend to earlier or later dates)
+- Storybook **Drag And Drop** story
+
+### Changed
+
+- Timed events show a resize handle when drop/resize handlers (or `onUpdateEvent`) are configured
+- Span resize now live-previews by stretching the bar from the anchored edge (with a highlighted outline) so it reads as "extending" instead of moving
+
+### Notes
+
+- Drag-and-drop is disabled when `readOnly` is `true`
+- If `onEventDrop` / `onEventResize` are omitted, `onUpdateEvent` is used as a fallback
+
 ## [1.7.0] - 2026-06-10
 
 ### Added

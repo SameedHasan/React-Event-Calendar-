@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `1.7.0`  
+**Current version:** `2.0.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -324,7 +324,7 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 **Duration:** 2–4 weeks (pick based on positioning)  
 **Target release:** `2.0.0` – `2.2.0`
 
-### 6.1 Drag-and-drop reschedule
+### 6.1 Drag-and-drop reschedule ✅ COMPLETE
 
 | Scope | Approach |
 |-------|----------|
@@ -333,7 +333,12 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 | Guard | Disabled when `readOnly` is `true` |
 
 **Effort:** ~5–7 days  
-**Release:** `2.0.0`
+**Release:** `2.0.0`  
+**Shipped in:** `v2.0.0` (June 10, 2026)
+
+- `DraggableTimedEvent`, `TimeGridDndProvider`, `DroppableDayColumn` components
+- 15-minute snap; week view column drops; month view day-cell drops; `onUpdateEvent` fallback
+- Storybook **Drag And Drop** story
 
 ### 6.2 Timezone support
 

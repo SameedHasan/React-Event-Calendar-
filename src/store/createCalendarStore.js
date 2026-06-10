@@ -28,6 +28,8 @@ export const createCalendarStore = (initialState = {}) => {
 
         onDateChange: null,
         onViewChange: null,
+        onEventDrop: null,
+        onEventResize: null,
         hideWeekends: false,
         showWeekNumbers: false,
         showToolbar: true,

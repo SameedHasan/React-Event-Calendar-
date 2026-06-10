@@ -8,6 +8,9 @@ import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
 import EventRenderer from './components/EventRenderer';
 import CalendarViewEmpty from './components/CalendarViewEmpty';
+import DraggableTimedEvent from './components/DraggableTimedEvent';
+import DroppableDayColumn from './components/DroppableDayColumn';
+import CalendarDndProvider from './components/CalendarDndProvider';
 
 dayjs.extend(isoWeek);
 
@@ -32,12 +35,19 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
         : `${durationMin}m`;
     const isCompact = height < 52;
 
-    const blockStyle = {
+    const shellStyle = {
         position: 'absolute',
         top: `${top}px`,
         left: '8px',
         right: '8px',
         height: `${height}px`,
+        zIndex: 2,
+        boxSizing: 'border-box',
+    };
+
+    const chromeStyle = {
+        height: '100%',
+        width: '100%',
         background: cfg.bg,
         border: `1px solid ${cfg.border}`,
         borderLeft: `4px solid ${cfg.color}`,
@@ -45,7 +55,6 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
         padding: isCompact ? '4px 8px' : '8px 12px',
         overflow: 'hidden',
         cursor: 'pointer',
-        zIndex: 2,
         boxSizing: 'border-box',
         transition: 'all 0.18s ease',
         display: 'flex',
@@ -55,16 +64,22 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
     };
 
     return (
-        <EventRenderer
+        <DraggableTimedEvent
             event={event}
-            view="day"
-            date={currentDate}
-            wrapperStyle={blockStyle}
+            anchorDay={currentDate}
+            hourHeight={HOUR_HEIGHT}
+            style={shellStyle}
         >
-            {({ onClick }) => (
+            <EventRenderer
+                event={event}
+                view="day"
+                date={currentDate}
+                wrapperStyle={shellStyle}
+            >
+                {({ onClick }) => (
         <div
             onClick={onClick}
-            style={blockStyle}
+            style={chromeStyle}
             onMouseEnter={e => {
                 e.currentTarget.style.boxShadow = `0 4px 16px ${cfg.color}35`;
                 e.currentTarget.style.transform = 'scale(1.005)';
@@ -125,7 +140,8 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
             )}
         </div>
             )}
-        </EventRenderer>
+            </EventRenderer>
+        </DraggableTimedEvent>
     );
 };
 
@@ -313,6 +329,7 @@ const CalenderDayView = () => {
             )}
 
             {/* Scrollable time grid */}
+            <CalendarDndProvider>
             <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: 'var(--white-color)', position: 'relative' }}>
                 <CalendarViewEmpty view="day" isEmpty={!dayHasEvents} />
                 <div style={{ display: 'flex', height: `${TOTAL_HOURS * HOUR_HEIGHT}px`, position: 'relative' }}>
@@ -335,7 +352,8 @@ const CalenderDayView = () => {
                     </div>
 
                     {/* Main grid column */}
-                    <div
+                    <DroppableDayColumn
+                        day={currentDate}
                         onClick={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             const y = e.clientY - rect.top;
@@ -401,9 +419,10 @@ const CalenderDayView = () => {
                             </div>
                         )}
 
-                    </div>
+                    </DroppableDayColumn>
                 </div>
             </div>
+            </CalendarDndProvider>
         </div>
     );
 };

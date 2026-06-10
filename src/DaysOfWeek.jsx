@@ -7,6 +7,10 @@ import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
 import EventRenderer from './components/EventRenderer';
 import CalendarViewEmpty from './components/CalendarViewEmpty';
+import DraggableTimedEvent from './components/DraggableTimedEvent';
+import DraggableSpanEvent from './components/DraggableSpanEvent';
+import DroppableDayColumn from './components/DroppableDayColumn';
+import CalendarDndProvider from './components/CalendarDndProvider';
 
 dayjs.extend(isoWeek);
 
@@ -26,12 +30,19 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
     const top = (startMinutes / 60) * HOUR_HEIGHT;
     const height = Math.max((segment.durationMinutes / 60) * HOUR_HEIGHT, 22);
 
-    const blockStyle = {
+    const shellStyle = {
         position: 'absolute',
         top: `${top}px`,
         left: '3px',
         right: '3px',
         height: `${height}px`,
+        zIndex: 2,
+        boxSizing: 'border-box',
+    };
+
+    const chromeStyle = {
+        height: '100%',
+        width: '100%',
         background: cfg.bg,
         border: `1px solid ${cfg.border}`,
         borderLeft: `3px solid ${cfg.color}`,
@@ -39,48 +50,54 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
         padding: '3px 5px',
         overflow: 'hidden',
         cursor: 'pointer',
-        zIndex: 2,
-        transition: 'all 0.15s ease',
         boxSizing: 'border-box',
+        transition: 'all 0.15s ease',
     };
 
     return (
-        <EventRenderer
+        <DraggableTimedEvent
             event={event}
-            view="week"
-            date={dayStart}
-            wrapperStyle={blockStyle}
+            anchorDay={dayStart}
+            hourHeight={HOUR_HEIGHT}
+            style={shellStyle}
         >
-            {({ onClick }) => (
-        <div
-            style={blockStyle}
-            onClick={onClick}
-        onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = `0 2px 10px ${cfg.color}40`;
-            e.currentTarget.style.zIndex = '10';
-        }}
-        onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = 'none';
-            e.currentTarget.style.zIndex = '2';
-        }}
-        >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1 }}>
-                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
-                <Text style={{
-                    fontSize: '11px', fontWeight: 700, color: cfg.color,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                    {event.title}
-                </Text>
-            </div>
-            {height > 36 && (
-                <Text style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
-                    {formatTime(event.start, timeFormat)}–{formatTime(event.end, timeFormat)}
-                </Text>
-            )}
-        </div>
-            )}
-        </EventRenderer>
+            <EventRenderer
+                event={event}
+                view="week"
+                date={dayStart}
+                wrapperStyle={shellStyle}
+            >
+                {({ onClick }) => (
+                    <div
+                        style={chromeStyle}
+                        onClick={onClick}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.boxShadow = `0 2px 10px ${cfg.color}40`;
+                            e.currentTarget.style.zIndex = '10';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.boxShadow = 'none';
+                            e.currentTarget.style.zIndex = '2';
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1 }}>
+                            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+                            <Text style={{
+                                fontSize: '11px', fontWeight: 700, color: cfg.color,
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            }}>
+                                {event.title}
+                            </Text>
+                        </div>
+                        {height > 36 && (
+                            <Text style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
+                                {formatTime(event.start, timeFormat)}–{formatTime(event.end, timeFormat)}
+                            </Text>
+                        )}
+                    </div>
+                )}
+            </EventRenderer>
+        </DraggableTimedEvent>
     );
 };
 
@@ -212,6 +229,7 @@ const DaysOfWeek = () => {
     const TIME_GUTTER = 56; // width of time column in px
 
     return (
+        <CalendarDndProvider>
         <div
             role="grid"
             aria-label="Week calendar"
@@ -280,26 +298,42 @@ const DaysOfWeek = () => {
                     </div>
 
                     <div style={{ flex: 1, position: 'relative', height: `${allDayTracks.length * 28 + 12}px` }}>
-                        {/* Background Column Dividers */}
-                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', pointerEvents: 'none' }}>
-                            {Array.from({ length: weekDays.length }).map((_, idx) => (
-                                <div key={idx} style={{ flex: 1, borderRight: idx < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none' }} />
+                        {/* Droppable day targets for span move / resize */}
+                        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', zIndex: 1 }}>
+                            {weekDays.map((day, idx) => (
+                                <DroppableDayColumn
+                                    key={day.format('YYYY-MM-DD')}
+                                    day={day}
+                                    style={{
+                                        flex: 1,
+                                        borderRight: idx < weekDays.length - 1 ? '1px solid var(--border-color)' : 'none',
+                                    }}
+                                />
                             ))}
                         </div>
 
                         {/* Spanning Event Bars */}
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 2 }}>
                         {allDayEventsWithLayout.map(({ event, track, startCol, endCol }) => {
                             const style = getEventStyle(event, eventColors);
                             const leftPct = (startCol / weekDays.length) * 100;
                             const widthPct = ((endCol - startCol + 1) / weekDays.length) * 100;
                             const contextDay = weekDays[startCol];
 
-                            const barStyle = {
+                            const shellStyle = {
                                 position: 'absolute',
                                 top: `${track * 28 + 6}px`,
                                 left: `calc(${leftPct}% + 4px)`,
                                 width: `calc(${widthPct}% - 8px)`,
                                 height: '22px',
+                                boxSizing: 'border-box',
+                                pointerEvents: 'auto',
+                                zIndex: 10,
+                            };
+
+                            const chromeStyle = {
+                                width: '100%',
+                                height: '100%',
                                 background: style.bg,
                                 border: `1px solid ${style.border}`,
                                 borderLeft: `4px solid ${style.color}`,
@@ -310,41 +344,48 @@ const DaysOfWeek = () => {
                                 justifyContent: 'space-between',
                                 boxSizing: 'border-box',
                                 cursor: 'pointer',
-                                zIndex: 10,
                             };
 
                             return (
-                                <EventRenderer
-                                    key={event.id}
+                                <DraggableSpanEvent
+                                    key={`${event.id}-allday-${startCol}`}
                                     event={event}
-                                    view="week"
-                                    date={contextDay.toDate()}
-                                    wrapperStyle={barStyle}
+                                    anchorDay={contextDay}
+                                    instanceKey={`w-allday-${startCol}`}
+                                    style={shellStyle}
                                 >
-                                    {({ onClick }) => (
-                                        <div
-                                            onClick={onClick}
-                                            style={barStyle}
-                                            title={`${event.title} - ${event.description || ''}`}
-                                        >
-                                            <Text style={{
-                                                fontSize: '11px',
-                                                fontWeight: 700,
-                                                color: 'var(--text-primary)',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                            }}>
-                                                {event.title}
-                                            </Text>
-                                            <span style={{ fontSize: '10px', color: style.color, fontWeight: 700, flexShrink: 0, marginLeft: '6px' }}>
-                                                {event.type}
-                                            </span>
-                                        </div>
-                                    )}
-                                </EventRenderer>
+                                    <EventRenderer
+                                        event={event}
+                                        view="week"
+                                        date={contextDay.toDate()}
+                                        wrapperStyle={chromeStyle}
+                                    >
+                                        {({ onClick }) => (
+                                            <div
+                                                onClick={onClick}
+                                                style={chromeStyle}
+                                                title={`${event.title} - ${event.description || ''}`}
+                                            >
+                                                <Text style={{
+                                                    fontSize: '11px',
+                                                    fontWeight: 700,
+                                                    color: 'var(--text-primary)',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                }}>
+                                                    {event.title}
+                                                </Text>
+                                                <span style={{ fontSize: '10px', color: style.color, fontWeight: 700, flexShrink: 0, marginLeft: '6px' }}>
+                                                    {event.type}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </EventRenderer>
+                                </DraggableSpanEvent>
                             );
                         })}
+                        </div>
                     </div>
                     {/* Scrollbar spacer to align with body */}
                     <div style={{ width: '8px', flexShrink: 0 }} />
@@ -375,8 +416,9 @@ const DaysOfWeek = () => {
                         const isWeekend = day.day() === 0 || day.day() === 6;
                         const dayEvents = getEventsForDay(day);
                         return (
-                            <div
+                            <DroppableDayColumn
                                 key={colIdx}
+                                day={day}
                                 role="gridcell"
                                 aria-selected={isToday}
                                 aria-label={day.format('dddd, MMMM D, YYYY')}
@@ -431,12 +473,13 @@ const DaysOfWeek = () => {
                                         <div style={{ flex: 1, height: '2px', background: '#ef4444' }} />
                                     </div>
                                 )}
-                            </div>
+                            </DroppableDayColumn>
                         );
                     })}
                 </div>
             </div>
         </div>
+        </CalendarDndProvider>
     );
 };
 

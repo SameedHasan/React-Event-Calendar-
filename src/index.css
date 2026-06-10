@@ -288,3 +288,57 @@
   background: #94a3b8;
 }
 
+/* Week/day drag-and-drop */
+[data-calendar-drop-active] {
+  outline: 2px dashed color-mix(in srgb, var(--primary-color) 55%, transparent);
+  outline-offset: -2px;
+}
+
+[data-calendar-dnd="resize"]::after {
+  content: '';
+  position: absolute;
+  left: 25%;
+  right: 25%;
+  bottom: 2px;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+}
+
+[data-calendar-dnd="resize"]:hover::after {
+  background: var(--primary-color);
+}
+
+[data-calendar-dnd="resize-end"]::after,
+[data-calendar-dnd="resize-start"]::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-secondary) 45%, transparent);
+}
+
+[data-calendar-dnd="resize-end"]::after {
+  right: 2px;
+}
+
+[data-calendar-dnd="resize-start"]::after {
+  left: 2px;
+}
+
+[data-calendar-dnd="resize-end"]:hover::after,
+[data-calendar-dnd="resize-start"]:hover::after {
+  background: var(--primary-color);
+}
+
+/* While extending a span, read it as a stretch, not a move */
+.calendar-span-event-shell[data-calendar-resizing] {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -1px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+  transition: left 0.05s linear, width 0.05s linear;
+}
+

@@ -208,6 +208,8 @@ export default App;
 | `eventColors` | `object` | `{}` | Optional. Custom color overrides per category (e.g. `{ Meeting: '#ef4444' }`). |
 | `theme` | `'light' \| 'dark'` | `'light'` | Optional. Applies light or premium dark styles to the calendar. |
 | `onEventClick` | `(event: CalendarEvent) => void \| boolean` | `undefined` | Optional. Intercepts event clicks. Return `false` to block the default edit modal. |
+| `onEventDrop` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after dragging a timed event in week/day view (15-minute snap). Disabled when `readOnly`. |
+| `onEventResize` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after resizing a timed event's end time in week/day view. Disabled when `readOnly`. |
 | `onDateClick` | `(date: Date) => void \| boolean` | `undefined` | Optional. Intercepts empty cell clicks. Return `false` to block the default creation modal. |
 | `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local state automatically. |
 | `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local state automatically. |
@@ -219,6 +221,35 @@ export default App;
 | `renderEventTooltip` | `(events, date) => ReactNode` | `undefined` | Optional. Custom tooltip for month view "+X more" overflow. |
 | `renderToolbar` | `(api) => ReactNode` | `undefined` | Optional. Replace the default header toolbar entirely. |
 | `renderEmpty` | `(view) => ReactNode` | `undefined` | Optional. Custom empty state when the visible range has no events (list, year, week, day). |
+
+### Drag-and-drop
+
+Provide `onEventDrop` and/or `onEventResize` to enable drag-and-drop. If omitted, `onUpdateEvent` is used as a fallback. Disabled when `readOnly` is `true`.
+
+| View | Drag behavior | Resize |
+| :--- | :--- | :--- |
+| **Month** | Drop on another day cell (whole-day shift, time preserved) | Right edge → drop on day to extend/shrink end date |
+| **Week (all-day row)** | Drop on another day column | Right edge → drop on day to extend/shrink end date |
+| **Week / Day (timed)** | Vertical drag + column change (15-min snap) | Bottom edge handle (can cross into next day) |
+
+```jsx
+<Calendar
+  events={events}
+  defaultView="week"
+  onEventDrop={({ event, start, end }) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? { ...e, start, end } : e))
+    );
+  }}
+  onEventResize={({ event, start, end }) => {
+    setEvents((prev) =>
+      prev.map((e) => (e.id === event.id ? { ...e, start, end } : e))
+    );
+  }}
+/>
+```
+
+In **month** and **week all-day** views, drag an event onto another day to move it, or drag the **right edge** onto a day to extend or shorten the end date. In **week/day timed** grids, drag vertically to change time (15-min snap) and use the **bottom edge** to resize duration.
 
 ### Customization examples
 

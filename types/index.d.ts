@@ -37,6 +37,12 @@ export interface EventRenderContext {
   onClick: () => void;
 }
 
+export interface EventScheduleChangePayload {
+  event: CalendarEvent;
+  start: Date;
+  end: Date;
+}
+
 export interface CalendarToolbarApi {
   view: CalendarView;
   currentDate: Date;
@@ -75,6 +81,8 @@ export interface CalendarProps {
   eventColors?: Record<string, string>;
   theme?: CalendarTheme;
   onEventClick?: (event: CalendarEvent) => void | boolean;
+  onEventDrop?: (payload: EventScheduleChangePayload) => void;
+  onEventResize?: (payload: EventScheduleChangePayload) => void;
   onDateClick?: (date: Date) => void | boolean;
   onAddEvent?: (event: CalendarEvent) => void;
   onUpdateEvent?: (event: CalendarEvent) => void;

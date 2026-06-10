@@ -194,6 +194,46 @@ function TwoCalendarsDemo() {
   );
 }
 
+function DragAndDropDemo() {
+  const [events, setEvents] = useState(sampleEvents);
+
+  const updateEventSchedule = (payload) => {
+    setEvents((prev) =>
+      prev.map((item) =>
+        item.id === payload.event.id
+          ? { ...item, start: payload.start, end: payload.end }
+          : item
+      )
+    );
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
+      <p style={{ margin: 0, fontFamily: 'system-ui, sans-serif', fontSize: 14 }}>
+        Month & week all-day: drag to move, or drag the right edge onto another day to extend the end
+        date. Week/day timed grid: drag vertically or across columns; bottom edge resizes duration.
+      </p>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Calendar
+          events={events}
+          defaultView="week"
+          currentDate={storyDate}
+          onEventDrop={updateEventSchedule}
+          onEventResize={updateEventSchedule}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Week/day drag-and-drop reschedule + resize (`onEventDrop`, `onEventResize`). */
+export const DragAndDrop = {
+  render: () => <DragAndDropDemo />,
+  parameters: {
+    controls: { disable: true },
+  },
+};
+
 /** Two instances on one page — each has its own Zustand store (Phase 1). */
 export const TwoCalendars = {
   render: () => <TwoCalendarsDemo />,

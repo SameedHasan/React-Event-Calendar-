@@ -1,15 +1,50 @@
 # react-event-calendar-suite
 
+**React event calendar & scheduler component** — month, week, day, list, and year views with drag-and-drop, recurring events, locales, timezones, and ICS export. Built for React 18/19, TypeScript, Vite, and Next.js.
+
+[![npm version](https://img.shields.io/npm/v/react-event-calendar-suite.svg)](https://www.npmjs.com/package/react-event-calendar-suite)
 [![CI](https://github.com/SameedHasan/React-Event-Calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/SameedHasan/React-Event-Calendar/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-utils%20%E2%89%A590%25-brightgreen)](vitest.config.js)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-18%20%7C%2019-61dafb)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-3178c6)](types/index.d.ts)
 
-A premium, highly performant, and fully customizable React Event Calendar component suite. It offers native CSS-Grid based views (Month, Week, Day, List, Year), dynamic status-color assignment, global store management, and clean navigational controls.
+```bash
+npm install react-event-calendar-suite
+```
 
-Ready to be dropped into any React application or published directly as a standalone npm package.
+[Live demo (Storybook)](https://sameedhasan.github.io/React-Event-Calendar/) · [npm package](https://www.npmjs.com/package/react-event-calendar-suite) · [GitHub](https://github.com/SameedHasan/React-Event-Calendar) · [Changelog](./CHANGELOG.md)
 
-See [CHANGELOG.md](./CHANGELOG.md) for release history and versioning policy.
+![React event calendar component — month view with spanning events and color-coded categories](https://raw.githubusercontent.com/SameedHasan/React-Event-Calendar/main/public/image.png)
 
-![React Event Calendar Suite Screenshot](https://raw.githubusercontent.com/SameedHasan/React-Event-Calendar/main/public/image.png)
+---
+
+## Table of contents
+
+- [Why use this calendar?](#why-use-this-calendar)
+- [Installation](#-installation)
+- [Quick start](#-quick-start)
+- [Features](#-features)
+- [Storybook](#-storybook)
+- [Examples](#-examples)
+- [Design philosophy](#-design-philosophy)
+- [Props reference](#props-reference)
+- [Event schema](#-event-schema)
+- [FAQ](#faq)
+- [License](#-license)
+
+---
+
+## Why use this calendar?
+
+Looking for a **React calendar component**, **event scheduler**, or **appointment booking UI**? `react-event-calendar-suite` is a drop-in library for apps that need:
+
+- A **FullCalendar-style** month / week / day grid without a heavy commercial license
+- **Drag-and-drop rescheduling** with optional disable flags
+- **Recurring events** (RFC 5545 RRULE) and **ICS / iCal export**
+- **Internationalization** (30+ locales) and **IANA timezone** display
+- **TypeScript** types, **accessibility** basics, and **Next.js App Router** support
+
+Minimal by default — pass `events` and render. Enable CRUD, DnD, export, and recurrence only when you need them.
 
 ---
 
@@ -201,7 +236,7 @@ export default App;
 
 ---
 
-## ⚙️ Props
+## Props reference
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -496,6 +531,32 @@ npm run ci            # build + lint + test
 
 ---
 
+## FAQ
+
+### Is this a FullCalendar alternative for React?
+
+It covers the same core use cases — month/week/day views, timed events, drag-and-drop, recurring rules, and ICS export — as a **lightweight, MIT-licensed** React component. It is a good fit when you already use Ant Design and want a prop-driven API with minimal setup.
+
+### Does it work with Next.js and Vite?
+
+Yes. See [examples/nextjs-app-router](./examples/nextjs-app-router) for App Router (`"use client"`) and [examples/minimal-vite](./examples/minimal-vite) for Vite. Import `react-event-calendar-suite/style.css` in your client bundle.
+
+### Is TypeScript supported?
+
+Yes. Types ship in `types/index.d.ts` — no `@types/` package required.
+
+### How do I search for this on npm?
+
+Package name: [`react-event-calendar-suite`](https://www.npmjs.com/package/react-event-calendar-suite). Keywords: `react-calendar`, `react-scheduler`, `event-calendar`, `appointment-calendar`, `drag-and-drop`, `recurring-events`, `ics-export`.
+
+### How do I improve discoverability after publishing?
+
+1. Publish with `npm publish --access public` (first time).
+2. Add GitHub topics: `react`, `calendar`, `scheduler`, `react-component`, `typescript`, `drag-and-drop`, `fullcalendar-alternative`, `event-calendar`.
+3. Link to the [Storybook demo](https://sameedhasan.github.io/React-Event-Calendar/) from your README and portfolio.
+
+---
+
 ## 📄 License
 
-MIT © Sameed Hasan
+MIT © [Sameed Hasan](https://github.com/SameedHasan)

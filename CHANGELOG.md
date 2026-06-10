@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.4.1] - 2026-06-10
+
+### Changed
+
+- Improved npm and search discoverability: keyword-rich `package.json` description, expanded keywords, Storybook homepage URL, README SEO (FAQ, table of contents, npm badges, alt text).
+
+---
+
 ## [2.4.0] - 2026-06-10
 
 ### Added

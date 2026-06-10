@@ -1,10 +1,12 @@
 # Installation
 
-## npm
+Install the **React event calendar** package from npm:
 
 ```bash
 npm install react-event-calendar-suite
 ```
+
+Package: [react-event-calendar-suite on npm](https://www.npmjs.com/package/react-event-calendar-suite)
 
 ## Peer dependencies
 

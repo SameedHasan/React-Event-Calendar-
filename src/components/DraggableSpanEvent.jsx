@@ -1,30 +1,142 @@
-import React, { useRef, useState } from 'react';
-import { useDraggable, useDndMonitor } from '@dnd-kit/core';
+import React, { useCallback, useRef, useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import dayjs from 'dayjs';
 import { useShallow } from 'zustand/react/shallow';
 import useCalendarStore from '../store/useCalendarStore';
-import { isCalendarDnDEnabled } from '../utils/eventDnD';
+import {
+    isCalendarDnDEnabled,
+    computeSpanEndResize,
+    computeSpanStartResize,
+    parseDayDropId,
+} from '../utils/eventDnD';
 
 const MIN_BAR_WIDTH = 24;
 
-/** Wrap drag listeners so a handle press doesn't also start the parent move drag. */
-const stopProp = (listeners = {}) => {
-    const wrapped = {};
-    for (const key of Object.keys(listeners)) {
-        wrapped[key] = (e) => {
-            e.stopPropagation();
-            listeners[key](e);
+/**
+ * Pointer-based resize for a span edge handle.
+ *
+ * Attaches window-level pointermove/pointerup listeners on pointerdown so there is
+ * no dependency on setPointerCapture, React synthetic event routing, or dnd-kit state.
+ * A drag that ends on an invalid target simply calls cleanup() — nothing can get stuck.
+ */
+function usePointerResize({ shellKey, calEvent, interaction, canResize, onEventResize, onUpdateEvent }) {
+    const [isResizing, setIsResizing] = useState(false);
+    const [ghost, setGhost] = useState(null);
+
+    // Ref so window listeners always read the latest values without stale closures.
+    const latestRef = useRef({});
+    latestRef.current = { calEvent, interaction, onEventResize, onUpdateEvent };
+
+    // Synchronous active-drag flag — not affected by React render cycles.
+    const dragRef = useRef(null);
+
+    const cleanup = useCallback(() => {
+        dragRef.current = null;
+        setIsResizing(false);
+        setGhost(null);
+    }, []);
+
+    const onPointerDown = useCallback((e) => {
+        if (!canResize) return;
+        if (dragRef.current) return; // ignore if already resizing
+
+        e.stopPropagation(); // prevent shell's dnd-kit move from starting
+
+        const shell = document.querySelector(`[data-calendar-span-shell="${shellKey}"]`);
+        const container = shell?.offsetParent;
+        if (!shell || !container) return;
+
+        const baseline = {
+            container,
+            shellLeft: shell.offsetLeft,
+            shellRight: shell.offsetLeft + shell.offsetWidth,
+            top: shell.offsetTop,
+            height: shell.offsetHeight,
         };
-    }
-    return wrapped;
-};
+
+        dragRef.current = { baseline };
+        setIsResizing(true);
+
+        // Compute ghost geometry for a given pointer position.
+        const ghostForPoint = (clientX, clientY) => {
+            const { container: c, shellLeft, shellRight, top, height } = baseline;
+            const { interaction: itr } = latestRef.current;
+
+            const els = document.elementsFromPoint(clientX, clientY);
+            const dayEl = els.find((el) => el.dataset.calendarDropDay);
+            if (!dayEl) return null;
+
+            const cRect = c.getBoundingClientRect();
+            const dRect = dayEl.getBoundingClientRect();
+
+            let left, width;
+            if (itr === 'resize-end') {
+                const right = dRect.right - cRect.left - 4;
+                width = Math.max(right - shellLeft, MIN_BAR_WIDTH);
+                left = shellLeft;
+            } else {
+                left = Math.min(dRect.left - cRect.left + 4, shellRight - MIN_BAR_WIDTH);
+                width = Math.max(shellRight - left, MIN_BAR_WIDTH);
+            }
+
+            return { top, height, left, width, dayId: dayEl.dataset.calendarDropDay };
+        };
+
+        const onMove = (ev) => {
+            if (!dragRef.current) return;
+            setGhost(ghostForPoint(ev.clientX, ev.clientY));
+        };
+
+        const onUp = (ev) => {
+            // Always remove listeners first so no double-firing.
+            window.removeEventListener('pointermove', onMove, true);
+            window.removeEventListener('pointerup', onUp, true);
+            window.removeEventListener('pointercancel', onUp, true);
+
+            if (!dragRef.current) return;
+
+            const g = ghostForPoint(ev.clientX, ev.clientY);
+            cleanup();
+
+            if (!g?.dayId) return;
+
+            const {
+                calEvent: evt,
+                interaction: itr,
+                onEventResize: onResize,
+                onUpdateEvent: onUpdate,
+            } = latestRef.current;
+
+            const targetDay = parseDayDropId(g.dayId);
+            if (!targetDay) return;
+
+            const range = itr === 'resize-end'
+                ? computeSpanEndResize({ event: evt, targetDay })
+                : computeSpanStartResize({ event: evt, targetDay });
+
+            if (!range) return;
+
+            if (onResize) {
+                onResize({ event: evt, ...range });
+            } else if (onUpdate) {
+                onUpdate({ ...evt, start: range.start, end: range.end });
+            }
+        };
+
+        // Use capture phase so these fire even if a child stops propagation.
+        window.addEventListener('pointermove', onMove, true);
+        window.addEventListener('pointerup', onUp, true);
+        window.addEventListener('pointercancel', onUp, true);
+    }, [canResize, shellKey, cleanup]);
+
+    return { isResizing, ghost, onPointerDown };
+}
 
 /**
  * Drag + edge-resize shell for spanning event bars (month view + week all-day row).
- * - Move: translate the whole bar, drop on a day cell to reschedule.
- * - Resize start/end: anchor the opposite edge and live-extend the bar toward the
- *   hovered day, so it reads as "extending" rather than moving.
+ * - Move: dnd-kit (translate the bar, drop on a day cell to reschedule)
+ * - Resize start / end: window pointer listeners (can never get stuck)
  */
 export default function DraggableSpanEvent({
     event,
@@ -33,25 +145,29 @@ export default function DraggableSpanEvent({
     style,
     children,
 }) {
-    const { readOnly, onEventDrop, onEventResize, onUpdateEvent } = useCalendarStore(
+    const {
+        readOnly,
+        onEventDrop,
+        onEventResize,
+        onUpdateEvent,
+        disableDrag,
+        disableResize,
+    } = useCalendarStore(
         useShallow((state) => ({
             readOnly: state.readOnly,
             onEventDrop: state.onEventDrop,
             onEventResize: state.onEventResize,
             onUpdateEvent: state.callbacks.onUpdateEvent,
+            disableDrag: state.disableDrag,
+            disableResize: state.disableResize,
         }))
     );
+
     const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent });
-    const canMove = enabled && Boolean(onEventDrop || onUpdateEvent);
-    const canResize = enabled && Boolean(onEventResize || onUpdateEvent);
+    const canMove = enabled && !disableDrag && Boolean(onEventDrop || onUpdateEvent);
+    const canResize = enabled && !disableResize && Boolean(onEventResize || onUpdateEvent);
     const dayKey = dayjs(anchorDay).format('YYYY-MM-DD');
-
-    const shellRef = useRef(null);
-    const [preview, setPreview] = useState(null);
-
     const moveId = `span-move-${event.id}-${instanceKey}-${dayKey}`;
-    const resizeStartId = `span-resize-start-${event.id}-${instanceKey}-${dayKey}`;
-    const resizeEndId = `span-resize-end-${event.id}-${instanceKey}-${dayKey}`;
 
     const move = useDraggable({
         id: moveId,
@@ -59,133 +175,102 @@ export default function DraggableSpanEvent({
         disabled: !canMove,
     });
 
-    const resizeStart = useDraggable({
-        id: resizeStartId,
-        data: { event, anchorDay: dayjs(anchorDay).toDate(), mode: 'span', interaction: 'resize-start' },
-        disabled: !canResize,
+    const endResize = usePointerResize({
+        shellKey: moveId,
+        calEvent: event,
+        interaction: 'resize-end',
+        canResize,
+        onEventResize,
+        onUpdateEvent,
     });
 
-    const resizeEnd = useDraggable({
-        id: resizeEndId,
-        data: { event, anchorDay: dayjs(anchorDay).toDate(), mode: 'span', interaction: 'resize-end' },
-        disabled: !canResize,
+    const startResize = usePointerResize({
+        shellKey: moveId,
+        calEvent: event,
+        interaction: 'resize-start',
+        canResize,
+        onEventResize,
+        onUpdateEvent,
     });
 
-    const computePreview = (activeId, overId) => {
-        const isStart = activeId === resizeStartId;
-        const isEnd = activeId === resizeEndId;
-        if (!isStart && !isEnd) return;
-
-        const shell = shellRef.current;
-        const container = shell?.offsetParent;
-        if (!shell || !container) return;
-
-        const dayEl = document.querySelector(`[data-calendar-drop-day="${overId}"]`);
-        if (!dayEl) return;
-
-        const containerRect = container.getBoundingClientRect();
-        const dayRect = dayEl.getBoundingClientRect();
-        const shellLeft = shell.offsetLeft;
-        const shellRight = shell.offsetLeft + shell.offsetWidth;
-
-        if (isEnd) {
-            const right = dayRect.right - containerRect.left - 4;
-            const width = Math.max(right - shellLeft, MIN_BAR_WIDTH);
-            setPreview({ left: shellLeft, width });
-        } else {
-            const left = dayRect.left - containerRect.left + 4;
-            const clampedLeft = Math.min(left, shellRight - MIN_BAR_WIDTH);
-            const width = Math.max(shellRight - clampedLeft, MIN_BAR_WIDTH);
-            setPreview({ left: clampedLeft, width });
-        }
-    };
-
-    useDndMonitor({
-        onDragMove({ active, over }) {
-            if (!over) return;
-            computePreview(active.id, over.id);
-        },
-        onDragOver({ active, over }) {
-            if (!over) return;
-            computePreview(active.id, over.id);
-        },
-        onDragEnd() {
-            setPreview(null);
-        },
-        onDragCancel() {
-            setPreview(null);
-        },
-    });
-
-    const isResizing = resizeStart.isDragging || resizeEnd.isDragging;
+    const isResizing = startResize.isResizing || endResize.isResizing;
     const isDragging = move.isDragging || isResizing;
+    const ghost = startResize.ghost ?? endResize.ghost;
+
     const transformStyle = move.isDragging && move.transform
         ? CSS.Translate.toString(move.transform)
         : undefined;
 
-    const previewStyle = preview
-        ? { left: `${preview.left}px`, width: `${preview.width}px` }
-        : null;
-
     return (
-        <div
-            ref={(node) => {
-                shellRef.current = node;
-                move.setNodeRef(node);
-            }}
-            className="calendar-span-event-shell"
-            style={{
-                ...style,
-                ...previewStyle,
-                transform: transformStyle,
-                zIndex: isDragging ? 50 : style?.zIndex,
-                opacity: move.isDragging ? 0.85 : 1,
-                touchAction: canMove ? 'none' : undefined,
-            }}
-            {...(canMove ? move.listeners : {})}
-            {...(canMove ? move.attributes : {})}
-            data-calendar-dnd={canMove ? 'span-move' : undefined}
-            data-calendar-resizing={isResizing || undefined}
-        >
-            {children}
-            {canResize && (
+        <>
+            <div
+                ref={move.setNodeRef}
+                className="calendar-span-event-shell"
+                data-calendar-span-shell={moveId}
+                style={{
+                    ...style,
+                    transform: transformStyle,
+                    zIndex: isDragging ? 50 : style?.zIndex,
+                    opacity: move.isDragging ? 0.85 : isResizing ? 0.5 : 1,
+                    touchAction: canMove ? 'none' : undefined,
+                }}
+                {...(canMove ? move.listeners : {})}
+                {...(canMove ? move.attributes : {})}
+                data-calendar-dnd={canMove ? 'span-move' : undefined}
+                data-calendar-resizing={isResizing || undefined}
+            >
+                {children}
+                {canResize && (
+                    <div
+                        data-calendar-dnd="resize-start"
+                        aria-label={`Change start day of ${event.title}`}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: 8,
+                            height: '100%',
+                            cursor: 'ew-resize',
+                            touchAction: 'none',
+                            zIndex: 2,
+                        }}
+                        onPointerDown={startResize.onPointerDown}
+                    />
+                )}
+                {canResize && (
+                    <div
+                        data-calendar-dnd="resize-end"
+                        aria-label={`Extend ${event.title} to another day`}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            width: 8,
+                            height: '100%',
+                            cursor: 'ew-resize',
+                            touchAction: 'none',
+                            zIndex: 2,
+                        }}
+                        onPointerDown={endResize.onPointerDown}
+                    />
+                )}
+            </div>
+            {ghost && (
                 <div
-                    ref={resizeStart.setNodeRef}
-                    {...stopProp(resizeStart.listeners)}
-                    {...resizeStart.attributes}
-                    data-calendar-dnd="resize-start"
-                    aria-label={`Change start day of ${event.title}`}
+                    className="calendar-span-resize-ghost"
+                    aria-hidden
                     style={{
                         position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: 8,
-                        height: '100%',
-                        cursor: 'ew-resize',
-                        touchAction: 'none',
-                        zIndex: 2,
+                        top: `${ghost.top}px`,
+                        left: `${ghost.left}px`,
+                        width: `${ghost.width}px`,
+                        height: `${ghost.height}px`,
+                        pointerEvents: 'none',
+                        zIndex: 55,
+                        boxSizing: 'border-box',
                     }}
                 />
             )}
-            {canResize && (
-                <div
-                    ref={resizeEnd.setNodeRef}
-                    {...stopProp(resizeEnd.listeners)}
-                    {...resizeEnd.attributes}
-                    data-calendar-dnd="resize-end"
-                    aria-label={`Extend ${event.title} to another day`}
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: 8,
-                        height: '100%',
-                        cursor: 'ew-resize',
-                        touchAction: 'none',
-                        zIndex: 2,
-                    }}
-                />
-            )}
-        </div>
+        </>
     );
 }

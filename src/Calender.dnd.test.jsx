@@ -68,6 +68,42 @@ describe('Calendar drag-and-drop', () => {
         });
     });
 
+    it('disableDrag removes the move handle but keeps resize', async () => {
+        render(
+            <Calendar
+                events={[timedEvent]}
+                defaultView="week"
+                currentDate={new Date(2026, 5, 9)}
+                onEventDrop={vi.fn()}
+                onEventResize={vi.fn()}
+                disableDrag
+            />
+        );
+
+        await waitFor(() => {
+            expect(document.querySelector('[data-calendar-dnd="resize"]')).toBeTruthy();
+        });
+        expect(document.querySelector('[data-calendar-dnd="move"]')).toBeNull();
+    });
+
+    it('disableResize removes the resize handle but keeps move', async () => {
+        render(
+            <Calendar
+                events={[timedEvent]}
+                defaultView="week"
+                currentDate={new Date(2026, 5, 9)}
+                onEventDrop={vi.fn()}
+                onEventResize={vi.fn()}
+                disableResize
+            />
+        );
+
+        await waitFor(() => {
+            expect(document.querySelector('[data-calendar-dnd="move"]')).toBeTruthy();
+        });
+        expect(document.querySelector('[data-calendar-dnd="resize"]')).toBeNull();
+    });
+
     it('falls back to onUpdateEvent for resize when onEventResize is omitted', async () => {
         render(
             <Calendar

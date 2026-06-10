@@ -28,8 +28,8 @@ export default function CalendarDndProvider({ children }) {
     );
 
     const onDragEnd = useCallback(
-        (event) => {
-            handleCalendarDragEnd(event, {
+        (dndEvent) => {
+            handleCalendarDragEnd(dndEvent, {
                 readOnly,
                 onEventDrop,
                 onEventResize,

@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Week view supports dropping events onto adjacent day columns
 - Month view supports dragging events onto another day cell (whole-day shift)
 - Month & week all-day bars: **both-edge** resize — drag the right edge to change the end day or the left edge to change the start day (extend to earlier or later dates)
+- `disableDrag` prop — turn off event moving while keeping resize/other handlers active
+- `disableResize` prop — turn off event extending/resizing while keeping move/other handlers active
 - Storybook **Drag And Drop** story
 
 ### Changed

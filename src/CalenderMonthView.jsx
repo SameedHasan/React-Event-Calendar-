@@ -457,10 +457,13 @@ const CalenderMonthView = () => {
                                                                 cursor: 'pointer',
                                                                 boxSizing: 'border-box',
                                                                 borderRadius: '4px',
-                                                                transition: 'background 0.15s',
+                                                                background: style.bg,
+                                                                border: `1px solid ${style.border}`,
+                                                                borderLeft: `3px solid ${style.color}`,
+                                                                transition: 'filter 0.15s',
                                                             }}
-                                                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-color)'; }}
-                                                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                                                            onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.97)'; }}
+                                                            onMouseLeave={e => { e.currentTarget.style.filter = ''; }}
                                                             title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
                                                         >
                                                             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color, flexShrink: 0 }} />

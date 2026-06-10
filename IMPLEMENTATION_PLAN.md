@@ -328,17 +328,20 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 
 | Scope | Approach |
 |-------|----------|
-| Week / day views | `@dnd-kit/core` (recommended over native HTML5 for touch + a11y) |
-| New props | `onEventDrop({ event, start, end })`, `onEventResize({ event, start, end })` |
-| Guard | Disabled when `readOnly` is `true` |
+| Week / day timed grids | `@dnd-kit/core` — vertical move + bottom-edge resize, 15-min snap |
+| Month view | Day-cell drops (whole-day shift); span bars with left/right edge resize |
+| Week all-day row | Same span move + both-edge resize as month |
+| New props | `onEventDrop`, `onEventResize`, `disableDrag`, `disableResize` |
+| Guard | Disabled when `readOnly` is `true`; per-interaction opt-out via disable flags |
 
 **Effort:** ~5–7 days  
 **Release:** `2.0.0`  
 **Shipped in:** `v2.0.0` (June 10, 2026)
 
-- `DraggableTimedEvent`, `TimeGridDndProvider`, `DroppableDayColumn` components
-- 15-minute snap; week view column drops; month view day-cell drops; `onUpdateEvent` fallback
-- Storybook **Drag And Drop** story
+- `DraggableTimedEvent`, `DraggableSpanEvent`, `CalendarDndProvider`, `DroppableDayColumn`
+- Span resize live-previews by stretching from anchored edge (distinct from move)
+- `onUpdateEvent` fallback when drop/resize handlers omitted
+- Storybook **Drag And Drop** story; README + types documented
 
 ### 6.2 Timezone support
 

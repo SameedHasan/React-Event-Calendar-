@@ -16,7 +16,8 @@
     "month-view",
     "week-view",
     "day-view",
-    "year-view"
+    "year-view",
+    "drag-and-drop"
   ],
   "author": "Sameed Hasan",
   "license": "MIT",

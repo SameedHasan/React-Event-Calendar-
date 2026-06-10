@@ -43,7 +43,7 @@ Additional guides: [docs/installation.md](./docs/installation.md) · [docs/ssr-n
 - 📅 **5 Interactive Views**: Standard Month, Time-Grid Week, Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
 - ⚙️ **Localization & Format Settings**: Fully configurable week start day (any day of the week, e.g., `'monday'`, `'sunday'`, `'wednesday'`, etc.) and time format (`'12h'` or `'24h'`) passed directly as props. All grid columns, boundary offsets, hour gutters, time-indicator lines, overnight range formats, and tooltips automatically sync dynamically to these selections.
 - 🔗 **Advanced Spanning & Overnight Support**:
-  - **Month View**: Renders multi-day events as continuous horizontal solid-colored spanning bars across columns, and single-day events as transparent rows with colored dots.
+  - **Month View**: Renders multi-day events as continuous horizontal spanning bars across columns; single-day events as compact colored pills with time + title.
   - **Week View**: Features a sticky **All-day** row showing multi-day events as continuous spanning bars aligned perfectly with the column grid.
   - **Day View**: Includes a dedicated header section for **All-day & Spanning Events**.
   - **List View**: Spans overnight and multi-day events across dates, displaying relative times (e.g. including dates on boundary days) and a custom `SPANNING` tag.
@@ -54,6 +54,7 @@ Additional guides: [docs/installation.md](./docs/installation.md) · [docs/ssr-n
 - 🔍 **Tooltips & Detailed Aggregates**: Auto-calculating status legends, busy metrics, real-time current time tracker lines, and clean tooltip overlays for overlapping event blocks.
 - ⌨️ **Keyboard Shortcuts**: Built-in keyboard navigation for fast, mouse-free control — switch views, navigate periods, and jump to today instantly.
 - 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
+- 🖱️ **Drag-and-drop scheduling** *(v2.0)*: Move and resize events in month, week, and day views — with 15-minute snap on timed grids, both-edge span resize on month/week all-day bars, and optional `disableDrag` / `disableResize` flags.
 
 ---
 
@@ -191,7 +192,7 @@ export default App;
 | `events` | `Array` | `[]` | **Required.** Array of event objects following the schema below. |
 | `defaultView` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `'month'` | The initial active view when the component mounts (uncontrolled mode only). |
 | `view` | `'month' \| 'week' \| 'day' \| 'list' \| 'year'` | `undefined` | Optional. Controlled active view. Pair with `onViewChange`. |
-| `readOnly` | `boolean` | `false` | Optional. Disables create, edit, delete, and day-click actions. `onEventClick` still fires. |
+| `readOnly` | `boolean` | `false` | Optional. Disables create, edit, delete, day-click actions, and all drag-and-drop. `onEventClick` still fires. |
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
 | `categories` | `string[]` | `['Meeting', ...]` | Optional. List of event categories/types available for creating or editing events. |
@@ -208,8 +209,10 @@ export default App;
 | `eventColors` | `object` | `{}` | Optional. Custom color overrides per category (e.g. `{ Meeting: '#ef4444' }`). |
 | `theme` | `'light' \| 'dark'` | `'light'` | Optional. Applies light or premium dark styles to the calendar. |
 | `onEventClick` | `(event: CalendarEvent) => void \| boolean` | `undefined` | Optional. Intercepts event clicks. Return `false` to block the default edit modal. |
-| `onEventDrop` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after dragging a timed event in week/day view (15-minute snap). Disabled when `readOnly`. |
-| `onEventResize` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after resizing a timed event's end time in week/day view. Disabled when `readOnly`. |
+| `onEventDrop` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after moving an event via drag-and-drop. Disabled when `readOnly` or `disableDrag`. |
+| `onEventResize` | `({ event, start, end }) => void` | `undefined` | Optional. Fires after extending or resizing an event. Disabled when `readOnly` or `disableResize`. |
+| `disableDrag` | `boolean` | `false` | Optional. Disables event moving (drag handles) while keeping resize and other handlers active. |
+| `disableResize` | `boolean` | `false` | Optional. Disables event extending/resizing (edge handles) while keeping move and other handlers active. |
 | `onDateClick` | `(date: Date) => void \| boolean` | `undefined` | Optional. Intercepts empty cell clicks. Return `false` to block the default creation modal. |
 | `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local state automatically. |
 | `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local state automatically. |
@@ -224,12 +227,19 @@ export default App;
 
 ### Drag-and-drop
 
-Provide `onEventDrop` and/or `onEventResize` to enable drag-and-drop. If omitted, `onUpdateEvent` is used as a fallback. Disabled when `readOnly` is `true`.
+Provide `onEventDrop` and/or `onEventResize` to enable drag-and-drop. If omitted, `onUpdateEvent` is used as a fallback for the corresponding interaction.
 
-| View | Drag behavior | Resize |
+| Control | Effect |
+| :--- | :--- |
+| `readOnly` | Disables all drag-and-drop (and create/edit/delete) |
+| `disableDrag` | Disables moving only — resize handles still work |
+| `disableResize` | Disables extending/resizing only — move handles still work |
+| No handlers | No drag handles rendered (`onEventDrop`, `onEventResize`, or `onUpdateEvent` required) |
+
+| View | Move | Resize |
 | :--- | :--- | :--- |
-| **Month** | Drop on another day cell (whole-day shift, time preserved) | Right edge → drop on day to extend/shrink end date |
-| **Week (all-day row)** | Drop on another day column | Right edge → drop on day to extend/shrink end date |
+| **Month** | Drop on another day cell (whole-day shift, time preserved) | **Left edge** → change start day · **Right edge** → change end day (live stretch preview) |
+| **Week (all-day row)** | Drop on another day column | **Left / right edge** → extend or shrink span to earlier or later days |
 | **Week / Day (timed)** | Vertical drag + column change (15-min snap) | Bottom edge handle (can cross into next day) |
 
 ```jsx
@@ -249,7 +259,19 @@ Provide `onEventDrop` and/or `onEventResize` to enable drag-and-drop. If omitted
 />
 ```
 
-In **month** and **week all-day** views, drag an event onto another day to move it, or drag the **right edge** onto a day to extend or shorten the end date. In **week/day timed** grids, drag vertically to change time (15-min snap) and use the **bottom edge** to resize duration.
+**Selective disable** — keep handlers wired but turn off one interaction:
+
+```jsx
+// Move only, no extending
+<Calendar events={events} onEventDrop={handleDrop} onEventResize={handleResize} disableResize />
+
+// Extend only, no moving
+<Calendar events={events} onEventDrop={handleDrop} onEventResize={handleResize} disableDrag />
+```
+
+In **month** and **week all-day** views, drag an event onto another day to move it, or drag the **left or right edge** onto a day to extend or shorten the span (the bar stretches live from the anchored edge). In **week/day timed** grids, drag vertically to change time (15-min snap) and use the **bottom edge** to resize duration.
+
+See the Storybook **Drag And Drop** story (`npm run storybook`) for a live demo.
 
 ### Customization examples
 

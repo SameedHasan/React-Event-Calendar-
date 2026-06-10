@@ -210,8 +210,10 @@ function DragAndDropDemo() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
       <p style={{ margin: 0, fontFamily: 'system-ui, sans-serif', fontSize: 14 }}>
-        Month & week all-day: drag to move, or drag the right edge onto another day to extend the end
-        date. Week/day timed grid: drag vertically or across columns; bottom edge resizes duration.
+        Month & week all-day: drag to move, or drag the left/right edge onto another day to extend or
+        shrink the span (live stretch preview). Week/day timed grid: drag vertically or across columns;
+        bottom edge resizes duration. Use <code>disableDrag</code> or <code>disableResize</code> to turn
+        off one interaction.
       </p>
       <div style={{ flex: 1, minHeight: 0 }}>
         <Calendar
@@ -226,7 +228,7 @@ function DragAndDropDemo() {
   );
 }
 
-/** Week/day drag-and-drop reschedule + resize (`onEventDrop`, `onEventResize`). */
+/** Drag-and-drop move + resize across month, week, and day views (`onEventDrop`, `onEventResize`). */
 export const DragAndDrop = {
   render: () => <DragAndDropDemo />,
   parameters: {

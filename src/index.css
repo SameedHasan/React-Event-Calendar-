@@ -335,10 +335,16 @@
 
 /* While extending a span, read it as a stretch, not a move */
 .calendar-span-event-shell[data-calendar-resizing] {
-  outline: 2px solid var(--primary-color);
+  outline: 2px dashed color-mix(in srgb, var(--primary-color) 70%, transparent);
   outline-offset: -1px;
   border-radius: 4px;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
-  transition: left 0.05s linear, width 0.05s linear;
+}
+
+/* Live resize target — separate from source shell so failed drops never stick */
+.calendar-span-resize-ghost {
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 18%, transparent);
 }
 

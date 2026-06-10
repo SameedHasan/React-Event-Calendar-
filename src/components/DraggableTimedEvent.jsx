@@ -17,17 +17,19 @@ export default function DraggableTimedEvent({
     style,
     children,
 }) {
-    const { readOnly, onEventDrop, onEventResize, onUpdateEvent } = useCalendarStore(
+    const { readOnly, onEventDrop, onEventResize, onUpdateEvent, disableDrag, disableResize } = useCalendarStore(
         useShallow((state) => ({
             readOnly: state.readOnly,
             onEventDrop: state.onEventDrop,
             onEventResize: state.onEventResize,
             onUpdateEvent: state.callbacks.onUpdateEvent,
+            disableDrag: state.disableDrag,
+            disableResize: state.disableResize,
         }))
     );
     const enabled = isCalendarDnDEnabled({ readOnly, onEventDrop, onEventResize, onUpdateEvent });
-    const canMove = enabled && Boolean(onEventDrop || onUpdateEvent);
-    const canResize = enabled && Boolean(onEventResize || onUpdateEvent);
+    const canMove = enabled && !disableDrag && Boolean(onEventDrop || onUpdateEvent);
+    const canResize = enabled && !disableResize && Boolean(onEventResize || onUpdateEvent);
     const dayKey = dayjs(anchorDay).format('YYYY-MM-DD');
 
     const move = useDraggable({

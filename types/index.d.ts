@@ -83,6 +83,10 @@ export interface CalendarProps {
   onEventClick?: (event: CalendarEvent) => void | boolean;
   onEventDrop?: (payload: EventScheduleChangePayload) => void;
   onEventResize?: (payload: EventScheduleChangePayload) => void;
+  /** Disable moving events via drag-and-drop while keeping other handlers active. Default: false. */
+  disableDrag?: boolean;
+  /** Disable extending/resizing events via the edge handles while keeping other handlers active. Default: false. */
+  disableResize?: boolean;
   onDateClick?: (date: Date) => void | boolean;
   onAddEvent?: (event: CalendarEvent) => void;
   onUpdateEvent?: (event: CalendarEvent) => void;

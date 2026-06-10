@@ -33,6 +33,10 @@ import 'react-event-calendar-suite/style.css';
 
 Types ship with the package at `types/index.d.ts`. No `@types/` package is required.
 
+## v2 drag-and-drop (optional)
+
+Drag-and-drop is off until you pass `onEventDrop`, `onEventResize`, or `onUpdateEvent`. See [migration-v2.md](./migration-v2.md) and the README **Drag-and-drop** section.
+
 ## Examples
 
 - [minimal-vite](../examples/minimal-vite) — smallest Vite setup

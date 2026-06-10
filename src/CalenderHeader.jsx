@@ -58,11 +58,14 @@ function CalendarHeader() {
     const { localeReady, locale } = useLocaleAware();
 
     const views = useMemo(
-        () => VIEW_VALUES.map((value) => ({
-            value,
-            label: getViewLabel(value, locale),
-            icon: VIEW_ICONS[value],
-        })),
+        () => {
+            void localeReady;
+            return VIEW_VALUES.map((value) => ({
+                value,
+                label: getViewLabel(value, locale),
+                icon: VIEW_ICONS[value],
+            }));
+        },
         [locale, localeReady]
     );
 
@@ -84,6 +87,7 @@ function CalendarHeader() {
 
     // Title text shown in the header centre-left
     const titleContent = useMemo(() => {
+        void localeReady;
         switch (view) {
             case 'month':
                 return dayjs(currentDate).format('MMMM YYYY');
@@ -104,6 +108,7 @@ function CalendarHeader() {
 
     // Sub-label (e.g. "Week 23")
     const subLabel = useMemo(() => {
+        void localeReady;
         if (view === 'week' || view === 'list' || view === 'day') {
             return formatWeekLabel(weekRange.count, locale);
         }

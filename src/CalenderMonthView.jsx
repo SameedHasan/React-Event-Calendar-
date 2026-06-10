@@ -4,7 +4,7 @@ import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW, getLocalizedShortDOW, DAY_INDEX_MAP, nowInTz } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getLocalizedShortDOW, DAY_INDEX_MAP, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import RovingTabIndexGroup from './components/RovingTabIndexGroup';
@@ -73,8 +73,9 @@ const CalenderMonthView = () => {
 
     // Build grid: days from startOfWeek of week containing 1st to end of week containing last
     const gridDays = useMemo(() => {
-        const firstDay = current.startOf('month');
-        const lastDay = current.endOf('month');
+        const anchor = dayjs(currentDate);
+        const firstDay = anchor.startOf('month');
+        const lastDay = anchor.endOf('month');
         
         const startOffset = getDayIndex(firstDay.toDate(), startOfWeek);
         const gridStart = firstDay.subtract(startOffset, 'day');
@@ -101,6 +102,7 @@ const CalenderMonthView = () => {
     }, [gridDays]);
 
     const dow = useMemo(() => {
+        void localeReady;
         const baseDOW = getLocalizedShortDOW(startOfWeek);
         if (hideWeekends) {
             // Filter out Sat/Sun — we need their English names as reference, then filter

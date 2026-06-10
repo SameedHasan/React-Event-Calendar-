@@ -6,7 +6,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import localeData from 'dayjs/plugin/localeData';
 import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW, getLocalizedSingleDOW, nowInTz } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex, getLocalizedSingleDOW, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
 
 dayjs.extend(isoWeek);
@@ -21,7 +21,7 @@ dayjs.extend(localeData);
  * before the bundle is ready). This ensures dayjs.months() returns the right names.
  */
 function useLocaleMonths() {
-    const localeReady = useCalendarStore((s) => s.localeReady);
+    useCalendarStore((s) => s.localeReady); // re-render when async locale bundle loads
     // No useMemo — dayjs.months() is O(1) and must be fresh after each locale load
     try {
         const months = dayjs.months();
@@ -31,22 +31,6 @@ function useLocaleMonths() {
         'January', 'February', 'March', 'April',
         'May', 'June', 'July', 'August',
         'September', 'October', 'November', 'December',
-    ];
-}
-
-/**
- * Returns single-letter / short weekday labels for the current dayjs locale.
- * Also depends on localeReady for the same reason as useLocaleMonths.
- */
-function useLocaleMonthsShort() {
-    useCalendarStore((s) => s.localeReady); // subscribe so we re-render when locale changes
-    try {
-        const months = dayjs.monthsShort();
-        if (Array.isArray(months) && months.length === 12) return months;
-    } catch {/* ignore */}
-    return [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
 }
 
@@ -79,7 +63,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
             }
         });
         return map;
-    }, [eventsForYear, days, year, monthNumber]);
+    }, [eventsForYear, days, year, monthNumber, timezone]);
 
     const totalEvents = Object.values(eventMap).reduce((sum, arr) => sum + arr.length, 0);
 
@@ -344,7 +328,7 @@ const CalenderYearView = () => {
             const endYear = toDayjs(e.end, timezone).year();
             return startYear <= currentYear && endYear >= currentYear;
         });
-    }, [currentYear, events]);
+    }, [currentYear, events, timezone]);
 
     const totalYearEvents = eventsForYear.length;
 

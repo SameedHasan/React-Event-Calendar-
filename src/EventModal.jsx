@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Modal, Form, Input, DatePicker, Select, Button, Space, message } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
-import dayjs from 'dayjs';
 import { toDayjs, nowInTz } from './utils/tz';
 
 const { TextArea } = Input;
@@ -60,7 +59,7 @@ export default function EventModal() {
                 range: [start, end],
             });
         }
-    }, [isModalOpen, selectedEvent, prepopulatedStartDate, form, categories, readOnly]);
+    }, [isModalOpen, selectedEvent, prepopulatedStartDate, form, categories, readOnly, timezone]);
 
     const handleCancel = () => {
         closeModal();

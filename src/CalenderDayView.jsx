@@ -6,7 +6,6 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex, nowInTz } from './utils/dateHelpers';
-import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import CalendarViewEmpty from './components/CalendarViewEmpty';
 import DraggableTimedEvent from './components/DraggableTimedEvent';

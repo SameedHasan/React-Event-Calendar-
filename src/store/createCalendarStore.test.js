@@ -82,6 +82,33 @@ describe('createCalendarStore', () => {
     expect(store.getState().events).toEqual([]);
   });
 
+  it('setCurrentDate does not notify parent when notify is false', () => {
+    const onDateChange = vi.fn();
+    const store = createCalendarStore();
+
+    store.getState().setConfigs({ onDateChange });
+    store.getState().setCurrentDate(new Date(2026, 5, 15), { notify: false });
+
+    expect(onDateChange).not.toHaveBeenCalled();
+    expect(new Date(store.getState().currentDate).getTime()).toBe(
+      new Date(2026, 5, 15).getTime()
+    );
+  });
+
+  it('setCurrentDate is a no-op when the date is unchanged', () => {
+    const onDateChange = vi.fn();
+    const store = createCalendarStore();
+    const date = new Date(2026, 5, 15);
+
+    store.getState().setConfigs({ onDateChange });
+    store.getState().setCurrentDate(date);
+    onDateChange.mockClear();
+
+    store.getState().setCurrentDate(new Date(date.getTime()));
+
+    expect(onDateChange).not.toHaveBeenCalled();
+  });
+
   it('navigates months and calls onDateChange', () => {
     const onDateChange = vi.fn();
     const store = createCalendarStore();

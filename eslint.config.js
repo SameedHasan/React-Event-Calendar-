@@ -5,9 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'examples']),
+  globalIgnores(['dist', 'examples', 'storybook-static', 'coverage']),
   {
-    files: ['vite*.config.js', 'vitest.config.js'],
+    files: ['vite*.config.js', 'vitest.config.js', '.storybook/**/*.cjs'],
     languageOptions: {
       globals: globals.node,
     },
@@ -29,7 +29,10 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' },
+      ],
     },
   },
   {

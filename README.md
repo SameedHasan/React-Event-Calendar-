@@ -13,6 +13,18 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history and versioning policy.
 
 ---
 
+## 📖 Storybook
+
+Interactive demos for every major feature — views, controlled mode, theming, and customization slots.
+
+```bash
+npm run storybook
+```
+
+Published build: [GitHub Pages Storybook](https://sameedhasan.github.io/React-Event-Calendar-/) (after the `Storybook` workflow runs on `main`).
+
+---
+
 ## 📁 Examples
 
 | Example | Description |
@@ -21,6 +33,8 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history and versioning policy.
 | [examples/nextjs-app-router](./examples/nextjs-app-router) | Next.js App Router with `"use client"` |
 
 The Vite example bundles from source (no pre-build needed). For npm installs, use `import Calendar from 'react-event-calendar-suite'` directly.
+
+Additional guides: [docs/installation.md](./docs/installation.md) · [docs/ssr-nextjs.md](./docs/ssr-nextjs.md) · [docs/migration-v2.md](./docs/migration-v2.md)
 
 ---
 

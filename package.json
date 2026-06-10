@@ -1,7 +1,7 @@
 {
   "name": "react-event-calendar-suite",
   "private": false,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "A premium, highly performant, and fully customizable React Event Calendar component suite.",
   "keywords": [
     "react",
@@ -62,8 +62,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "ci": "npm run build && npm run lint && npm run test",
-    "preview": "vite preview"
+    "ci": "npm run build && npm run lint && npm run test && npm run build-storybook",
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o storybook-static"
   },
   "peerDependencies": {
     "@ant-design/icons": "^5.0.0 || ^6.0.0",
@@ -76,6 +78,9 @@
   "devDependencies": {
     "@ant-design/icons": "^5.6.1",
     "@eslint/js": "^9.36.0",
+    "@storybook/addon-docs": "^9.1.20",
+    "@storybook/addon-links": "^9.1.20",
+    "@storybook/react-vite": "^9.1.20",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -92,6 +97,7 @@
     "jsdom": "^29.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "storybook": "^9.1.20",
     "vite": "^7.1.7",
     "vitest": "^3.2.4",
     "zustand": "^5.0.8"

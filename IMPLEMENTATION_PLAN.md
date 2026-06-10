@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `1.6.0`  
+**Current version:** `1.7.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -285,13 +285,14 @@ Add an **Accessibility** section to README listing supported shortcuts and ARIA 
 
 ---
 
-## Phase 5 — Docs & Storybook
+## Phase 5 — Docs & Storybook ✅ COMPLETE
 
 **Duration:** 2–3 days  
 **Target release:** `1.7.0`  
-**Breaking changes:** None
+**Breaking changes:** None  
+**Shipped in:** `v1.7.0` (June 10, 2026)
 
-### 5.1 Storybook stories
+### 5.1 Storybook stories ✅
 
 | Story | Demonstrates |
 |-------|--------------|
@@ -303,14 +304,18 @@ Add an **Accessibility** section to README listing supported shortcuts and ARIA 
 | Custom render | `renderEvent` override |
 | Two calendars | Instance isolation proof (Phase 1) |
 
-### 5.2 Docs site (optional — VitePress)
+Run locally: `npm run storybook`. Build: `npm run build-storybook`.
 
-- Installation and peer dependency guide
-- Props reference (generated from `types/`)
-- Migration guide v1 → v2
-- SSR / Next.js App Router guide
+### 5.2 Docs ✅ (lightweight markdown; VitePress deferred)
 
-Publish Storybook to GitHub Pages or Chromatic.
+| Doc | Path |
+|-----|------|
+| Installation & peer deps | `docs/installation.md` |
+| SSR / Next.js App Router | `docs/ssr-nextjs.md` |
+| Migration v1 → v2 (planned) | `docs/migration-v2.md` |
+| Props reference | `types/index.d.ts` |
+
+Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STORYBOOK_BASE=/React-Event-Calendar-/`).
 
 ---
 

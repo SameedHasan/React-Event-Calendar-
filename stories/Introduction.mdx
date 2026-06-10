@@ -1,0 +1,59 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Introduction" />
+
+# react-event-calendar-suite
+
+Interactive demos for the calendar component. Use the **Calendar** stories to explore views, controlled mode, theming, and customization slots.
+
+## Install
+
+```bash
+npm install react-event-calendar-suite
+```
+
+Peer dependencies (install in your app):
+
+```bash
+npm install react react-dom antd @ant-design/icons dayjs zustand
+```
+
+## Quick start
+
+```jsx
+import Calendar from 'react-event-calendar-suite';
+import 'react-event-calendar-suite/style.css';
+
+const events = [
+  {
+    id: 1,
+    title: 'Team sync',
+    start: new Date(2026, 5, 9, 9, 0),
+    end: new Date(2026, 5, 9, 10, 0),
+    type: 'Meeting',
+  },
+];
+
+export function App() {
+  return <Calendar events={events} defaultView="month" />;
+}
+```
+
+## Further reading
+
+- [README](https://github.com/SameedHasan/React-Event-Calendar-/blob/main/README.md) — full props and keyboard shortcuts
+- [types/index.d.ts](https://github.com/SameedHasan/React-Event-Calendar-/blob/main/types/index.d.ts) — TypeScript API
+- [examples/minimal-vite](https://github.com/SameedHasan/React-Event-Calendar-/tree/main/examples/minimal-vite) — Vite integration
+- [examples/nextjs-app-router](https://github.com/SameedHasan/React-Event-Calendar-/tree/main/examples/nextjs-app-router) — Next.js App Router + SSR notes
+
+## Story index
+
+| Story | What it shows |
+| :--- | :--- |
+| **Default** | Month view with sample events |
+| **All Views** | Month / week / day / list / year |
+| **Controlled** | `currentDate` + `view` from parent state |
+| **Read Only** | `readOnly` + `onEventClick` |
+| **Theming** | `primaryColor`, `theme`, CSS variables |
+| **Custom Render** | `renderEvent` override |
+| **Two Calendars** | Per-instance store isolation |

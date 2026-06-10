@@ -132,11 +132,13 @@ const CalendarInner = ({
         setConfigs,
     ]);
 
+    const currentDateTime = currentDate?.getTime?.();
+
     useEffect(() => {
-        if (currentDate) {
-            setCurrentDate(currentDate);
+        if (currentDateTime != null) {
+            setCurrentDate(currentDate, { notify: false });
         }
-    }, [currentDate, setCurrentDate]);
+    }, [currentDate, currentDateTime, setCurrentDate]);
 
     useEffect(() => {
         setStartOfWeek(startOfWeek);

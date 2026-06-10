@@ -212,11 +212,20 @@ export const createCalendarStore = (initialState = {}) => {
             if (state.onDateChange) state.onDateChange(newDate);
         },
 
-        setCurrentDate: (date) => {
+        setCurrentDate: (date, options = { notify: true }) => {
             const newDate = date ? new Date(date) : new Date();
-            set({ currentDate: newDate.toISOString() });
             const state = get();
-            if (state.onDateChange) state.onDateChange(newDate);
+            const prevTime = new Date(state.currentDate).getTime();
+            const nextTime = newDate.getTime();
+
+            if (prevTime === nextTime) {
+                return;
+            }
+
+            set({ currentDate: newDate.toISOString() });
+            if (options.notify !== false && state.onDateChange) {
+                state.onDateChange(newDate);
+            }
         },
 
         setView: (view, options = { notify: true }) => {

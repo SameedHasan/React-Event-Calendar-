@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [1.7.0] - 2026-06-10
+
+### Added
+
+- Storybook 9 with interactive demos: Default, All Views, Controlled, Read Only, Theming, Custom Render, Two Calendars
+- `npm run storybook` and `npm run build-storybook` scripts
+- GitHub Actions workflow to publish Storybook to GitHub Pages
+- `docs/` guides: installation, SSR/Next.js, planned v2 migration
+
+### Changed
+
+- CI now verifies Storybook builds successfully
+
+### Fixed
+
+- Infinite update loop when using controlled `currentDate` with `onDateChange` (prop sync no longer notifies parent; duplicate dates are skipped)
+
 ## [1.6.0] - 2026-06-10
 
 ### Added

@@ -20,13 +20,13 @@
   ],
   "author": "Sameed Hasan",
   "license": "MIT",
-  "homepage": "https://github.com/SameedHasan/React-Event-Calendar-#readme",
+  "homepage": "https://github.com/SameedHasan/React-Event-Calendar#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SameedHasan/React-Event-Calendar-.git"
+    "url": "git+https://github.com/SameedHasan/React-Event-Calendar.git"
   },
   "bugs": {
-    "url": "https://github.com/SameedHasan/React-Event-Calendar-/issues"
+    "url": "https://github.com/SameedHasan/React-Event-Calendar/issues"
   },
   "type": "module",
   "main": "./dist/react-event-calendar-suite.umd.cjs",

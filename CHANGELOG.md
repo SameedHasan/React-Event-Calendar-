@@ -117,9 +117,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial published feature set: 5 views, keyboard shortcuts, ICS export, theming
 
-[1.6.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.5.0...v1.6.0
-[1.5.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.1...v1.4.0
-[1.3.1]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.1.8...v1.3.0
-[1.1.8]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.1.7...v1.1.8
+[1.6.0]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.3.1...v1.4.0
+[1.3.1]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.1.8...v1.3.0
+[1.1.8]: https://github.com/SameedHasan/React-Event-Calendar/compare/v1.1.7...v1.1.8

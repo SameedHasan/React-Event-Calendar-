@@ -315,7 +315,7 @@ Run locally: `npm run storybook`. Build: `npm run build-storybook`.
 | Migration v1 → v2 (planned) | `docs/migration-v2.md` |
 | Props reference | `types/index.d.ts` |
 
-Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STORYBOOK_BASE=/React-Event-Calendar-/`).
+Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STORYBOOK_BASE=/React-Event-Calendar/`).
 
 ---
 

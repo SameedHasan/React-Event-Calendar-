@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Storybook
         env:
-          STORYBOOK_BASE: /React-Event-Calendar-/
+          STORYBOOK_BASE: /React-Event-Calendar/
         run: npm run build-storybook
 
       - name: Upload Pages artifact

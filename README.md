@@ -1,6 +1,6 @@
 # react-event-calendar-suite
 
-[![CI](https://github.com/SameedHasan/React-Event-Calendar-/actions/workflows/ci.yml/badge.svg)](https://github.com/SameedHasan/React-Event-Calendar-/actions/workflows/ci.yml)
+[![CI](https://github.com/SameedHasan/React-Event-Calendar/actions/workflows/ci.yml/badge.svg)](https://github.com/SameedHasan/React-Event-Calendar/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-utils%20%E2%89%A590%25-brightgreen)](vitest.config.js)
 
 A premium, highly performant, and fully customizable React Event Calendar component suite. It offers native CSS-Grid based views (Month, Week, Day, List, Year), dynamic status-color assignment, global store management, and clean navigational controls.
@@ -9,7 +9,7 @@ Ready to be dropped into any React application or published directly as a standa
 
 See [CHANGELOG.md](./CHANGELOG.md) for release history and versioning policy.
 
-![React Event Calendar Suite Screenshot](https://raw.githubusercontent.com/SameedHasan/React-Event-Calendar-/main/public/image.png)
+![React Event Calendar Suite Screenshot](https://raw.githubusercontent.com/SameedHasan/React-Event-Calendar/main/public/image.png)
 
 ---
 
@@ -21,7 +21,7 @@ Interactive demos for every major feature — views, controlled mode, theming, a
 npm run storybook
 ```
 
-Published build: [GitHub Pages Storybook](https://sameedhasan.github.io/React-Event-Calendar-/) (after the `Storybook` workflow runs on `main`).
+Published build: [GitHub Pages Storybook](https://sameedhasan.github.io/React-Event-Calendar/) (after the `Storybook` workflow runs on `main`).
 
 ---
 

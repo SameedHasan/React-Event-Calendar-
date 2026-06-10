@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import useCalendarStore from './store/useCalendarStore';
-import { Typography, Tooltip } from 'antd';
+import { Text } from './components/ui/Text';
+import Tooltip from './components/ui/Tooltip';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
@@ -19,8 +20,6 @@ const buildEventAriaLabel = (event, timeFormat, tz) => {
 };
 
 dayjs.extend(isoWeek);
-
-const { Text } = Typography;
 
 const TooltipContent = ({ events, day, timeFormat, eventColors, timezone }) => (
     <div style={{ padding: '2px 0' }}>

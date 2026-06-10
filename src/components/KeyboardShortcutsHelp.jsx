@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, Typography } from 'antd';
+import Modal from './ui/Modal';
+import { Text } from './ui/Text';
 import { CALENDAR_SHORTCUTS } from '../utils/a11y';
-
-const { Text } = Typography;
 
 export default function KeyboardShortcutsHelp() {
     const [open, setOpen] = useState(false);

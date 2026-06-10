@@ -36,4 +36,4 @@ Open [http://localhost:3000](http://localhost:3000).
 
 4. **Transpile** — `transpilePackages: ['react-event-calendar-suite']` lets Next.js bundle the linked ESM package.
 
-5. **Peer dependencies** — Install `react`, `react-dom`, `antd`, `dayjs`, `zustand`, and `@ant-design/icons` alongside the calendar package.
+5. **Peer dependencies** — Install `react`, `react-dom`, `dayjs`, and `zustand` alongside the calendar package.

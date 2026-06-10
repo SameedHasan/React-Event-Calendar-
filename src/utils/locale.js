@@ -65,50 +65,6 @@ const DAYJS_LOCALE_MAP = {
     'zh-tw': () => import('dayjs/locale/zh-tw'),
 };
 
-// ─── antd locale map ──────────────────────────────────────────────────────────
-// antd 5/6 locale files live at `antd/locale/<Code>`.
-
-const ANTD_LOCALE_MAP = {
-    'ar':    () => import('antd/locale/ar_EG'),
-    'bg':    () => import('antd/locale/bg_BG'),
-    'cs':    () => import('antd/locale/cs_CZ'),
-    'da':    () => import('antd/locale/da_DK'),
-    'de':    () => import('antd/locale/de_DE'),
-    'el':    () => import('antd/locale/el_GR'),
-    'en':    () => import('antd/locale/en_US'),
-    'es':    () => import('antd/locale/es_ES'),
-    'fi':    () => import('antd/locale/fi_FI'),
-    'fr':    () => import('antd/locale/fr_FR'),
-    'he':    () => import('antd/locale/he_IL'),
-    'hi':    () => import('antd/locale/hi_IN'),
-    'hr':    () => import('antd/locale/hr_HR'),
-    'hu':    () => import('antd/locale/hu_HU'),
-    'id':    () => import('antd/locale/id_ID'),
-    'it':    () => import('antd/locale/it_IT'),
-    'ja':    () => import('antd/locale/ja_JP'),
-    'ko':    () => import('antd/locale/ko_KR'),
-    'lt':    () => import('antd/locale/lt_LT'),
-    'lv':    () => import('antd/locale/lv_LV'),
-    'ms':    () => import('antd/locale/ms_MY'),
-    'nb':    () => import('antd/locale/nb_NO'),
-    'nl':    () => import('antd/locale/nl_NL'),
-    'pl':    () => import('antd/locale/pl_PL'),
-    'pt':    () => import('antd/locale/pt_PT'),
-    'pt-br': () => import('antd/locale/pt_BR'),
-    'ro':    () => import('antd/locale/ro_RO'),
-    'ru':    () => import('antd/locale/ru_RU'),
-    'sk':    () => import('antd/locale/sk_SK'),
-    'sl':    () => import('antd/locale/sl_SI'),
-    'sr':    () => import('antd/locale/sr_RS'),
-    'sv':    () => import('antd/locale/sv_SE'),
-    'th':    () => import('antd/locale/th_TH'),
-    'tr':    () => import('antd/locale/tr_TR'),
-    'uk':    () => import('antd/locale/uk_UA'),
-    'vi':    () => import('antd/locale/vi_VN'),
-    'zh-cn': () => import('antd/locale/zh_CN'),
-    'zh-tw': () => import('antd/locale/zh_TW'),
-};
-
 /**
  * Cache of codes already imported so we never double-load.
  * @type {Set<string>}
@@ -163,27 +119,6 @@ export async function loadDayjsLocale(locale) {
     // Apply the locale globally so all dayjs format() calls pick it up
     dayjs.locale(code);
     return code;
-}
-
-/**
- * Loads an Ant Design locale object for a given locale code.
- *
- * @param {string} locale  BCP-47 tag, e.g. 'de', 'fr', 'zh-cn'
- * @returns {Promise<object|null>}  antd locale object, or null for 'en'
- */
-export async function loadAntdLocale(locale) {
-    if (!locale) return null;
-
-    const code = normalise(locale);
-    const loader = ANTD_LOCALE_MAP[code] ?? ANTD_LOCALE_MAP['en'];
-
-    try {
-        const mod = await loader();
-        return mod?.default ?? mod ?? null;
-    } catch (err) {
-        console.warn(`[react-event-calendar] Could not load antd locale "${code}".`, err);
-        return null;
-    }
 }
 
 /**

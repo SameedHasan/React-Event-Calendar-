@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [3.0.0] - 2026-06-10
+
+### Changed (BREAKING)
+
+- **Removed the Ant Design dependency.** The calendar is now fully framework-agnostic and ships self-contained CSS, so it drops into projects using Material UI, Ant Design, Tailwind, Bootstrap, or plain CSS without conflicts.
+- **Peer dependencies removed:** `antd` and `@ant-design/icons` are no longer required (or installed). Remaining peers: `react`, `react-dom`, `dayjs`, `zustand`.
+- All Ant Design components were replaced with self-contained primitives:
+  - `Typography.Text` → internal `Text`
+  - `Tooltip` → internal portal-based `Tooltip`
+  - `Tag` → internal `Tag`
+  - `Spin` → internal `Spinner`
+  - `Modal` / `Modal.confirm` → internal `Modal` + `confirm`
+  - `message` → internal `toast`
+  - `Empty` → inline empty state
+  - `@ant-design/icons` → inline SVG icon set (`src/components/icons.jsx`)
+  - `ConfigProvider` theming + antd locale bundles → removed (theme still driven by `primaryColor` / `theme` props and CSS variables)
+- The event modal's date/time field now uses **`react-datepicker`** (a small, framework-agnostic dependency installed automatically — not a peer dependency).
+
+### Migration
+
+- Remove `antd` and `@ant-design/icons` from your install command if you added them only for this package. The public `Calendar` API (props, callbacks, `renderToolbar`/`renderEvent`/`renderEmpty`, ICS import/export) is unchanged.
+
+---
+
 ## [2.5.0] - 2026-06-10
 
 ### Added

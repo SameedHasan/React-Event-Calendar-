@@ -101,7 +101,7 @@ export interface CalendarProps {
    * When set:
    * - All date / time labels (month names, weekday abbreviations, formatted dates) are
    *   rendered in that locale via dayjs locale bundles.
-   * - Ant Design UI elements (date picker, modals) are rendered in the matching antd locale.
+   * - The event modal's date picker localizes via the active dayjs locale.
    * - `startOfWeek` defaults to the locale's natural week-start day (Mon vs Sun) unless
    *   you explicitly pass the `startOfWeek` prop to override it.
    *

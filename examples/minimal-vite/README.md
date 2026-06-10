@@ -18,7 +18,7 @@ No separate library build is required for this example.
 
 ## What this demonstrates
 
-- Installing peer dependencies (`react`, `antd`, `dayjs`, `zustand`, `@ant-design/icons`)
+- Installing peer dependencies (`react`, `react-dom`, `dayjs`, `zustand`)
 - Importing the calendar component and stylesheet
 - Passing an `events` array with CRUD callbacks
 

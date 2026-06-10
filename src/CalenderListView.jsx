@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
-import { Typography, Empty, Tag } from 'antd';
+import { Text } from './components/ui/Text';
+import Tag from './components/ui/Tag';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
-import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, CalendarOutlined } from './components/icons';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, formatTime, getDayIndex, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
@@ -12,8 +13,6 @@ import useLocaleAware from './hooks/useLocaleAware';
 import { formatWeekLabel } from './utils/locale';
 
 dayjs.extend(isoWeek);
-
-const { Text, Title } = Typography;
 
 const getDayEvents = (date, events, tz) => {
     return events.filter(event => isEventOnDay(event, date, tz));
@@ -328,20 +327,22 @@ const CalenderListView = () => {
             {/* Days with events */}
             {weekEvents.length === 0 ? (
                 renderEmpty ? renderEmpty('list') : (
-                    <Empty
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                            <div style={{ textAlign: 'center' }}>
-                                <Text style={{ fontSize: '15px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                                    No events this week
-                                </Text>
-                                <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                    Navigate to another week to see your schedule
-                                </Text>
-                            </div>
-                        }
-                        style={{ padding: '48px 0' }}
-                    />
+                    <div style={{ padding: '48px 0', textAlign: 'center' }}>
+                        <div style={{
+                            width: '64px', height: '64px', margin: '0 auto 16px',
+                            borderRadius: '50%', background: 'var(--bg-color)',
+                            border: '1px solid var(--border-color)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <CalendarOutlined style={{ fontSize: '28px', color: 'var(--text-secondary)' }} />
+                        </div>
+                        <Text style={{ fontSize: '15px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                            No events this week
+                        </Text>
+                        <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                            Navigate to another week to see your schedule
+                        </Text>
+                    </div>
                 )
             ) : (
                 weekDays.map(day => (

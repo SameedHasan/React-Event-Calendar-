@@ -62,6 +62,6 @@ v2 (`2.0.0`) adds drag-and-drop scheduling. Existing v1 integrations continue to
 | Area | v1 / v2 (current) | Future |
 | :--- | :--- | :--- |
 | Internal file names | `Calender.jsx` (typo) | Renamed to `Calendar.jsx` |
-| Peer deps | Documented ranges | May bump minimum React / antd versions |
+| Peer deps | Documented ranges | May bump minimum React version (note: v3 removed the antd peer dependency) |
 
 We will document any future breaking changes in [CHANGELOG.md](../CHANGELOG.md) before they ship.

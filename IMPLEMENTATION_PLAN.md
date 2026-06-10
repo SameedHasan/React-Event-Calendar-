@@ -18,7 +18,7 @@
 7. [Phase 4 — Accessibility](#phase-4--accessibility)
 8. [Phase 5 — Docs & Storybook](#phase-5--docs--storybook)
 9. [Phase 6 — Advanced calendar features](#phase-6--advanced-calendar-features)
-10. [Phase 7 — Headless split (optional, v3)](#phase-7--headless-split-optional-v3)
+10. [Phase 7 — Remove Ant Design / framework-agnostic](#phase-7--remove-ant-design--framework-agnostic-)
 11. [Timeline](#timeline)
 12. [Versioning strategy](#versioning-strategy)
 13. [Recommended starting point](#recommended-starting-point)
@@ -397,22 +397,35 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 
 ---
 
-## Phase 7 — Headless split (optional, v3)
+## Phase 7 — Remove Ant Design / framework-agnostic ✅
 
-**Duration:** 2–3 weeks  
-**Target release:** `3.0.0`  
-**Only pursue if npm adoption justifies the effort**
+**Status:** Complete  
+**Released:** `3.0.0`
 
-```
-@react-event-calendar/core    ← date math, layout, spanning (no UI)
-react-event-calendar-suite    ← antd UI layer (current package)
-```
+Rather than the originally-proposed headless monorepo split, v3 makes the existing
+single package framework-agnostic by removing the Ant Design dependency entirely,
+so it integrates cleanly with Material UI, Ant Design, Tailwind, Bootstrap, or
+plain CSS.
 
-Benefits:
+What changed:
 
-- Smaller install for non-antd consumers
-- Clearer separation of concerns
-- Easier to add alternative UI adapters (e.g. Tailwind)
+- Dropped `antd` and `@ant-design/icons` peer dependencies.
+- Added self-contained UI primitives under `src/components/ui/` (`Text`, `Tag`,
+  `Tooltip`, `Spinner`, `Modal`, `Button`, `Select`, `confirm`, `toast`) plus an
+  inline SVG icon set (`src/components/icons.jsx`).
+- Rewrote `EventModal.jsx` with native inputs, a swatch color picker, and
+  `react-datepicker` for the date/time fields (a small framework-agnostic
+  dependency installed automatically, not a peer dep).
+- Removed `ConfigProvider` and the antd locale bundle map; theming is driven by
+  `primaryColor` / `theme` props and CSS variables in `index.css`.
+- The visible UI is preserved (no visual regression); only the implementation
+  changed.
+
+Benefits delivered:
+
+- Smaller install, no UI-kit dependency conflicts.
+- Integrates with any styling stack.
+- Lean dist (`react-datepicker` is externalized and bundled by the consumer).
 
 ---
 
@@ -460,6 +473,8 @@ gantt
 | `2.1.0` | Recurring events |
 | `2.2.0` | ICS import |
 | `2.3.0` | Locale / i18n |
+| `2.5.0` | ICS import toolbar button + standalone parser |
+| `3.0.0` | Remove Ant Design — framework-agnostic, self-contained CSS |
 
 ### Semver rules
 

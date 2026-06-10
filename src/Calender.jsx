@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ConfigProvider } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import dayjs from 'dayjs';
 import './index.css';
@@ -16,7 +15,7 @@ import CalendarLoadingOverlay from './components/CalendarLoadingOverlay';
 import CalendarLiveRegion from './components/CalendarLiveRegion';
 import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp';
 import { CALENDAR_KEYSHORTCUTS_ATTR } from './utils/a11y';
-import { loadDayjsLocale, loadAntdLocale, getLocaleWeekStart } from './utils/locale';
+import { loadDayjsLocale, getLocaleWeekStart } from './utils/locale';
 
 const CalendarInner = ({
     events = [],
@@ -60,7 +59,6 @@ const CalendarInner = ({
     style,
 }) => {
     // ── Locale state ──────────────────────────────────────────────────────────
-    const [antdLocale, setAntdLocale] = useState(null);
     const [localeStartOfWeek, setLocaleStartOfWeek] = useState('monday');
     const prevLocale = useRef(null);
 
@@ -114,7 +112,6 @@ const CalendarInner = ({
         prevLocale.current = code;
 
         if (!code) {
-            setAntdLocale(null);
             setLocaleStartOfWeek('monday');
             setLocaleReadyRef.current(null);
             dayjs.locale('en');
@@ -124,13 +121,9 @@ const CalendarInner = ({
 
         let cancelled = false;
         (async () => {
-            const [resolvedDayjs, resolvedAntd] = await Promise.all([
-                loadDayjsLocale(code),
-                loadAntdLocale(code),
-            ]);
+            const resolvedDayjs = await loadDayjsLocale(code);
             if (cancelled) return;
             // loadDayjsLocale already calls dayjs.locale() internally
-            setAntdLocale(resolvedAntd);
             setLocaleStartOfWeek(getLocaleWeekStart(resolvedDayjs));
             // Signal child hooks (useLocaleMonths etc.) that the bundle is ready
             setLocaleReadyRef.current(resolvedDayjs);
@@ -260,38 +253,33 @@ const CalendarInner = ({
     const activeView = controlledView ?? view;
 
     return (
-        <ConfigProvider
-            locale={antdLocale || undefined}
-            theme={{ token: { colorPrimary: primaryColor } }}
+        <div
+            className={['calendar-root', `theme-${theme}`, className].filter(Boolean).join(' ')}
+            role="application"
+            aria-label="Event calendar"
+            aria-keyshortcuts={CALENDAR_KEYSHORTCUTS_ATTR}
+            style={{
+                height: '100%',
+                minHeight: 0,
+                overflow: 'auto',
+                backgroundColor: 'var(--white-color)',
+                transition: 'background-color 0.25s ease, color 0.25s ease',
+                '--primary-color': primaryColor,
+                ...style,
+            }}
         >
-            <div
-                className={['calendar-root', `theme-${theme}`, className].filter(Boolean).join(' ')}
-                role="application"
-                aria-label="Event calendar"
-                aria-keyshortcuts={CALENDAR_KEYSHORTCUTS_ATTR}
-                style={{
-                    height: '100%',
-                    minHeight: 0,
-                    overflow: 'auto',
-                    backgroundColor: 'var(--white-color)',
-                    transition: 'background-color 0.25s ease, color 0.25s ease',
-                    '--primary-color': primaryColor,
-                    ...style,
-                }}
-            >
-                {showToolbar && <CalendarToolbar />}
-                <CalendarLoadingOverlay loading={loading}>
-                    {activeView === 'month' && <CalenderMonthView />}
-                    {activeView === 'week' && <DaysOfWeek />}
-                    {activeView === 'day' && <CalenderDayView />}
-                    {activeView === 'list' && <CalenderListView />}
-                    {activeView === 'year' && <CalenderYearView />}
-                </CalendarLoadingOverlay>
-                {!readOnly && <EventModal />}
-                <CalendarLiveRegion />
-                <KeyboardShortcutsHelp />
-            </div>
-        </ConfigProvider>
+            {showToolbar && <CalendarToolbar />}
+            <CalendarLoadingOverlay loading={loading}>
+                {activeView === 'month' && <CalenderMonthView />}
+                {activeView === 'week' && <DaysOfWeek />}
+                {activeView === 'day' && <CalenderDayView />}
+                {activeView === 'list' && <CalenderListView />}
+                {activeView === 'year' && <CalenderYearView />}
+            </CalendarLoadingOverlay>
+            {!readOnly && <EventModal />}
+            <CalendarLiveRegion />
+            <KeyboardShortcutsHelp />
+        </div>
     );
 };
 

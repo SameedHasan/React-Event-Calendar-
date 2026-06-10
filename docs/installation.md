@@ -10,20 +10,20 @@ Package: [react-event-calendar-suite on npm](https://www.npmjs.com/package/react
 
 ## Peer dependencies
 
-Install these in your application (versions must satisfy the ranges below):
+As of **v3.0.0** the calendar is **framework-agnostic** — it no longer depends on Ant Design or any UI kit, so it drops into projects using MUI, antd, Tailwind, Bootstrap, or plain CSS. Install these in your application (versions must satisfy the ranges below):
 
 | Package | Range |
 | :--- | :--- |
 | `react` | `^18.0.0 \|\| ^19.0.0` |
 | `react-dom` | `^18.0.0 \|\| ^19.0.0` |
-| `antd` | `^5.0.0 \|\| ^6.0.0` |
-| `@ant-design/icons` | `^5.0.0 \|\| ^6.0.0` |
 | `dayjs` | `^1.11.0` |
 | `zustand` | `^5.0.0` |
 
 ```bash
-npm install react react-dom antd @ant-design/icons dayjs zustand
+npm install react react-dom dayjs zustand
 ```
+
+`react-datepicker` (used by the event modal's date/time field) is a regular dependency and is installed automatically — you do not need to add it yourself.
 
 ## Styles
 

@@ -90,6 +90,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 
 ## ✨ Features
 
+- 🧩 **Framework-agnostic** *(v3.0)*: Zero UI-library dependency — no Ant Design or other UI kit. Ships self-contained CSS so it drops cleanly into any project using Material UI, Ant Design, Tailwind, Bootstrap, or plain CSS.
 - 📅 **5 Interactive Views**: Standard Month, Time-Grid Week, Time-Grid Day, Agenda List view, and comprehensive Year overview with mini-calendars.
 - ⚙️ **Localization & Format Settings**: Fully configurable week start day (any day of the week, e.g., `'monday'`, `'sunday'`, `'wednesday'`, etc.) and time format (`'12h'` or `'24h'`) passed directly as props. All grid columns, boundary offsets, hour gutters, time-indicator lines, overnight range formats, and tooltips automatically sync dynamically to these selections.
 - 🔗 **Advanced Spanning & Overnight Support**:
@@ -106,7 +107,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 - 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
 - 📥 **iCal / ICS Import** *(v2.5)*: Import `.ics` files via the toolbar or the standalone `parseICS` utility — supports UTC, local datetimes, all-day events, RRULE, and common VEVENT fields.
 - 🖱️ **Drag-and-drop scheduling** *(v2.0)*: Move and resize events in month, week, and day views — with 15-minute snap on timed grids, both-edge span resize on month/week all-day bars, and optional `disableDrag` / `disableResize` flags.
-- 🌍 **Locale / i18n** *(v2.3)*: Pass any BCP-47 tag (e.g. `'de'`, `'zh-cn'`, `'ja'`) via the `locale` prop to translate month names, weekday abbreviations, and Ant Design UI (date picker, modals). `startOfWeek` auto-derives from the locale when not set explicitly.
+- 🌍 **Locale / i18n** *(v2.3)*: Pass any BCP-47 tag (e.g. `'de'`, `'zh-cn'`, `'ja'`) via the `locale` prop to translate month names, weekday abbreviations, and the event modal's date picker. `startOfWeek` auto-derives from the locale when not set explicitly.
 - 🔁 **Recurring events** *(v2.4)*: Add `recurrence` (RRULE) on events for daily, weekly, or monthly repeats. Instances expand for the visible range only; modal picker + ICS `RRULE` export included.
 
 ---
@@ -198,11 +199,13 @@ Install the package via npm:
 npm install react-event-calendar-suite
 ```
 
-Ensure you have the required peer dependencies installed (`antd` and `@ant-design/icons` v5 or v6):
+Ensure you have the required peer dependencies installed:
 
 ```bash
-npm install react react-dom antd dayjs zustand @ant-design/icons
+npm install react react-dom dayjs zustand
 ```
+
+> **v3 is framework-agnostic.** The calendar no longer depends on Ant Design (or any UI library) — it ships self-contained CSS, so it drops cleanly into apps built with Material UI, Ant Design, Tailwind, Bootstrap, or plain CSS. `react-datepicker` (the event modal's date/time field) is bundled as a regular dependency and installed automatically.
 
 ---
 
@@ -274,7 +277,7 @@ export default App;
 | `startOfWeek` | `'sunday' \| 'monday' \| 'tuesday' \| 'wednesday' \| 'thursday' \| 'friday' \| 'saturday'` | `'monday'` | Configures which weekday the calendar views, headers, and column grids start on (supports any of the 7 weekdays). |
 | `timeFormat` | `'12h' \| '24h'` | `'12h'` | Configures whether hour labels, event cards, overnight ranges, and current-time indicators use a 12-hour (AM/PM) or 24-hour display. |
 | `categories` | `string[]` | `['Meeting', ...]` | Optional. List of event categories/types available for creating or editing events. |
-| `primaryColor` | `string` | `'#1272bf'` | Optional. Configures the primary theme color dynamically across all views and components (including internal Ant Design components). |
+| `primaryColor` | `string` | `'#1272bf'` | Optional. Configures the primary theme color dynamically across all views and built-in UI controls (date picker, event modal, buttons). |
 | `currentDate` | `Date \| string` | `undefined` | Optional. Controls the calendar's currently focused date from the parent. |
 | `onDateChange` | `(date: Date) => void` | `undefined` | Optional. Fires when the active calendar date/range changes. |
 | `onViewChange` | `(view: string) => void` | `undefined` | Optional. Fires when the active calendar view switches. |
@@ -301,7 +304,7 @@ export default App;
 | `style` | `React.CSSProperties` | `undefined` | Optional. Inline styles for the calendar root element. The root uses `height: 100%`, so wrap it in a sized container. |
 | `loading` | `boolean` | `false` | Optional. Shows a spinner overlay on the active view while async data loads. |
 | `timezone` | `string \| null` | `null` | Optional. IANA timezone string (e.g. `'America/New_York'`). Displays all event times in this zone. ICS exports use `DTSTART;TZID=...`. |
-| `locale` | `string \| null` | `null` | Optional. BCP-47 locale tag (e.g. `'de'`, `'fr'`, `'zh-cn'`, `'ja'`). Translates month names, weekday labels, and Ant Design UI components. `startOfWeek` defaults to the locale's natural week-start when not explicitly set. Bundles load asynchronously; the calendar renders in English for a brief moment. |
+| `locale` | `string \| null` | `null` | Optional. BCP-47 locale tag (e.g. `'de'`, `'fr'`, `'zh-cn'`, `'ja'`). Translates month names, weekday labels, and the event modal's date picker. `startOfWeek` defaults to the locale's natural week-start when not explicitly set. Bundles load asynchronously; the calendar renders in English for a brief moment. |
 | `renderEvent` | `(event, context) => ReactNode` | `undefined` | Optional. Custom event chip/card renderer for month, week, day, and list views. |
 | `renderEventTooltip` | `(events, date) => ReactNode` | `undefined` | Optional. Custom tooltip for month view "+X more" overflow. |
 | `renderToolbar` | `(api) => ReactNode` | `undefined` | Optional. Replace the default header toolbar entirely. |
@@ -367,7 +370,7 @@ Pass a **BCP-47 locale tag** via the `locale` prop to translate the entire calen
 | :--- | :--- |
 | Month names | Derived from the dayjs locale bundle (e.g. January → Januar in `'de'`) |
 | Weekday abbreviations | Mon/Tue/… → Mo/Di/… (all 5 views) |
-| Ant Design components | Date picker, confirmation modals, and other antd UI elements |
+| Date / time picker | The event modal's date picker localizes via the active dayjs locale |
 | `startOfWeek` default | Auto-derived from the locale (e.g. Sunday for `'en'`, Monday for most European locales) |
 
 ### Basic usage
@@ -564,7 +567,11 @@ npm run ci            # build + lint + test
 
 ### Is this a FullCalendar alternative for React?
 
-It covers the same core use cases — month/week/day views, timed events, drag-and-drop, recurring rules, and ICS export — as a **lightweight, MIT-licensed** React component. It is a good fit when you already use Ant Design and want a prop-driven API with minimal setup.
+It covers the same core use cases — month/week/day views, timed events, drag-and-drop, recurring rules, and ICS export — as a **lightweight, MIT-licensed** React component. Since v3 it is **framework-agnostic** (no Ant Design or other UI-kit dependency), so it fits any stack — Material UI, Ant Design, Tailwind, Bootstrap, or plain CSS — with a prop-driven API and minimal setup.
+
+### Does it require Ant Design / a specific UI library?
+
+No. As of v3.0.0 the calendar ships self-contained CSS and has **no UI-framework dependency**. It drops into projects using Material UI, Ant Design, Tailwind, Bootstrap, or custom CSS without conflicts.
 
 ### Does it work with Next.js and Vite?
 
@@ -573,16 +580,6 @@ Yes. See [examples/nextjs-app-router](./examples/nextjs-app-router) for App Rout
 ### Is TypeScript supported?
 
 Yes. Types ship in `types/index.d.ts` — no `@types/` package required.
-
-### How do I search for this on npm?
-
-Package name: [`react-event-calendar-suite`](https://www.npmjs.com/package/react-event-calendar-suite). Keywords: `react-calendar`, `react-scheduler`, `event-calendar`, `appointment-calendar`, `drag-and-drop`, `recurring-events`, `ics-export`.
-
-### How do I improve discoverability after publishing?
-
-1. Publish with `npm publish --access public` (first time).
-2. Add GitHub topics: `react`, `calendar`, `scheduler`, `react-component`, `typescript`, `drag-and-drop`, `fullcalendar-alternative`, `event-calendar`.
-3. Link to the [Storybook demo](https://sameedhasan.github.io/React-Event-Calendar/) from your README and portfolio.
 
 ---
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spin } from 'antd';
+import Spinner from './ui/Spinner';
 
 export default function CalendarLoadingOverlay({ loading, children }) {
     return (
@@ -21,7 +21,7 @@ export default function CalendarLoadingOverlay({ loading, children }) {
                     aria-busy="true"
                     aria-live="polite"
                 >
-                    <Spin size="large" />
+                    <Spinner size="large" />
                 </div>
             )}
         </div>

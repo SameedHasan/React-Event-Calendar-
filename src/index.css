@@ -348,3 +348,201 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 18%, transparent);
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Self-contained UI primitives (replacing Ant Design)
+   ────────────────────────────────────────────────────────────────────────── */
+
+@keyframes rec-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Inputs / textarea / native select */
+.rec-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 4px 11px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--white-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.rec-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
+.rec-input:hover {
+  border-color: var(--primary-color);
+}
+
+.rec-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.rec-textarea {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 11px;
+  resize: vertical;
+}
+
+/* Native select wrapper with custom chevron */
+.rec-select {
+  width: 100%;
+}
+
+.rec-select-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 4px 32px 4px 11px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--white-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.rec-select-input:hover {
+  border-color: var(--primary-color);
+}
+
+.rec-select-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.rec-select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--text-secondary);
+  border-bottom: 1.5px solid var(--text-secondary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Buttons */
+.rec-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 4px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--white-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.rec-btn-default:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.rec-btn-primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.rec-btn-primary:hover {
+  background: color-mix(in srgb, var(--primary-color) 85%, #000);
+  border-color: color-mix(in srgb, var(--primary-color) 85%, #000);
+}
+
+.rec-btn-danger {
+  background: var(--white-color);
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+.rec-btn-danger:hover {
+  background: #fff1f0;
+  border-color: #ff7875;
+  color: #ff7875;
+}
+
+.calendar-root.theme-dark .rec-btn-danger:hover,
+.rec-modal-card .rec-btn-danger:hover {
+  background: color-mix(in srgb, #ff4d4f 12%, transparent);
+}
+
+.rec-btn-primary-danger {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+.rec-btn-primary-danger:hover {
+  background: #ff7875;
+  border-color: #ff7875;
+}
+
+/* Keyboard chip */
+.rec-kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--text-primary);
+  background: var(--tag-bg);
+  border: 1px solid var(--border-color);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+/* react-datepicker: make the input fill its grid cell + primary accents */
+.rec-datepicker-wrap,
+.rec-datepicker-wrap .react-datepicker__input-container {
+  display: block;
+  width: 100%;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+  background-color: var(--primary-color) !important;
+}
+
+.react-datepicker__day--in-range,
+.react-datepicker__day--in-selecting-range {
+  background-color: color-mix(in srgb, var(--primary-color) 22%, transparent) !important;
+  color: var(--text-primary);
+}
+
+.react-datepicker__header {
+  background-color: var(--bg-color);
+}
+
+.rec-datepicker-popper {
+  z-index: 1600;
+}
+

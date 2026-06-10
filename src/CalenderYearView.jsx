@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { Typography, Tooltip } from 'antd';
+import { Text } from './components/ui/Text';
+import Tooltip from './components/ui/Tooltip';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import localeData from 'dayjs/plugin/localeData';
-import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, formatTime, getDayIndex, getLocalizedSingleDOW, nowInTz } from './utils/dateHelpers';
 import { toDayjs } from './utils/tz';
@@ -33,8 +33,6 @@ function useLocaleMonths() {
         'September', 'October', 'November', 'December',
     ];
 }
-
-const { Text, Title } = Typography;
 
 // Get all days to display in a month grid (Mon/Sun-first, 6 weeks)
 const getMonthGridDays = (year, month, startOfWeek = 'monday') => {

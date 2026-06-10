@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Typography } from 'antd';
+import { Text } from './components/ui/Text';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -15,8 +15,6 @@ import CalendarDndProvider from './components/CalendarDndProvider';
 import useLocaleAware from './hooks/useLocaleAware';
 
 dayjs.extend(isoWeek);
-
-const { Text } = Typography;
 
 const HOUR_HEIGHT = 56; // px per hour
 const START_HOUR = 0;

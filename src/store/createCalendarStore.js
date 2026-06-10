@@ -54,7 +54,6 @@ export const createCalendarStore = (initialState = {}) => {
         loading: false,
         timezone: null,
         locale: null,
-        antdLocale: null,
         /** Set to the resolved dayjs locale code once the async bundle is loaded. */
         localeReady: null,
         renderEvent: null,

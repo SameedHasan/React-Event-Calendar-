@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { Typography } from 'antd';
+import { Text } from './components/ui/Text';
 import {
     LeftOutlined,
     RightOutlined,
@@ -11,7 +11,7 @@ import {
     DownloadOutlined,
     UploadOutlined,
     PlusOutlined,
-} from '@ant-design/icons';
+} from './components/icons';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { tzLabel } from './utils/tz';
@@ -22,8 +22,6 @@ import useLocaleAware from './hooks/useLocaleAware';
 import { getViewLabel, formatWeekLabel } from './utils/locale';
 
 dayjs.extend(isoWeek);
-
-const { Text } = Typography;
 
 const VIEW_ICONS = {
     month: <CalendarOutlined />,

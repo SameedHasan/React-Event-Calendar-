@@ -5,29 +5,32 @@ import { resolve } from 'path'
 const external = [
   'react',
   'react-dom',
+  'react-dom/client',
   'react/jsx-runtime',
   'react/jsx-dev-runtime',
-  'antd',
   'dayjs',
   'zustand',
   'zustand/react',
   'zustand/vanilla',
   'zustand/react/shallow',
-  '@ant-design/icons',
+  // Bundled into the consumer app (installed automatically via dependencies),
+  // kept out of our dist so it stays lean and tree-shakeable.
+  'react-datepicker',
+  'react-datepicker/dist/react-datepicker.css',
 ]
 
 const globals = {
   react: 'React',
   'react-dom': 'ReactDOM',
+  'react-dom/client': 'ReactDOMClient',
   'react/jsx-runtime': 'jsxRuntime',
   'react/jsx-dev-runtime': 'jsxDevRuntime',
-  antd: 'antd',
   dayjs: 'dayjs',
   zustand: 'zustand',
   'zustand/react': 'zustand',
   'zustand/vanilla': 'zustand',
   'zustand/react/shallow': 'zustand',
-  '@ant-design/icons': 'icons',
+  'react-datepicker': 'ReactDatePicker',
 }
 
 // https://vite.dev/config/

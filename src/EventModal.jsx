@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Modal, Form, Input, DatePicker, Select, Button, Space, message } from 'antd';
 import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
+import { toDayjs, nowInTz } from './utils/tz';
 
 const { TextArea } = Input;
 
@@ -27,6 +28,7 @@ export default function EventModal() {
         categories,
         timeFormat,
         readOnly,
+        timezone,
     } = useCalendarStore();
 
     const is12h = timeFormat !== '24h';
@@ -44,10 +46,10 @@ export default function EventModal() {
                 type: selectedEvent.type || (categories[0] || 'Meeting'),
                 description: selectedEvent.description || '',
                 color: selectedEvent.color || '',
-                range: [dayjs(selectedEvent.start), dayjs(selectedEvent.end)],
+                range: [toDayjs(selectedEvent.start, timezone), toDayjs(selectedEvent.end, timezone)],
             });
         } else {
-            const start = prepopulatedStartDate ? dayjs(prepopulatedStartDate) : dayjs();
+            const start = prepopulatedStartDate ? toDayjs(prepopulatedStartDate, timezone) : nowInTz(timezone);
             const end = start.add(1, 'hour');
 
             form.setFieldsValue({

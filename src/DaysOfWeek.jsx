@@ -4,7 +4,8 @@ import useCalendarStore from './store/useCalendarStore';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex, nowInTz } from './utils/dateHelpers';
+import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import CalendarViewEmpty from './components/CalendarViewEmpty';
 import DraggableTimedEvent from './components/DraggableTimedEvent';
@@ -20,10 +21,10 @@ const HOUR_HEIGHT = 56; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
+const WeekEventBlock = ({ event, dayStart, timeFormat, timezone }) => {
     const { eventColors } = useCalendarStore();
     const cfg = getEventStyle(event, eventColors);
-    const segment = getEventDaySegment(event, dayStart);
+    const segment = getEventDaySegment(event, dayStart, timezone);
     if (!segment) return null;
 
     const startMinutes = segment.start.hour() * 60 + segment.start.minute() - START_HOUR * 60;
@@ -91,7 +92,7 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
                         </div>
                         {height > 36 && (
                             <Text style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
-                                {formatTime(event.start, timeFormat)}–{formatTime(event.end, timeFormat)}
+                                {formatTime(event.start, timeFormat, timezone)}–{formatTime(event.end, timeFormat, timezone)}
                             </Text>
                         )}
                     </div>
@@ -113,8 +114,9 @@ const DaysOfWeek = () => {
         onDateClick,
         allowDateClick,
         eventColors,
+        timezone,
     } = useCalendarStore();
-    const today = dayjs();
+    const today = nowInTz(timezone);
     const containerRef = useRef(null);
 
     const weekDays = useMemo(() => {
@@ -141,16 +143,16 @@ const DaysOfWeek = () => {
     }, []);
 
     const getEventsForDay = (day) =>
-        events.filter(ev => isEventOnDay(ev, day) && !isAllDayOrMultiDay(ev))
+        events.filter(ev => isEventOnDay(ev, day, timezone) && !isAllDayOrMultiDay(ev, timezone))
                .sort((a, b) => new Date(a.start) - new Date(b.start));
 
     const hasAllDayEvents = useMemo(() => {
-        return events.some(ev => isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day)));
-    }, [events, weekDays]);
+        return events.some(ev => isAllDayOrMultiDay(ev, timezone) && weekDays.some(day => isEventOnDay(ev, day, timezone)));
+    }, [events, weekDays, timezone]);
 
     const weekHasEvents = useMemo(
-        () => events.some((ev) => weekDays.some((day) => isEventOnDay(ev, day))),
-        [events, weekDays]
+        () => events.some((ev) => weekDays.some((day) => isEventOnDay(ev, day, timezone))),
+        [events, weekDays, timezone]
     );
 
     const startOfWeekDay = weekDays[0];
@@ -161,14 +163,14 @@ const DaysOfWeek = () => {
         }
         // 1. Get all-day events overlapping with this week
         const weekAllDayEvents = events.filter(ev =>
-            isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day))
+            isAllDayOrMultiDay(ev, timezone) && weekDays.some(day => isEventOnDay(ev, day, timezone))
         );
 
         // 2. Sort by start date (earlier start goes first) and then by duration (longer first)
         const sorted = [...weekAllDayEvents].sort((a, b) => {
-            const diffStart = dayjs(a.start).diff(dayjs(b.start));
+            const diffStart = toDayjs(a.start, timezone).diff(toDayjs(b.start, timezone));
             if (diffStart !== 0) return diffStart;
-            return dayjs(b.end).diff(dayjs(b.start)) - dayjs(a.end).diff(dayjs(a.start));
+            return toDayjs(b.end, timezone).diff(toDayjs(b.start, timezone)) - toDayjs(a.end, timezone).diff(toDayjs(a.start, timezone));
         });
 
         // 3. Assign tracks
@@ -177,16 +179,16 @@ const DaysOfWeek = () => {
             let startCol = 0;
             let endCol = 0;
 
-            if (dayjs(event.start).isBefore(startOfWeekDay, 'day')) {
+            if (toDayjs(event.start, timezone).isBefore(startOfWeekDay, 'day')) {
                 startCol = 0;
             } else {
-                startCol = weekDays.findIndex(d => d.isSame(dayjs(event.start), 'day'));
+                startCol = weekDays.findIndex(d => d.isSame(toDayjs(event.start, timezone), 'day'));
             }
 
-            if (dayjs(event.end).isAfter(weekDays[weekDays.length - 1], 'day')) {
+            if (toDayjs(event.end, timezone).isAfter(weekDays[weekDays.length - 1], 'day')) {
                 endCol = weekDays.length - 1;
             } else {
-                endCol = weekDays.findIndex(d => d.isSame(dayjs(event.end), 'day'));
+                endCol = weekDays.findIndex(d => d.isSame(toDayjs(event.end, timezone), 'day'));
             }
 
             if (startCol === -1 || endCol === -1) {
@@ -220,10 +222,10 @@ const DaysOfWeek = () => {
             allDayEventsWithLayout: layout,
             allDayTracks: tracks
         };
-    }, [events, weekDays, startOfWeekDay, hasAllDayEvents]);
+    }, [events, weekDays, startOfWeekDay, hasAllDayEvents, timezone]);
 
     // Current time indicator
-    const now = dayjs();
+    const now = nowInTz(timezone);
     const currentTimeTop = (now.hour() + now.minute() / 60 - START_HOUR) * HOUR_HEIGHT;
 
     const TIME_GUTTER = 56; // width of time column in px
@@ -460,7 +462,7 @@ const DaysOfWeek = () => {
                                 ))}
                                 {/* Events */}
                                 {dayEvents.map(ev => (
-                                    <WeekEventBlock key={ev.id} event={ev} dayStart={day} timeFormat={timeFormat} />
+                                    <WeekEventBlock key={ev.id} event={ev} dayStart={day} timeFormat={timeFormat} timezone={timezone} />
                                 ))}
                                 {/* Current time line for today */}
                                 {isToday && (

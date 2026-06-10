@@ -4,15 +4,16 @@ import { Typography, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW, nowInTz } from './utils/dateHelpers';
+import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import RovingTabIndexGroup from './components/RovingTabIndexGroup';
 import CalendarDndProvider from './components/CalendarDndProvider';
 import DroppableDayColumn from './components/DroppableDayColumn';
 import DraggableSpanEvent from './components/DraggableSpanEvent';
 
-const buildEventAriaLabel = (event, timeFormat) => {
-    const timeLabel = formatTime(event.start, timeFormat);
+const buildEventAriaLabel = (event, timeFormat, tz) => {
+    const timeLabel = formatTime(event.start, timeFormat, tz);
     return `${event.title}, ${event.type || 'Event'}, ${timeLabel}`;
 };
 
@@ -20,14 +21,14 @@ dayjs.extend(isoWeek);
 
 const { Text } = Typography;
 
-const TooltipContent = ({ events, day, timeFormat, eventColors }) => (
+const TooltipContent = ({ events, day, timeFormat, eventColors, timezone }) => (
     <div style={{ padding: '2px 0' }}>
         <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: '#1e293b' }}>
             All Events ({events.length})
         </div>
         {events.map(ev => {
             const cfg = getEventStyle(ev, eventColors);
-            const isStartDay = dayjs(ev.start).isSame(day, 'day');
+            const isStartDay = toDayjs(ev.start, timezone).isSame(toDayjs(day, timezone), 'day');
             return (
                 <div key={ev.id} style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
@@ -38,7 +39,7 @@ const TooltipContent = ({ events, day, timeFormat, eventColors }) => (
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#1e293b', flex: 1 }}>{ev.title}</span>
                     <span style={{ fontSize: '11px', color: cfg.color, fontWeight: 600 }}>{ev.type}</span>
                     <span style={{ fontSize: '11px', color: '#64748b' }}>
-                        {isStartDay ? formatTime(ev.start, timeFormat) : '← Cont.'}
+                        {isStartDay ? formatTime(ev.start, timeFormat, timezone) : '← Cont.'}
                     </span>
                 </div>
             );
@@ -59,12 +60,13 @@ const CalenderMonthView = () => {
         allowDateClick,
         eventColors,
         renderEventTooltip,
+        timezone,
     } = useCalendarStore();
-    const today = dayjs();
+    const today = nowInTz(timezone);
     const current = dayjs(currentDate);
 
     const getEventsForDate = (date) =>
-        events.filter(ev => isEventOnDay(ev, date))
+        events.filter(ev => isEventOnDay(ev, date, timezone))
                .sort((a, b) => new Date(a.start) - new Date(b.start));
 
     // Build grid: days from startOfWeek of week containing 1st to end of week containing last
@@ -160,13 +162,13 @@ const CalenderMonthView = () => {
 
                     // 1. Get all events overlapping with this week
                     const weekEvents = events.filter(ev =>
-                        filteredWeek.some(day => isEventOnDay(ev, day))
+                        filteredWeek.some(day => isEventOnDay(ev, day, timezone))
                     );
 
                     // 2. Sort events: multi-day first, then single-day by start time
                     const sortedWeekEvents = [...weekEvents].sort((a, b) => {
-                        const isAMulti = dayjs(a.end).diff(dayjs(a.start), 'day') > 0 || isAllDayOrMultiDay(a);
-                        const isBMulti = dayjs(b.end).diff(dayjs(b.start), 'day') > 0 || isAllDayOrMultiDay(b);
+                        const isAMulti = toDayjs(a.end, timezone).diff(toDayjs(a.start, timezone), 'day') > 0 || isAllDayOrMultiDay(a, timezone);
+                        const isBMulti = toDayjs(b.end, timezone).diff(toDayjs(b.start, timezone), 'day') > 0 || isAllDayOrMultiDay(b, timezone);
                         if (isAMulti && !isBMulti) return -1;
                         if (!isAMulti && isBMulti) return 1;
                         return new Date(a.start) - new Date(b.start);
@@ -178,16 +180,16 @@ const CalenderMonthView = () => {
                         let startCol = 0;
                         let endCol = 0;
 
-                        if (dayjs(event.start).isBefore(filteredWeek[0], 'day')) {
+                        if (toDayjs(event.start, timezone).isBefore(filteredWeek[0], 'day')) {
                             startCol = 0;
                         } else {
-                            startCol = filteredWeek.findIndex(d => d.isSame(dayjs(event.start), 'day'));
+                            startCol = filteredWeek.findIndex(d => d.isSame(toDayjs(event.start, timezone), 'day'));
                         }
 
-                        if (dayjs(event.end).isAfter(filteredWeek[filteredWeek.length - 1], 'day')) {
+                        if (toDayjs(event.end, timezone).isAfter(filteredWeek[filteredWeek.length - 1], 'day')) {
                             endCol = filteredWeek.length - 1;
                         } else {
-                            endCol = filteredWeek.findIndex(d => d.isSame(dayjs(event.end), 'day'));
+                            endCol = filteredWeek.findIndex(d => d.isSame(toDayjs(event.end, timezone), 'day'));
                         }
 
                         if (startCol === -1 || endCol === -1) {
@@ -319,7 +321,7 @@ const CalenderMonthView = () => {
                                                     title={
                                                         renderEventTooltip
                                                             ? renderEventTooltip(dayEvents, day.toDate())
-                                                            : <TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} eventColors={eventColors} />
+                                                            : <TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} eventColors={eventColors} timezone={timezone} />
                                                     }
                                                     overlayInnerStyle={{ color: 'var(--text-primary)', background: 'var(--white-color)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
                                                     color="var(--white-color)"
@@ -464,7 +466,7 @@ const CalenderMonthView = () => {
                                                             }}
                                                             onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.97)'; }}
                                                             onMouseLeave={e => { e.currentTarget.style.filter = ''; }}
-                                                            title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
+                                                            title={`${formatTime(event.start, timeFormat, timezone)} - ${event.title}`}
                                                         >
                                                             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color, flexShrink: 0 }} />
                                                             <Text style={{
@@ -473,7 +475,7 @@ const CalenderMonthView = () => {
                                                                 fontWeight: 700,
                                                                 flexShrink: 0,
                                                             }}>
-                                                                {formatTime(event.start, timeFormat)}
+                                                                {formatTime(event.start, timeFormat, timezone)}
                                                             </Text>
                                                             <Text style={{
                                                                 fontSize: '11px',

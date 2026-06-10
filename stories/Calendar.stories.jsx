@@ -286,7 +286,71 @@ export const DragAndDrop = {
 };
 
 // ---------------------------------------------------------------------------
-// 9. Two Calendars — per-instance store isolation
+// 9. Timezone — display events in a different IANA timezone
+// ---------------------------------------------------------------------------
+const TZ_OPTIONS = [
+    { label: 'Local time (default)', value: '' },
+    { label: 'UTC', value: 'UTC' },
+    { label: 'America/New_York (ET)', value: 'America/New_York' },
+    { label: 'America/Los_Angeles (PT)', value: 'America/Los_Angeles' },
+    { label: 'Europe/London (GMT)', value: 'Europe/London' },
+    { label: 'Europe/Berlin (CET)', value: 'Europe/Berlin' },
+    { label: 'Asia/Kolkata (IST)', value: 'Asia/Kolkata' },
+    { label: 'Asia/Tokyo (JST)', value: 'Asia/Tokyo' },
+    { label: 'Australia/Sydney (AEST)', value: 'Australia/Sydney' },
+];
+
+function TimezoneDemo() {
+    const [tz, setTz] = React.useState('America/New_York');
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: 'calc(100vh - 32px)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'system-ui, sans-serif', fontSize: 13 }}>
+                <label htmlFor="tz-select" style={{ fontWeight: 600, color: '#475569' }}>
+                    Timezone:
+                </label>
+                <select
+                    id="tz-select"
+                    value={tz}
+                    onChange={(e) => setTz(e.target.value)}
+                    style={{
+                        padding: '4px 10px', borderRadius: 6, border: '1px solid #e2e8f0',
+                        fontSize: 13, background: '#fff', cursor: 'pointer',
+                    }}
+                >
+                    {TZ_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                </select>
+                <span style={{ color: '#94a3b8', fontSize: 12 }}>
+                    Event times are re-interpreted in the selected zone
+                </span>
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+                <Calendar
+                    events={sampleEvents}
+                    defaultView="week"
+                    currentDate={storyDate}
+                    timezone={tz || null}
+                    readOnly
+                />
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Pass an IANA timezone string via the `timezone` prop to display all event times
+ * in that zone instead of the browser's local time.
+ * The toolbar shows the active zone. ICS exports include `DTSTART;TZID=...`.
+ */
+export const Timezone = {
+    render: () => <TimezoneDemo />,
+    parameters: { controls: { disable: true } },
+};
+
+// ---------------------------------------------------------------------------
+// 10. Two Calendars — per-instance store isolation
 // ---------------------------------------------------------------------------
 function TwoCalendarsDemo() {
   const [leftDate, setLeftDate] = useState(new Date(2026, 5, 9));

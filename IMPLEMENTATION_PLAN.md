@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `2.0.0`  
+**Current version:** `2.2.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -343,17 +343,19 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 - `onUpdateEvent` fallback when drop/resize handlers omitted
 - Storybook **Drag And Drop** story; README + types documented
 
-### 6.2 Timezone support
+### 6.2 Timezone support ✅ COMPLETE
 
 | Task | Details |
 |------|---------|
 | `timezone` prop | IANA string, e.g. `'America/New_York'` |
-| Display | dayjs + `utc` / `timezone` plugins |
-| ICS export | `DTSTART;TZID=` or UTC with `VTIMEZONE` block |
-| Docs | Explain local vs zoned behavior clearly |
+| Display | `toDayjs(date, tz)` / `nowInTz(tz)` helpers wrap all dayjs calls in all five views |
+| ICS export | `DTSTART;TZID=...` when timezone set, UTC otherwise |
+| Toolbar | Active timezone label shown in header sub-line |
+| Docs | README prop table, CHANGELOG v2.2.0, Storybook Timezone story |
 
-**Effort:** ~3–5 days  
-**Release:** `2.0.0`
+**Effort:** ~2 days  
+**Release:** `2.2.0`  
+**Shipped in:** `v2.2.0` (June 10, 2026)
 
 ### 6.3 Locale / i18n
 

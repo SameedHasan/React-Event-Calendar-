@@ -78,6 +78,13 @@ export interface CalendarProps {
   allowDateClick?: boolean;
   readOnly?: boolean;
   loading?: boolean;
+  /**
+   * IANA timezone string, e.g. `'America/New_York'`, `'Europe/London'`, `'Asia/Tokyo'`.
+   * When set, all event times and the "today" indicator are displayed in this timezone.
+   * ICS exports will include `DTSTART;TZID=...` instead of UTC.
+   * Default: `null` (browser local time).
+   */
+  timezone?: string | null;
   eventColors?: Record<string, string>;
   theme?: CalendarTheme;
   onEventClick?: (event: CalendarEvent) => void | boolean;

@@ -5,7 +5,8 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
+import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex, nowInTz } from './utils/dateHelpers';
+import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 import CalendarViewEmpty from './components/CalendarViewEmpty';
 import DraggableTimedEvent from './components/DraggableTimedEvent';
@@ -20,10 +21,10 @@ const HOUR_HEIGHT = 64; // px per hour
 const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
-const DayEventBlock = ({ event, currentDate, timeFormat }) => {
+const DayEventBlock = ({ event, currentDate, timeFormat, timezone }) => {
     const { eventColors } = useCalendarStore();
     const cfg = getEventStyle(event, eventColors);
-    const segment = getEventDaySegment(event, currentDate);
+    const segment = getEventDaySegment(event, currentDate, timezone);
     if (!segment) return null;
 
     const startMin = segment.start.hour() * 60 + segment.start.minute();
@@ -121,7 +122,7 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <ClockCircleOutlined style={{ fontSize: '11px', color: 'var(--text-secondary)' }} />
                         <Text style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                            {formatTime(event.start, timeFormat)} – {formatTime(event.end, timeFormat)}
+                            {formatTime(event.start, timeFormat, timezone)} – {formatTime(event.end, timeFormat, timezone)}
                         </Text>
                     </div>
                     <Text style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>· {durationStr}</Text>
@@ -157,6 +158,7 @@ const CalenderDayView = () => {
         onDateClick,
         allowDateClick,
         eventColors,
+        timezone,
     } = useCalendarStore();
     const containerRef = useRef(null);
 
@@ -181,19 +183,19 @@ const CalenderDayView = () => {
         }
     }, []);
 
-    const today = dayjs();
+    const today = nowInTz(timezone);
     const isToday = currentDate.isSame(today, 'day');
 
     const dayEvents = useMemo(() =>
         events
-            .filter(ev => isEventOnDay(ev, currentDate) && !isAllDayOrMultiDay(ev))
+            .filter(ev => isEventOnDay(ev, currentDate, timezone) && !isAllDayOrMultiDay(ev, timezone))
             .sort((a, b) => new Date(a.start) - new Date(b.start)),
-        [currentDate, events]
+        [currentDate, events, timezone]
     );
 
     const allDayEvents = useMemo(() =>
-        events.filter(ev => isEventOnDay(ev, currentDate) && isAllDayOrMultiDay(ev)),
-        [currentDate, events]
+        events.filter(ev => isEventOnDay(ev, currentDate, timezone) && isAllDayOrMultiDay(ev, timezone)),
+        [currentDate, events, timezone]
     );
 
     const dayHasEvents = dayEvents.length > 0 || allDayEvents.length > 0;
@@ -392,7 +394,7 @@ const CalenderDayView = () => {
 
                         {/* Events */}
                         {dayEvents.map(ev => (
-                            <DayEventBlock key={ev.id} event={ev} currentDate={currentDate} timeFormat={timeFormat} />
+                            <DayEventBlock key={ev.id} event={ev} currentDate={currentDate} timeFormat={timeFormat} timezone={timezone} />
                         ))}
 
                         {/* Current time indicator */}
@@ -414,7 +416,7 @@ const CalenderDayView = () => {
                                     background: 'var(--white-color)', border: '1px solid #fecaca',
                                     padding: '1px 6px', borderRadius: '4px', marginLeft: '4px', flexShrink: 0,
                                 }}>
-                                    {formatTime(now, timeFormat)}
+                                    {formatTime(now, timeFormat, timezone)}
                                 </div>
                             </div>
                         )}

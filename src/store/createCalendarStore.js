@@ -44,6 +44,7 @@ export const createCalendarStore = (initialState = {}) => {
         onEventClick: null,
         onDateClick: null,
         loading: false,
+        timezone: null,
         renderEvent: null,
         renderEventTooltip: null,
         renderToolbar: null,

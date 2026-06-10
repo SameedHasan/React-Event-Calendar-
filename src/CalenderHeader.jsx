@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { tzLabel } from './utils/tz';
 import useCalendarStore from './store/useCalendarStore';
 import { exportEventsToICS } from './utils/icsExport';
 
@@ -47,6 +48,7 @@ function CalendarHeader() {
         openCreateModal,
         showExportButton,
         showAddEventButton,
+        timezone,
     } = useCalendarStore();
 
     // Navigation handlers per view
@@ -207,6 +209,17 @@ function CalendarHeader() {
                             {subLabel}
                         </Text>
                     )}
+                    {timezone && (
+                        <Text style={{
+                            fontSize: '10px', fontWeight: 500,
+                            color: '#94a3b8', letterSpacing: '0.2px',
+                            marginTop: '2px', display: 'block',
+                        }}
+                            title={tzLabel(timezone)}
+                        >
+                            {tzLabel(timezone)}
+                        </Text>
+                    )}
                 </div>
             </div>
 
@@ -252,7 +265,7 @@ function CalendarHeader() {
                 {showExportButton && (
                     <button
                         type="button"
-                        onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite' })}
+                        onClick={() => exportEventsToICS(events, { calendarName: 'React Event Calendar Suite', timezone })}
                         title="Export all events to iCal (.ics)"
                         aria-label="Export all events to iCal"
                         style={{

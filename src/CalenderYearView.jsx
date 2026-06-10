@@ -5,7 +5,8 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex, getShiftedSingleDOW, nowInTz } from './utils/dateHelpers';
+import { toDayjs } from './utils/tz';
 
 dayjs.extend(isoWeek);
 
@@ -19,8 +20,8 @@ const getMonthGridDays = (year, month, startOfWeek = 'monday') => {
     return Array.from({ length: 42 }, (_, i) => gridStart.add(i, 'day'));
 };
 
-const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear, startOfWeek, timeFormat, eventColors }) => {
-    const today = dayjs();
+const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMonth, eventsForYear, startOfWeek, timeFormat, eventColors, timezone }) => {
+    const today = nowInTz(timezone);
     const days = useMemo(() => getMonthGridDays(year, monthNumber, startOfWeek), [year, monthNumber, startOfWeek]);
 
     // Build a map: "YYYY-MM-DD" -> [events]
@@ -30,7 +31,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
             if (day.month() === monthNumber && day.year() === year) {
                 const key = day.format('YYYY-MM-DD');
                 eventsForYear.forEach(event => {
-                    if (isEventOnDay(event, day)) {
+                    if (isEventOnDay(event, day, timezone)) {
                         if (!map[key]) map[key] = [];
                         map[key].push(event);
                     }
@@ -241,7 +242,7 @@ const MiniMonthCalendar = ({ year, monthNumber, monthName, onClick, isCurrentMon
                                                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color }} />
                                                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{ev.title}</span>
                                                     <span style={{ color: 'var(--text-secondary)', marginLeft: 'auto' }}>
-                                                        {formatTime(ev.start, timeFormat)}
+                                                        {formatTime(ev.start, timeFormat, timezone)}
                                                     </span>
                                                 </div>
                                             );
@@ -295,17 +296,17 @@ const MONTHS = [
 ];
 
 const CalenderYearView = () => {
-    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors, renderEmpty } = useCalendarStore();
+    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors, renderEmpty, timezone } = useCalendarStore();
     const currentYear = dayjs(currentDate).year();
-    const today = dayjs();
+    const today = nowInTz(timezone);
     const isCurrentYear = today.year() === currentYear;
     const currentMonth = today.month();
 
     // Filter events for the current year (including events that span across this year)
     const eventsForYear = useMemo(() => {
         return events.filter(e => {
-            const startYear = dayjs(e.start).year();
-            const endYear = dayjs(e.end).year();
+            const startYear = toDayjs(e.start, timezone).year();
+            const endYear = toDayjs(e.end, timezone).year();
             return startYear <= currentYear && endYear >= currentYear;
         });
     }, [currentYear, events]);
@@ -459,6 +460,7 @@ const CalenderYearView = () => {
                         startOfWeek={startOfWeek}
                         timeFormat={timeFormat}
                         eventColors={eventColors}
+                        timezone={timezone}
                     />
                 ))}
             </div>

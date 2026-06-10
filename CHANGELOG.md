@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.2.0] - 2026-06-10
+
+### Added
+
+- **`timezone` prop** — pass any IANA timezone string (e.g. `'America/New_York'`, `'Asia/Tokyo'`) to display all event times in that zone instead of the browser locale. Affects all five views, the event modal pre-fill, and the "today" indicator.
+- ICS export (`showExportButton`) now emits `DTSTART;TZID=...` when `timezone` is set, producing standards-compliant zoned calendar files.
+- Toolbar sub-label shows the active timezone when `timezone` is provided.
+- New **Timezone** Storybook story with an interactive zone picker.
+
+### Changed
+
+- `dayjs/plugin/timezone` is now a bundled dependency (extends the existing `dayjs/plugin/utc` usage).
+
+---
+
 ## [2.1.0] - 2026-06-10
 
 ### Changed

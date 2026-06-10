@@ -1,14 +1,24 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezonePlugin from 'dayjs/plugin/timezone';
 
 dayjs.extend(utc);
+dayjs.extend(timezonePlugin);
 
 /**
- * Converts a dayjs/Date object to an ICS-compatible datetime string.
- * Format: YYYYMMDDTHHMMSSZ (UTC)
+ * Converts a date to an ICS-compatible UTC datetime string.
+ * Format: YYYYMMDDTHHMMSSZ
  */
-const toICSDate = (date) => {
+const toICSDateUTC = (date) => {
     return dayjs(date).utc().format('YYYYMMDDTHHmmss') + 'Z';
+};
+
+/**
+ * Converts a date to an ICS-compatible local datetime string in a given timezone.
+ * Format: YYYYMMDDTHHMMSS (no Z suffix — timezone is conveyed in the property name)
+ */
+const toICSDateLocal = (date, tz) => {
+    return dayjs.tz(date, tz).format('YYYYMMDDTHHmmss');
 };
 
 /**
@@ -58,9 +68,10 @@ const generateUID = (event) => {
  *
  * @param {Array} events - Array of event objects with { id, title, start, end, type?, description? }
  * @param {string} calendarName - Optional calendar name for the PRODID/X-WR-CALNAME
+ * @param {string|null} timezone - IANA timezone string; when set events are written with DTSTART;TZID=...
  * @returns {string} A valid .ics file content string
  */
-export const eventsToICS = (events, calendarName = 'My Calendar') => {
+export const eventsToICS = (events, calendarName = 'My Calendar', timezone = null) => {
     const lines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
@@ -70,17 +81,28 @@ export const eventsToICS = (events, calendarName = 'My Calendar') => {
         'METHOD:PUBLISH',
     ];
 
+    if (timezone) {
+        lines.push(`X-WR-TIMEZONE:${timezone}`);
+    }
+
     events.forEach((event) => {
-        const start = toICSDate(event.start);
-        const end = toICSDate(event.end);
         const uid = generateUID(event);
-        const now = toICSDate(new Date());
+        const now = toICSDateUTC(new Date());
+
+        let dtStart, dtEnd;
+        if (timezone) {
+            dtStart = `DTSTART;TZID=${timezone}:${toICSDateLocal(event.start, timezone)}`;
+            dtEnd = `DTEND;TZID=${timezone}:${toICSDateLocal(event.end, timezone)}`;
+        } else {
+            dtStart = `DTSTART:${toICSDateUTC(event.start)}`;
+            dtEnd = `DTEND:${toICSDateUTC(event.end)}`;
+        }
 
         lines.push('BEGIN:VEVENT');
         lines.push(`UID:${uid}`);
         lines.push(`DTSTAMP:${now}`);
-        lines.push(`DTSTART:${start}`);
-        lines.push(`DTEND:${end}`);
+        lines.push(dtStart);
+        lines.push(dtEnd);
         lines.push(foldLine(`SUMMARY:${escapeICSText(event.title)}`));
 
         if (event.description) {
@@ -141,6 +163,7 @@ export const exportEventsToICS = (events, options = {}) => {
     const {
         calendarName = 'My Calendar',
         filename = 'calendar-events.ics',
+        timezone = null,
     } = options;
 
     if (!events || events.length === 0) {
@@ -148,6 +171,6 @@ export const exportEventsToICS = (events, options = {}) => {
         return;
     }
 
-    const icsContent = eventsToICS(events, calendarName);
+    const icsContent = eventsToICS(events, calendarName, timezone);
     downloadICS(icsContent, filename);
 };

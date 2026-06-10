@@ -5,24 +5,25 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
-import { isEventOnDay, formatTime, getDayIndex } from './utils/dateHelpers';
+import { isEventOnDay, formatTime, getDayIndex, nowInTz } from './utils/dateHelpers';
+import { toDayjs } from './utils/tz';
 import EventRenderer from './components/EventRenderer';
 
 dayjs.extend(isoWeek);
 
 const { Text, Title } = Typography;
 
-const getDayEvents = (date, events) => {
-    return events.filter(event => isEventOnDay(event, date));
+const getDayEvents = (date, events, tz) => {
+    return events.filter(event => isEventOnDay(event, date, tz));
 };
 
-const EventCard = ({ event, date, timeFormat }) => {
+const EventCard = ({ event, date, timeFormat, timezone }) => {
     const { eventColors } = useCalendarStore();
     const config = getEventStyle(event, eventColors);
-    const dayStart = dayjs(date).startOf('day');
-    const dayEnd = dayjs(date).endOf('day');
-    const eventStart = dayjs(event.start);
-    const eventEnd = dayjs(event.end);
+    const dayStart = toDayjs(date, timezone).startOf('day');
+    const dayEnd = toDayjs(date, timezone).endOf('day');
+    const eventStart = toDayjs(event.start, timezone);
+    const eventEnd = toDayjs(event.end, timezone);
 
     const isSpanningFromPrev = eventStart.isBefore(dayStart);
     const isSpanningToNext = eventEnd.isAfter(dayEnd);
@@ -75,10 +76,10 @@ const EventCard = ({ event, date, timeFormat }) => {
             {/* Time column */}
             <div style={{ minWidth: '95px', display: 'flex', flexDirection: 'column', gap: '2px', justifyContent: 'center' }}>
                 <Text style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {isSpanningFromPrev ? eventStart.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventStart, timeFormat)}
+                    {isSpanningFromPrev ? eventStart.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventStart, timeFormat, timezone)}
                 </Text>
                 <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    {isSpanningToNext ? eventEnd.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventEnd, timeFormat)}
+                    {isSpanningToNext ? eventEnd.format(timeFormat === '24h' ? 'MMM D, HH:mm' : 'MMM D, h:mm A') : formatTime(eventEnd, timeFormat, timezone)}
                 </Text>
                 {(isSpanningFromPrev || isSpanningToNext) && (
                     <Text style={{ fontSize: '9px', color: '#e11d48', fontWeight: 700, textTransform: 'uppercase', marginTop: '2px' }}>
@@ -151,8 +152,8 @@ const EventCard = ({ event, date, timeFormat }) => {
     );
 };
 
-const DaySection = ({ date, events, isToday, timeFormat }) => {
-    const dayEvents = getDayEvents(date, events);
+const DaySection = ({ date, events, isToday, timeFormat, timezone }) => {
+    const dayEvents = getDayEvents(date, events, timezone);
     if (dayEvents.length === 0) return null;
 
     return (
@@ -212,7 +213,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
                 {dayEvents
                     .sort((a, b) => new Date(a.start) - new Date(b.start))
                     .map((event) => (
-                        <EventCard key={event.id} event={event} date={date} timeFormat={timeFormat} />
+                        <EventCard key={event.id} event={event} date={date} timeFormat={timeFormat} timezone={timezone} />
                     ))}
             </div>
         </div>
@@ -220,7 +221,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
 };
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors, renderEmpty } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors, renderEmpty, timezone } = useCalendarStore();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
@@ -240,14 +241,14 @@ const CalenderListView = () => {
         return baseDays;
     }, [currentWeek, startOfWeek, hideWeekends]);
 
-    const today = dayjs();
+    const today = nowInTz(timezone);
 
     // Summary stats for the week
     const weekEvents = useMemo(() => {
         return events.filter(event => {
-            return weekDays.some(wd => isEventOnDay(event, wd));
+            return weekDays.some(wd => isEventOnDay(event, wd, timezone));
         });
-    }, [weekDays, events]);
+    }, [weekDays, events, timezone]);
 
     const typeCounts = useMemo(() => {
         const counts = {};
@@ -341,6 +342,7 @@ const CalenderListView = () => {
                         events={events}
                         isToday={day.isSame(today, 'day')}
                         timeFormat={timeFormat}
+                        timezone={timezone}
                     />
                 ))
             )}

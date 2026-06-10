@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [2.5.0] - 2026-06-10
+
+### Added
+
+- **ICS import** — `parseICS(content)` utility exported at `react-event-calendar-suite/utils/icsImport`
+- Lightweight RFC 5545 parser: VEVENT fields (SUMMARY, DTSTART, DTEND, DESCRIPTION, CATEGORIES, LOCATION, RRULE), folded lines, UTC/local datetimes, all-day events, DURATION
+- **`showImportButton`** prop (default `false`) — toolbar Import button with hidden file input
+- **`onImportEvents`** callback for controlled import; uncontrolled mode merges into internal `sourceEvents`
+- **`CalendarToolbarApi.importEvents`** — programmatic file picker via `useToolbarApi` / `renderToolbar`
+- Interactive Storybook story updated with import enabled
+
+---
+
 ## [2.4.1] - 2026-06-10
 
 ### Changed

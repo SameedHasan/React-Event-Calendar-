@@ -76,10 +76,12 @@ function InteractiveDemo() {
         startOfWeek="monday"
         showAddEventButton
         showExportButton
+        showImportButton
         allowDateClick
         onAddEvent={(ev) => setEvents((prev) => [...prev, ev])}
         onUpdateEvent={(ev) => setEvents((prev) => prev.map((e) => (e.id === ev.id ? ev : e)))}
         onDeleteEvent={(id) => setEvents((prev) => prev.filter((e) => e.id !== id))}
+        onImportEvents={(imported) => setEvents((prev) => [...prev, ...imported])}
       />
     </div>
   );
@@ -87,7 +89,7 @@ function InteractiveDemo() {
 
 /**
  * Opt-in CRUD — enable editing by passing `onAddEvent`, `onUpdateEvent`, `onDeleteEvent`.
- * `showAddEventButton` and `showExportButton` must also be set to `true`.
+ * `showAddEventButton`, `showExportButton`, and `showImportButton` must also be set to `true`.
  */
 export const Interactive = {
   render: () => <InteractiveDemo />,

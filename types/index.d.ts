@@ -61,7 +61,9 @@ export interface CalendarToolbarApi {
   next: () => void;
   openCreateModal: () => void;
   exportEvents: () => void;
+  importEvents: () => void;
   showExportButton: boolean;
+  showImportButton: boolean;
   showAddEventButton: boolean;
   readOnly: boolean;
 }
@@ -81,6 +83,8 @@ export interface CalendarProps {
   showWeekNumbers?: boolean;
   showToolbar?: boolean;
   showExportButton?: boolean;
+  /** Renders the toolbar "Import" iCal button. Opt-in. Default: `false`. */
+  showImportButton?: boolean;
   showAddEventButton?: boolean;
   allowDateClick?: boolean;
   readOnly?: boolean;
@@ -119,6 +123,8 @@ export interface CalendarProps {
   onAddEvent?: (event: CalendarEvent) => void;
   onUpdateEvent?: (event: CalendarEvent) => void;
   onDeleteEvent?: (id: string | number) => void;
+  /** Called when the user imports a .ics file via the toolbar. Receives parsed master events. */
+  onImportEvents?: (events: CalendarEvent[]) => void;
   renderEvent?: (event: CalendarEvent, context: EventRenderContext) => ReactNode;
   renderEventTooltip?: (events: CalendarEvent[], date: Date) => ReactNode;
   renderToolbar?: (api: CalendarToolbarApi) => ReactNode;

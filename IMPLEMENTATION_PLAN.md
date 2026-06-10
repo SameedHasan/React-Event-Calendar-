@@ -383,16 +383,17 @@ Storybook published via `.github/workflows/storybook.yml` to GitHub Pages (`STOR
 **Release:** `2.4.0`  
 **Shipped in:** `v2.4.0` (June 10, 2026)
 
-### 6.5 ICS import
+### 6.5 ICS import ✅
 
 | Task | Details |
 |------|---------|
-| `parseICS(content: string): CalendarEvent[]` | New util export at `./utils/icsImport` |
-| Toolbar | Optional import button via `showImportButton` prop |
-| Dependency | `ical.js` or lightweight RFC 5545 parser |
+| `parseICS(content: string): CalendarEvent[]` | `src/utils/icsImport.js` — exported at `./utils/icsImport` |
+| Toolbar | `showImportButton` prop (default `false`) + `onImportEvents` callback |
+| Parser | Lightweight RFC 5545 parser (no extra dependency) |
 
 **Effort:** ~3–4 days  
-**Release:** `2.2.0`
+**Release:** `2.5.0`  
+**Shipped in:** `v2.5.0` (June 10, 2026)
 
 ---
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Typography } from 'antd';
 import {
     LeftOutlined,
@@ -9,6 +9,7 @@ import {
     FieldTimeOutlined,
     TableOutlined,
     DownloadOutlined,
+    UploadOutlined,
     PlusOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -16,6 +17,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { tzLabel } from './utils/tz';
 import useCalendarStore from './store/useCalendarStore';
 import { exportEventsToICS } from './utils/icsExport';
+import { parseICSFile } from './utils/icsImport';
 import useLocaleAware from './hooks/useLocaleAware';
 import { getViewLabel, formatWeekLabel } from './utils/locale';
 
@@ -51,9 +53,13 @@ function CalendarHeader() {
         sourceEvents,
         openCreateModal,
         showExportButton,
+        showImportButton,
         showAddEventButton,
+        importEvents,
         timezone,
     } = useCalendarStore();
+
+    const importInputRef = useRef(null);
 
     const { localeReady, locale } = useLocaleAware();
 
@@ -279,6 +285,59 @@ function CalendarHeader() {
                         <PlusOutlined style={{ fontSize: '14px' }} />
                         <span>Add Event</span>
                     </button>
+                )}
+
+                {/* Import button */}
+                {showImportButton && (
+                    <>
+                        <input
+                            ref={importInputRef}
+                            type="file"
+                            accept=".ics,text/calendar"
+                            style={{ display: 'none' }}
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                e.target.value = '';
+                                if (!file) return;
+                                const parsed = await parseICSFile(file);
+                                importEvents(parsed);
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => importInputRef.current?.click()}
+                            title="Import events from iCal (.ics)"
+                            aria-label="Import events from iCal"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '6px 14px',
+                                borderRadius: '10px',
+                                border: '1.5px solid var(--border-color)',
+                                background: 'var(--white-color)',
+                                color: 'var(--text-secondary)',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.18s ease',
+                                lineHeight: '20px',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.borderColor = 'var(--primary-color)';
+                                e.currentTarget.style.color = 'var(--primary-color)';
+                                e.currentTarget.style.background = 'var(--color-active-menu-bg)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.borderColor = 'var(--border-color)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                                e.currentTarget.style.background = 'var(--white-color)';
+                            }}
+                        >
+                            <UploadOutlined style={{ fontSize: '14px' }} />
+                            <span>Import</span>
+                        </button>
+                    </>
                 )}
 
                 {/* Export button */}

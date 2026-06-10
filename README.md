@@ -81,6 +81,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 | :--- | :--- | :--- |
 | Add / edit / delete | off (no modal) | `onAddEvent` + `onUpdateEvent` + `onDeleteEvent` |
 | Export button | off | `showExportButton={true}` |
+| Import button | off | `showImportButton={true}` + `onImportEvents` (controlled) |
 | Drag-and-drop | off | `onEventDrop` handler |
 | Event resize / extend | off | `onEventResize` handler |
 | Date click to create | on | `allowDateClick={false}` to turn off |
@@ -103,6 +104,7 @@ The calendar is a **display component by default** — pass `events` and it rend
 - 🔍 **Tooltips & Detailed Aggregates**: Auto-calculating status legends, busy metrics, real-time current time tracker lines, and clean tooltip overlays for overlapping event blocks.
 - ⌨️ **Keyboard Shortcuts**: Built-in keyboard navigation for fast, mouse-free control — switch views, navigate periods, and jump to today instantly.
 - 📤 **iCal / ICS Export**: Export calendar events directly to standard iCalendar (`.ics`) format, ready to be imported into Google Calendar, Apple Calendar, or Outlook.
+- 📥 **iCal / ICS Import** *(v2.5)*: Import `.ics` files via the toolbar or the standalone `parseICS` utility — supports UTC, local datetimes, all-day events, RRULE, and common VEVENT fields.
 - 🖱️ **Drag-and-drop scheduling** *(v2.0)*: Move and resize events in month, week, and day views — with 15-minute snap on timed grids, both-edge span resize on month/week all-day bars, and optional `disableDrag` / `disableResize` flags.
 - 🌍 **Locale / i18n** *(v2.3)*: Pass any BCP-47 tag (e.g. `'de'`, `'zh-cn'`, `'ja'`) via the `locale` prop to translate month names, weekday abbreviations, and Ant Design UI (date picker, modals). `startOfWeek` auto-derives from the locale when not set explicitly.
 - 🔁 **Recurring events** *(v2.4)*: Add `recurrence` (RRULE) on events for daily, weekly, or monthly repeats. Instances expand for the visible range only; modal picker + ICS `RRULE` export included.
@@ -159,6 +161,31 @@ exportEventsToICS(events, {
   calendarName: 'React Event Calendar Suite',
   filename: 'calendar-events.ics'
 });
+```
+
+## 📥 Importing from iCalendar (iCal / ICS)
+
+Import events from `.ics` files via the toolbar or programmatically.
+
+- **Header Toolbar Button:** Set `showImportButton={true}`. In controlled mode, pass `onImportEvents` to merge parsed events into your state.
+- **Standalone Import API:**
+
+```javascript
+import { parseICS, parseICSFile } from 'react-event-calendar-suite/utils/icsImport';
+
+// Parse a string
+const events = parseICS(icsContent);
+
+// Parse a File from an <input type="file" />
+const imported = await parseICSFile(file);
+```
+
+```jsx
+<Calendar
+  events={events}
+  showImportButton
+  onImportEvents={(imported) => setEvents((prev) => [...prev, ...imported])}
+/>
 ```
 
 ---
@@ -255,6 +282,7 @@ export default App;
 | `showWeekNumbers` | `boolean` | `false` | Optional. Shows the week number column on Month and Week views. |
 | `showToolbar` | `boolean` | `true` | Optional. Renders the main header navigation toolbar. |
 | `showExportButton` | `boolean` | `false` | Optional. Renders the toolbar "Export" iCal button. Opt-in. |
+| `showImportButton` | `boolean` | `false` | Optional. Renders the toolbar "Import" iCal button. Opt-in. Use with `onImportEvents` in controlled mode. |
 | `showAddEventButton` | `boolean` | `true` | Optional. Renders the toolbar "+ Add Event" button. |
 | `allowDateClick` | `boolean` | `true` | Optional. Enables/disables the click-to-add event action on empty day slots. |
 | `eventColors` | `object` | `{}` | Optional. Custom color overrides per category (e.g. `{ Meeting: '#ef4444' }`). |
@@ -268,6 +296,7 @@ export default App;
 | `onAddEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when a new event is created. If not provided, updates local state automatically. |
 | `onUpdateEvent` | `(event: CalendarEvent) => void` | `undefined` | Optional. Callback triggered when an existing event is edited. If not provided, updates local state automatically. |
 | `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local state automatically. |
+| `onImportEvents` | `(events: CalendarEvent[]) => void` | `undefined` | Optional. Callback when the user imports a `.ics` file. If not provided, merges into internal state automatically. |
 | `className` | `string` | `undefined` | Optional. Additional CSS class names for the calendar root element. |
 | `style` | `React.CSSProperties` | `undefined` | Optional. Inline styles for the calendar root element. The root uses `height: 100%`, so wrap it in a sized container. |
 | `loading` | `boolean` | `false` | Optional. Shows a spinner overlay on the active view while async data loads. |

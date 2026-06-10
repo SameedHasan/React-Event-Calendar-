@@ -1,8 +1,8 @@
 {
   "name": "react-event-calendar-suite",
   "private": false,
-  "version": "2.4.1",
-  "description": "React event calendar & scheduler — month/week/day/list/year views, drag-and-drop, recurring events (RRULE), i18n, timezone, ICS export. TypeScript, React 18/19, Vite & Next.js.",
+  "version": "2.5.0",
+  "description": "React event calendar & scheduler — month/week/day/list/year views, drag-and-drop, recurring events (RRULE), i18n, timezone, ICS import & export. TypeScript, React 18/19, Vite & Next.js.",
   "keywords": [
     "react",
     "react-calendar",
@@ -29,6 +29,7 @@
     "recurring-events",
     "rrule",
     "ics-export",
+    "ics-import",
     "ical",
     "icalendar",
     "timezone",
@@ -75,6 +76,11 @@
       "types": "./types/utils/icsExport.d.ts",
       "import": "./dist/utils/icsExport.js",
       "require": "./dist/utils/icsExport.cjs"
+    },
+    "./utils/icsImport": {
+      "types": "./types/utils/icsImport.d.ts",
+      "import": "./dist/utils/icsImport.js",
+      "require": "./dist/utils/icsImport.cjs"
     },
     "./dist/react-event-calendar-suite.css": "./dist/react-event-calendar-suite.css",
     "./style.css": "./dist/react-event-calendar-suite.css"

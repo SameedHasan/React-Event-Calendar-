@@ -43,6 +43,7 @@ export const createCalendarStore = (initialState = {}) => {
         showWeekNumbers: false,
         showToolbar: true,
         showExportButton: false,
+        showImportButton: false,
         showAddEventButton: true,
         allowDateClick: true,
         readOnly: false,
@@ -68,6 +69,7 @@ export const createCalendarStore = (initialState = {}) => {
             onAddEvent: null,
             onUpdateEvent: null,
             onDeleteEvent: null,
+            onImportEvents: null,
         },
 
         setLocaleReady: (code) => set({ localeReady: code }),
@@ -167,6 +169,26 @@ export const createCalendarStore = (initialState = {}) => {
                 state.callbacks.onDeleteEvent(eventId);
             } else {
                 set({ sourceEvents: state.sourceEvents.filter((e) => e.id !== eventId) });
+                get().recomputeExpandedEvents();
+            }
+        },
+
+        importEvents: (importedEvents) => {
+            if (get().readOnly) return;
+            if (!Array.isArray(importedEvents) || importedEvents.length === 0) return;
+
+            const state = get();
+            const normalized = importedEvents.map((event, index) => ({
+                ...event,
+                id: event.id ?? `imported-${Date.now()}-${index}`,
+                start: event.start instanceof Date ? event.start : new Date(event.start),
+                end: event.end instanceof Date ? event.end : new Date(event.end),
+            }));
+
+            if (state.callbacks.onImportEvents) {
+                state.callbacks.onImportEvents(normalized);
+            } else {
+                set({ sourceEvents: [...state.sourceEvents, ...normalized] });
                 get().recomputeExpandedEvents();
             }
         },

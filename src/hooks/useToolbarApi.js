@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import useCalendarStore from '../store/useCalendarStore';
 import { exportEventsToICS } from '../utils/icsExport';
+import { pickAndParseICSFile } from '../utils/icsImport';
 import { navigateNext, navigatePrev } from './useKeyboardShortcuts';
 
 export function useToolbarApi() {
@@ -22,7 +23,9 @@ export function useToolbarApi() {
         handleNextandPrevDay,
         openCreateModal,
         showExportButton,
+        showImportButton,
         showAddEventButton,
+        importEvents,
         readOnly,
     } = useCalendarStore();
 
@@ -56,6 +59,13 @@ export function useToolbarApi() {
         exportEventsToICS(sourceEvents, { calendarName: 'React Event Calendar Suite' });
     }, [sourceEvents]);
 
+    const importEventsFromFile = useCallback(async () => {
+        const parsed = await pickAndParseICSFile();
+        if (parsed?.length) {
+            importEvents(parsed);
+        }
+    }, [importEvents]);
+
     return useMemo(() => ({
         view,
         currentDate: new Date(currentDate),
@@ -67,7 +77,9 @@ export function useToolbarApi() {
         next,
         openCreateModal: () => openCreateModal(null),
         exportEvents,
+        importEvents: importEventsFromFile,
         showExportButton,
+        showImportButton,
         showAddEventButton,
         readOnly,
     }), [
@@ -81,7 +93,9 @@ export function useToolbarApi() {
         next,
         openCreateModal,
         exportEvents,
+        importEventsFromFile,
         showExportButton,
+        showImportButton,
         showAddEventButton,
         readOnly,
     ]);

@@ -7,10 +7,13 @@ export default defineConfig({
     emptyOutDir: false,
     outDir: 'dist/utils',
     lib: {
-      entry: resolve(__dirname, 'src/utils/icsExport.js'),
-      name: 'ReactEventCalendarSuiteICS',
+      entry: {
+        icsExport: resolve(__dirname, 'src/utils/icsExport.js'),
+        icsImport: resolve(__dirname, 'src/utils/icsImport.js'),
+      },
       formats: ['es', 'cjs'],
-      fileName: (format) => `icsExport.${format === 'es' ? 'js' : 'cjs'}`,
+      fileName: (format, entryName) =>
+        `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
       external: ['dayjs'],

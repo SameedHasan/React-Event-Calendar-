@@ -29,6 +29,7 @@ const CalendarInner = ({
     onAddEvent,
     onUpdateEvent,
     onDeleteEvent,
+    onImportEvents,
     currentDate,
     onDateChange,
     onViewChange,
@@ -36,6 +37,7 @@ const CalendarInner = ({
     showWeekNumbers = false,
     showToolbar = true,
     showExportButton = false,
+    showImportButton = false,
     showAddEventButton = true,
     allowDateClick = true,
     readOnly = false,
@@ -160,8 +162,8 @@ const CalendarInner = ({
     ]);
 
     useEffect(() => {
-        setCallbacks({ onAddEvent, onUpdateEvent, onDeleteEvent });
-    }, [onAddEvent, onUpdateEvent, onDeleteEvent, setCallbacks]);
+        setCallbacks({ onAddEvent, onUpdateEvent, onDeleteEvent, onImportEvents });
+    }, [onAddEvent, onUpdateEvent, onDeleteEvent, onImportEvents, setCallbacks]);
 
     useEffect(() => {
         if (categories) {
@@ -177,6 +179,7 @@ const CalendarInner = ({
             showWeekNumbers,
             showToolbar,
             showExportButton,
+            showImportButton: readOnly ? false : showImportButton,
             showAddEventButton: readOnly ? false : showAddEventButton,
             allowDateClick: readOnly ? false : allowDateClick,
             readOnly,
@@ -203,6 +206,7 @@ const CalendarInner = ({
         showWeekNumbers,
         showToolbar,
         showExportButton,
+        showImportButton,
         showAddEventButton,
         allowDateClick,
         readOnly,

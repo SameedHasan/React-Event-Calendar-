@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
+import EventRenderer from './components/EventRenderer';
+import CalendarViewEmpty from './components/CalendarViewEmpty';
 
 dayjs.extend(isoWeek);
 
@@ -15,7 +17,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
-    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const { eventColors } = useCalendarStore();
     const cfg = getEventStyle(event, eventColors);
     const segment = getEventDaySegment(event, dayStart);
     if (!segment) return null;
@@ -24,31 +26,35 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
     const top = (startMinutes / 60) * HOUR_HEIGHT;
     const height = Math.max((segment.durationMinutes / 60) * HOUR_HEIGHT, 22);
 
+    const blockStyle = {
+        position: 'absolute',
+        top: `${top}px`,
+        left: '3px',
+        right: '3px',
+        height: `${height}px`,
+        background: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        borderLeft: `3px solid ${cfg.color}`,
+        borderRadius: '6px',
+        padding: '3px 5px',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        zIndex: 2,
+        transition: 'all 0.15s ease',
+        boxSizing: 'border-box',
+    };
+
     return (
-        <div style={{
-            position: 'absolute',
-            top: `${top}px`,
-            left: '3px', right: '3px',
-            height: `${height}px`,
-            background: cfg.bg,
-            border: `1px solid ${cfg.border}`,
-            borderLeft: `3px solid ${cfg.color}`,
-            borderRadius: '6px',
-            padding: '3px 5px',
-            overflow: 'hidden',
-            cursor: 'pointer',
-            zIndex: 2,
-            transition: 'all 0.15s ease',
-            boxSizing: 'border-box',
-        }}
-        onClick={(e) => {
-            e.stopPropagation();
-            if (onEventClick) {
-                const res = onEventClick(event);
-                if (res === false) return;
-            }
-            openEditModal(event);
-        }}
+        <EventRenderer
+            event={event}
+            view="week"
+            date={dayStart}
+            wrapperStyle={blockStyle}
+        >
+            {({ onClick }) => (
+        <div
+            style={blockStyle}
+            onClick={onClick}
         onMouseEnter={e => {
             e.currentTarget.style.boxShadow = `0 2px 10px ${cfg.color}40`;
             e.currentTarget.style.zIndex = '10';
@@ -73,6 +79,8 @@ const WeekEventBlock = ({ event, dayStart, timeFormat }) => {
                 </Text>
             )}
         </div>
+            )}
+        </EventRenderer>
     );
 };
 
@@ -84,9 +92,7 @@ const DaysOfWeek = () => {
         startOfWeek,
         timeFormat,
         openCreateModal,
-        openEditModal,
         hideWeekends,
-        onEventClick,
         onDateClick,
         allowDateClick,
         eventColors,
@@ -124,6 +130,11 @@ const DaysOfWeek = () => {
     const hasAllDayEvents = useMemo(() => {
         return events.some(ev => isAllDayOrMultiDay(ev) && weekDays.some(day => isEventOnDay(ev, day)));
     }, [events, weekDays]);
+
+    const weekHasEvents = useMemo(
+        () => events.some((ev) => weekDays.some((day) => isEventOnDay(ev, day))),
+        [events, weekDays]
+    );
 
     const startOfWeekDay = weekDays[0];
 
@@ -269,52 +280,57 @@ const DaysOfWeek = () => {
                             const style = getEventStyle(event, eventColors);
                             const leftPct = (startCol / weekDays.length) * 100;
                             const widthPct = ((endCol - startCol + 1) / weekDays.length) * 100;
+                            const contextDay = weekDays[startCol];
+
+                            const barStyle = {
+                                position: 'absolute',
+                                top: `${track * 28 + 6}px`,
+                                left: `calc(${leftPct}% + 4px)`,
+                                width: `calc(${widthPct}% - 8px)`,
+                                height: '22px',
+                                background: style.bg,
+                                border: `1px solid ${style.border}`,
+                                borderLeft: `4px solid ${style.color}`,
+                                borderRadius: '4px',
+                                padding: '0 8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                boxSizing: 'border-box',
+                                cursor: 'pointer',
+                                zIndex: 10,
+                            };
 
                             return (
-                                <div
+                                <EventRenderer
                                     key={event.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (onEventClick) {
-                                            const res = onEventClick(event);
-                                            if (res === false) return;
-                                        }
-                                        openEditModal(event);
-                                    }}
-                                    style={{
-                                        position: 'absolute',
-                                        top: `${track * 28 + 6}px`,
-                                        left: `calc(${leftPct}% + 4px)`,
-                                        width: `calc(${widthPct}% - 8px)`,
-                                        height: '22px',
-                                        background: style.bg,
-                                        border: `1px solid ${style.border}`,
-                                        borderLeft: `4px solid ${style.color}`,
-                                        borderRadius: '4px',
-                                        padding: '0 8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        boxSizing: 'border-box',
-                                        cursor: 'pointer',
-                                        zIndex: 10,
-                                    }}
-                                    title={`${event.title} - ${event.description || ''}`}
+                                    event={event}
+                                    view="week"
+                                    date={contextDay.toDate()}
+                                    wrapperStyle={barStyle}
                                 >
-                                    <Text style={{
-                                        fontSize: '11px',
-                                        fontWeight: 700,
-                                        color: 'var(--text-primary)',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                    }}>
-                                        {event.title}
-                                    </Text>
-                                    <span style={{ fontSize: '10px', color: style.color, fontWeight: 700, flexShrink: 0, marginLeft: '6px' }}>
-                                        {event.type}
-                                    </span>
-                                </div>
+                                    {({ onClick }) => (
+                                        <div
+                                            onClick={onClick}
+                                            style={barStyle}
+                                            title={`${event.title} - ${event.description || ''}`}
+                                        >
+                                            <Text style={{
+                                                fontSize: '11px',
+                                                fontWeight: 700,
+                                                color: 'var(--text-primary)',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                            }}>
+                                                {event.title}
+                                            </Text>
+                                            <span style={{ fontSize: '10px', color: style.color, fontWeight: 700, flexShrink: 0, marginLeft: '6px' }}>
+                                                {event.type}
+                                            </span>
+                                        </div>
+                                    )}
+                                </EventRenderer>
                             );
                         })}
                     </div>
@@ -325,6 +341,7 @@ const DaysOfWeek = () => {
 
             {/* Scrollable grid body */}
             <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative', background: 'var(--white-color)' }}>
+                <CalendarViewEmpty view="week" isEmpty={!weekHasEvents} />
                 <div style={{ display: 'flex', position: 'relative', height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}>
                     {/* Time gutter */}
                     <div style={{ width: `${TIME_GUTTER}px`, flexShrink: 0, position: 'relative', borderRight: '1px solid var(--border-color)' }}>

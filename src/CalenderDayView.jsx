@@ -6,6 +6,8 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, getEventDaySegment, formatTime, formatHourLabel, getDayIndex } from './utils/dateHelpers';
+import EventRenderer from './components/EventRenderer';
+import CalendarViewEmpty from './components/CalendarViewEmpty';
 
 dayjs.extend(isoWeek);
 
@@ -16,7 +18,7 @@ const START_HOUR = 0;
 const TOTAL_HOURS = 24;
 
 const DayEventBlock = ({ event, currentDate, timeFormat }) => {
-    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const { eventColors } = useCalendarStore();
     const cfg = getEventStyle(event, eventColors);
     const segment = getEventDaySegment(event, currentDate);
     if (!segment) return null;
@@ -30,36 +32,39 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
         : `${durationMin}m`;
     const isCompact = height < 52;
 
+    const blockStyle = {
+        position: 'absolute',
+        top: `${top}px`,
+        left: '8px',
+        right: '8px',
+        height: `${height}px`,
+        background: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        borderLeft: `4px solid ${cfg.color}`,
+        borderRadius: '8px',
+        padding: isCompact ? '4px 8px' : '8px 12px',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        zIndex: 2,
+        boxSizing: 'border-box',
+        transition: 'all 0.18s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: '3px',
+    };
+
     return (
+        <EventRenderer
+            event={event}
+            view="day"
+            date={currentDate}
+            wrapperStyle={blockStyle}
+        >
+            {({ onClick }) => (
         <div
-            onClick={(e) => {
-                e.stopPropagation();
-                if (onEventClick) {
-                    const res = onEventClick(event);
-                    if (res === false) return;
-                }
-                openEditModal(event);
-            }}
-            style={{
-                position: 'absolute',
-                top: `${top}px`,
-                left: '8px', right: '8px',
-                height: `${height}px`,
-                background: cfg.bg,
-                border: `1px solid ${cfg.border}`,
-                borderLeft: `4px solid ${cfg.color}`,
-                borderRadius: '8px',
-                padding: isCompact ? '4px 8px' : '8px 12px',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                zIndex: 2,
-                boxSizing: 'border-box',
-                transition: 'all 0.18s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                gap: '3px',
-            }}
+            onClick={onClick}
+            style={blockStyle}
             onMouseEnter={e => {
                 e.currentTarget.style.boxShadow = `0 4px 16px ${cfg.color}35`;
                 e.currentTarget.style.transform = 'scale(1.005)';
@@ -119,6 +124,8 @@ const DayEventBlock = ({ event, currentDate, timeFormat }) => {
                 </Text>
             )}
         </div>
+            )}
+        </EventRenderer>
     );
 };
 
@@ -131,8 +138,6 @@ const CalenderDayView = () => {
         startOfWeek,
         timeFormat,
         openCreateModal,
-        openEditModal,
-        onEventClick,
         onDateClick,
         allowDateClick,
         eventColors,
@@ -174,6 +179,8 @@ const CalenderDayView = () => {
         events.filter(ev => isEventOnDay(ev, currentDate) && isAllDayOrMultiDay(ev)),
         [currentDate, events]
     );
+
+    const dayHasEvents = dayEvents.length > 0 || allDayEvents.length > 0;
 
     const now = today;
     const currentTimeTop = (now.hour() + now.minute() / 60 - START_HOUR) * HOUR_HEIGHT;
@@ -259,45 +266,47 @@ const CalenderDayView = () => {
                     </Text>
                     {allDayEvents.map(event => {
                         const style = getEventStyle(event, eventColors);
+                        const rowStyle = {
+                            background: style.bg,
+                            border: `1px solid ${style.border}`,
+                            borderLeft: `4px solid ${style.color}`,
+                            borderRadius: '6px',
+                            padding: '6px 12px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                        };
+
                         return (
-                            <div
+                            <EventRenderer
                                 key={event.id}
-                                onClick={() => {
-                                    if (onEventClick) {
-                                        const res = onEventClick(event);
-                                        if (res === false) return;
-                                    }
-                                    openEditModal(event);
-                                }}
-                                style={{
-                                    background: style.bg,
-                                    border: `1px solid ${style.border}`,
-                                    borderLeft: `4px solid ${style.color}`,
-                                    borderRadius: '6px',
-                                    padding: '6px 12px',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    cursor: 'pointer',
-                                }}
+                                event={event}
+                                view="day"
+                                date={currentDate.toDate()}
+                                wrapperStyle={rowStyle}
                             >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Text style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                                        {event.title}
-                                    </Text>
-                                    {event.description && (
-                                        <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                            — {event.description}
-                                        </Text>
-                                    )}
-                                </div>
-                                <Tag style={{
-                                    margin: 0, fontSize: '10px', borderRadius: '6px',
-                                    background: style.bg, borderColor: style.border, color: style.color, fontWeight: 600,
-                                }}>
-                                    {event.type}
-                                </Tag>
-                            </div>
+                                {({ onClick }) => (
+                                    <div onClick={onClick} style={rowStyle}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <Text style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                                {event.title}
+                                            </Text>
+                                            {event.description && (
+                                                <Text style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                                    — {event.description}
+                                                </Text>
+                                            )}
+                                        </div>
+                                        <Tag style={{
+                                            margin: 0, fontSize: '10px', borderRadius: '6px',
+                                            background: style.bg, borderColor: style.border, color: style.color, fontWeight: 600,
+                                        }}>
+                                            {event.type}
+                                        </Tag>
+                                    </div>
+                                )}
+                            </EventRenderer>
                         );
                     })}
                 </div>
@@ -305,6 +314,7 @@ const CalenderDayView = () => {
 
             {/* Scrollable time grid */}
             <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: 'var(--white-color)', position: 'relative' }}>
+                <CalendarViewEmpty view="day" isEmpty={!dayHasEvents} />
                 <div style={{ display: 'flex', height: `${TOTAL_HOURS * HOUR_HEIGHT}px`, position: 'relative' }}>
                     {/* Time gutter */}
                     <div style={{

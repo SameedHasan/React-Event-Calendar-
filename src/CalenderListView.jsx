@@ -6,6 +6,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, formatTime, getDayIndex } from './utils/dateHelpers';
+import EventRenderer from './components/EventRenderer';
 
 dayjs.extend(isoWeek);
 
@@ -16,7 +17,7 @@ const getDayEvents = (date, events) => {
 };
 
 const EventCard = ({ event, date, timeFormat }) => {
-    const { openEditModal, onEventClick, eventColors } = useCalendarStore();
+    const { eventColors } = useCalendarStore();
     const config = getEventStyle(event, eventColors);
     const dayStart = dayjs(date).startOf('day');
     const dayEnd = dayjs(date).endOf('day');
@@ -33,31 +34,35 @@ const EventCard = ({ event, date, timeFormat }) => {
         ? `${hours}h${mins > 0 ? ` ${mins}m` : ''}`
         : `${mins}m`;
 
+    const cardStyle = {
+        display: 'flex',
+        gap: '14px',
+        padding: '14px 16px',
+        marginBottom: '10px',
+        background: 'var(--white-color)',
+        borderRadius: '10px',
+        border: `1px solid ${config.border}`,
+        borderLeft: `4px solid ${config.color}`,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden',
+    };
+
     return (
+        <EventRenderer
+            event={event}
+            view="list"
+            date={date}
+            wrapperStyle={cardStyle}
+            wrapperClassName="list-event-card"
+        >
+            {({ onClick }) => (
         <div
             className="list-event-card"
-            onClick={() => {
-                if (onEventClick) {
-                    const res = onEventClick(event);
-                    if (res === false) return;
-                }
-                openEditModal(event);
-            }}
-            style={{
-                display: 'flex',
-                gap: '14px',
-                padding: '14px 16px',
-                marginBottom: '10px',
-                background: 'var(--white-color)',
-                borderRadius: '10px',
-                border: `1px solid ${config.border}`,
-                borderLeft: `4px solid ${config.color}`,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                position: 'relative',
-                overflow: 'hidden',
-            }}
+            onClick={onClick}
+            style={cardStyle}
             onMouseEnter={e => {
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
@@ -141,6 +146,8 @@ const EventCard = ({ event, date, timeFormat }) => {
                 </div>
             </div>
         </div>
+            )}
+        </EventRenderer>
     );
 };
 
@@ -213,7 +220,7 @@ const DaySection = ({ date, events, isToday, timeFormat }) => {
 };
 
 const CalenderListView = () => {
-    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors } = useCalendarStore();
+    const { weekRange, currentWeek, setWeekRange, events, startOfWeek, timeFormat, hideWeekends, eventColors, renderEmpty } = useCalendarStore();
 
     useEffect(() => {
         const weekNumber = dayjs(currentWeek).isoWeek();
@@ -310,20 +317,22 @@ const CalenderListView = () => {
 
             {/* Days with events */}
             {weekEvents.length === 0 ? (
-                <Empty
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description={
-                        <div style={{ textAlign: 'center' }}>
-                            <Text style={{ fontSize: '15px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                                No events this week
-                            </Text>
-                            <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                Navigate to another week to see your schedule
-                            </Text>
-                        </div>
-                    }
-                    style={{ padding: '48px 0' }}
-                />
+                renderEmpty ? renderEmpty('list') : (
+                    <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                            <div style={{ textAlign: 'center' }}>
+                                <Text style={{ fontSize: '15px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                                    No events this week
+                                </Text>
+                                <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                    Navigate to another week to see your schedule
+                                </Text>
+                            </div>
+                        }
+                        style={{ padding: '48px 0' }}
+                    />
+                )
             ) : (
                 weekDays.map(day => (
                     <DaySection

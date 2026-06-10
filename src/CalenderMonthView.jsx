@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { getEventStyle } from './utils/eventColors';
 import { isEventOnDay, isAllDayOrMultiDay, formatTime, getDayIndex, getShiftedShortDOW } from './utils/dateHelpers';
+import EventRenderer from './components/EventRenderer';
 
 dayjs.extend(isoWeek);
 
@@ -43,13 +44,12 @@ const CalenderMonthView = () => {
         startOfWeek,
         timeFormat,
         openCreateModal,
-        openEditModal,
         hideWeekends,
         showWeekNumbers,
-        onEventClick,
         onDateClick,
         allowDateClick,
         eventColors,
+        renderEventTooltip,
     } = useCalendarStore();
     const today = dayjs();
     const current = dayjs(currentDate);
@@ -290,7 +290,11 @@ const CalenderMonthView = () => {
                                                 style={{ display: 'flex', justifyContent: 'flex-start', height: '24px', alignItems: 'center' }}
                                             >
                                                 <Tooltip
-                                                    title={<TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} eventColors={eventColors} />}
+                                                    title={
+                                                        renderEventTooltip
+                                                            ? renderEventTooltip(dayEvents, day.toDate())
+                                                            : <TooltipContent events={dayEvents} day={day} timeFormat={timeFormat} eventColors={eventColors} />
+                                                    }
                                                     overlayInnerStyle={{ color: 'var(--text-primary)', background: 'var(--white-color)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px', minWidth: '220px' }}
                                                     color="var(--white-color)"
                                                     placement="top"
@@ -322,6 +326,7 @@ const CalenderMonthView = () => {
                                     const widthPct = ((endCol - startCol + 1) / totalCols) * 100;
 
                                     const isMultiDay = dayjs(event.end).diff(dayjs(event.start), 'day') > 0 || isAllDayOrMultiDay(event);
+                                    const contextDay = filteredWeek[startCol] || filteredWeek[0];
 
                                     return (
                                         <div
@@ -337,95 +342,95 @@ const CalenderMonthView = () => {
                                                 pointerEvents: 'auto',
                                             }}
                                         >
-                                            {isMultiDay ? (
-                                                <div
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (onEventClick) {
-                                                            const res = onEventClick(event);
-                                                            if (res === false) return;
-                                                        }
-                                                        openEditModal(event);
-                                                    }}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        background: style.bg,
-                                                        border: `1px solid ${style.border}`,
-                                                        borderLeft: `3px solid ${style.color}`,
-                                                        borderRadius: '4px',
-                                                        padding: '0 6px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'space-between',
-                                                        cursor: 'pointer',
-                                                        boxSizing: 'border-box',
-                                                    }}
-                                                    title={`${event.title} (${event.type})`}
-                                                >
-                                                    <Text style={{
-                                                        fontSize: '11px',
-                                                        fontWeight: 700,
-                                                        color: '#1e293b',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        whiteSpace: 'nowrap',
-                                                        flex: 1,
-                                                    }}>
-                                                        {event.title}
-                                                    </Text>
-                                                    <span style={{ fontSize: '9px', color: style.color, fontWeight: 700, marginLeft: '4px', flexShrink: 0 }}>
-                                                        {event.type}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (onEventClick) {
-                                                            const res = onEventClick(event);
-                                                            if (res === false) return;
-                                                        }
-                                                        openEditModal(event);
-                                                    }}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        padding: '0 4px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px',
-                                                        cursor: 'pointer',
-                                                        boxSizing: 'border-box',
-                                                        borderRadius: '4px',
-                                                        transition: 'background 0.15s',
-                                                    }}
-                                                onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                                title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
-                                                >
-                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color, flexShrink: 0 }} />
-                                                    <Text style={{
-                                                        fontSize: '10px',
-                                                        color: style.color,
-                                                        fontWeight: 700,
-                                                        flexShrink: 0,
-                                                    }}>
-                                                        {formatTime(event.start, timeFormat)}
-                                                    </Text>
-                                                    <Text style={{
-                                                        fontSize: '11px',
-                                                        fontWeight: 600,
-                                                        color: '#1e293b',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        whiteSpace: 'nowrap',
-                                                        flex: 1,
-                                                    }}>
-                                                        {event.title}
-                                                    </Text>
-                                                </div>
-                                            )}
+                                            <EventRenderer
+                                                event={event}
+                                                view="month"
+                                                date={contextDay.toDate()}
+                                                wrapperStyle={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    boxSizing: 'border-box',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                {({ onClick }) => (
+                                                    isMultiDay ? (
+                                                        <div
+                                                            onClick={onClick}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                background: style.bg,
+                                                                border: `1px solid ${style.border}`,
+                                                                borderLeft: `3px solid ${style.color}`,
+                                                                borderRadius: '4px',
+                                                                padding: '0 6px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'space-between',
+                                                                cursor: 'pointer',
+                                                                boxSizing: 'border-box',
+                                                            }}
+                                                            title={`${event.title} (${event.type})`}
+                                                        >
+                                                            <Text style={{
+                                                                fontSize: '11px',
+                                                                fontWeight: 700,
+                                                                color: '#1e293b',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                flex: 1,
+                                                            }}>
+                                                                {event.title}
+                                                            </Text>
+                                                            <span style={{ fontSize: '9px', color: style.color, fontWeight: 700, marginLeft: '4px', flexShrink: 0 }}>
+                                                                {event.type}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            onClick={onClick}
+                                                            style={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                padding: '0 4px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                cursor: 'pointer',
+                                                                boxSizing: 'border-box',
+                                                                borderRadius: '4px',
+                                                                transition: 'background 0.15s',
+                                                            }}
+                                                            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; }}
+                                                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                                                            title={`${formatTime(event.start, timeFormat)} - ${event.title}`}
+                                                        >
+                                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: style.color, flexShrink: 0 }} />
+                                                            <Text style={{
+                                                                fontSize: '10px',
+                                                                color: style.color,
+                                                                fontWeight: 700,
+                                                                flexShrink: 0,
+                                                            }}>
+                                                                {formatTime(event.start, timeFormat)}
+                                                            </Text>
+                                                            <Text style={{
+                                                                fontSize: '11px',
+                                                                fontWeight: 600,
+                                                                color: '#1e293b',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                flex: 1,
+                                                            }}>
+                                                                {event.title}
+                                                            </Text>
+                                                        </div>
+                                                    )
+                                                )}
+                                            </EventRenderer>
                                         </div>
                                     );
                                 })}

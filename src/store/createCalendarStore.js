@@ -39,6 +39,11 @@ export const createCalendarStore = (initialState = {}) => {
         theme: 'light',
         onEventClick: null,
         onDateClick: null,
+        loading: false,
+        renderEvent: null,
+        renderEventTooltip: null,
+        renderToolbar: null,
+        renderEmpty: null,
 
         isModalOpen: false,
         selectedEvent: null,

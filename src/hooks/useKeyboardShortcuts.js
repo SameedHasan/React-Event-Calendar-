@@ -126,7 +126,7 @@ const useKeyboardShortcuts = () => {
 };
 
 // ── Directional navigation helpers ──────────────────────
-function navigatePrev(view, currentDayIndex, actions) {
+export function navigatePrev(view, currentDayIndex, actions) {
     switch (view) {
         case 'month':
             actions.previousMonth();
@@ -151,7 +151,7 @@ function navigatePrev(view, currentDayIndex, actions) {
     }
 }
 
-function navigateNext(view, currentDayIndex, actions) {
+export function navigateNext(view, currentDayIndex, actions) {
     switch (view) {
         case 'month':
             actions.nextMonth();

@@ -182,6 +182,34 @@ export default App;
 | `onDeleteEvent` | `(id: string \| number) => void` | `undefined` | Optional. Callback triggered when an event is deleted. If not provided, updates local state automatically. |
 | `className` | `string` | `undefined` | Optional. Additional CSS class names for the calendar root element. |
 | `style` | `React.CSSProperties` | `undefined` | Optional. Inline styles for the calendar root element. The root uses `height: 100%`, so wrap it in a sized container. |
+| `loading` | `boolean` | `false` | Optional. Shows a spinner overlay on the active view while async data loads. |
+| `renderEvent` | `(event, context) => ReactNode` | `undefined` | Optional. Custom event chip/card renderer for month, week, day, and list views. |
+| `renderEventTooltip` | `(events, date) => ReactNode` | `undefined` | Optional. Custom tooltip for month view "+X more" overflow. |
+| `renderToolbar` | `(api) => ReactNode` | `undefined` | Optional. Replace the default header toolbar entirely. |
+| `renderEmpty` | `(view) => ReactNode` | `undefined` | Optional. Custom empty state when the visible range has no events (list, year, week, day). |
+
+### Customization examples
+
+```jsx
+<Calendar
+  events={events}
+  loading={isFetching}
+  renderEvent={(event, { view, onClick }) => (
+    <button type="button" onClick={onClick} className="my-event">
+      {event.title}
+    </button>
+  )}
+  renderToolbar={({ view, previous, next, goToToday, setView }) => (
+    <div>
+      <button type="button" onClick={previous}>Back</button>
+      <button type="button" onClick={goToToday}>Today</button>
+      <button type="button" onClick={next}>Forward</button>
+      <button type="button" onClick={() => setView('week')}>Week ({view})</button>
+    </div>
+  )}
+  renderEmpty={(view) => <p>No events in {view} view</p>}
+/>
+```
 
 ---
 
@@ -210,7 +238,9 @@ interface CalendarEvent {
   type: string;               // Category string (e.g. 'Call', 'Lunch', 'Social')
   color?: string;             // Optional hex/CSS color override (e.g. '#10b981')
   description?: string;       // Optional descriptive text shown in details/tooltips
+  location?: string;          // Optional. Included in ICS export
   allDay?: boolean;           // Optional. Renders in the all-day / spanning row
+  metadata?: Record<string, unknown>; // Optional. App-specific data (not rendered by default)
 }
 ```
 

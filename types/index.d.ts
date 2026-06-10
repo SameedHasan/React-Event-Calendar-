@@ -1,4 +1,4 @@
-import type { CSSProperties, FC } from 'react';
+import type { CSSProperties, FC, ReactNode } from 'react';
 
 export type CalendarView = 'month' | 'week' | 'day' | 'list' | 'year';
 
@@ -25,6 +25,32 @@ export interface CalendarEvent {
   description?: string;
   location?: string;
   allDay?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface EventRenderContext {
+  view: CalendarView;
+  date: Date;
+  isMultiDay: boolean;
+  isStartDay: boolean;
+  isEndDay: boolean;
+  onClick: () => void;
+}
+
+export interface CalendarToolbarApi {
+  view: CalendarView;
+  currentDate: Date;
+  weekRange: { count: number; range: string };
+  events: CalendarEvent[];
+  setView: (view: CalendarView) => void;
+  goToToday: () => void;
+  previous: () => void;
+  next: () => void;
+  openCreateModal: () => void;
+  exportEvents: () => void;
+  showExportButton: boolean;
+  showAddEventButton: boolean;
+  readOnly: boolean;
 }
 
 export interface CalendarProps {
@@ -45,6 +71,7 @@ export interface CalendarProps {
   showAddEventButton?: boolean;
   allowDateClick?: boolean;
   readOnly?: boolean;
+  loading?: boolean;
   eventColors?: Record<string, string>;
   theme?: CalendarTheme;
   onEventClick?: (event: CalendarEvent) => void | boolean;
@@ -52,6 +79,10 @@ export interface CalendarProps {
   onAddEvent?: (event: CalendarEvent) => void;
   onUpdateEvent?: (event: CalendarEvent) => void;
   onDeleteEvent?: (id: string | number) => void;
+  renderEvent?: (event: CalendarEvent, context: EventRenderContext) => ReactNode;
+  renderEventTooltip?: (events: CalendarEvent[], date: Date) => ReactNode;
+  renderToolbar?: (api: CalendarToolbarApi) => ReactNode;
+  renderEmpty?: (view: CalendarView) => ReactNode;
   className?: string;
   style?: CSSProperties;
 }

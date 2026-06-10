@@ -295,7 +295,7 @@ const MONTHS = [
 ];
 
 const CalenderYearView = () => {
-    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors } = useCalendarStore();
+    const { currentDate, setView, setCurrentDate, events, startOfWeek, timeFormat, eventColors, renderEmpty } = useCalendarStore();
     const currentYear = dayjs(currentDate).year();
     const today = dayjs();
     const isCurrentYear = today.year() === currentYear;
@@ -434,6 +434,12 @@ const CalenderYearView = () => {
                     </div>
                 )}
             </div>
+
+            {totalYearEvents === 0 && renderEmpty && (
+                <div style={{ marginBottom: '24px' }}>
+                    {renderEmpty('year')}
+                </div>
+            )}
 
             {/* Month grid */}
             <div style={{

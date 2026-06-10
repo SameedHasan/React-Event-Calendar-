@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { ConfigProvider } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import './index.css';
-import CalenderHeader from './CalenderHeader';
 import CalenderMonthView from './CalenderMonthView';
 import { CalendarStoreProvider, useCalendarStore } from './store/useCalendarStore';
 import DaysOfWeek from './DaysOfWeek';
@@ -11,6 +10,8 @@ import CalenderListView from './CalenderListView';
 import CalenderYearView from './CalenderYearView';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import EventModal from './EventModal';
+import CalendarToolbar from './components/CalendarToolbar';
+import CalendarLoadingOverlay from './components/CalendarLoadingOverlay';
 
 const CalendarInner = ({
     events = [],
@@ -37,6 +38,11 @@ const CalendarInner = ({
     theme = 'light',
     onEventClick,
     onDateClick,
+    loading = false,
+    renderEvent,
+    renderEventTooltip,
+    renderToolbar,
+    renderEmpty,
     className,
     style,
 }) => {
@@ -95,6 +101,11 @@ const CalendarInner = ({
             theme,
             onEventClick,
             onDateClick,
+            loading,
+            renderEvent,
+            renderEventTooltip,
+            renderToolbar,
+            renderEmpty,
         });
     }, [
         onDateChange,
@@ -110,6 +121,11 @@ const CalendarInner = ({
         theme,
         onEventClick,
         onDateClick,
+        loading,
+        renderEvent,
+        renderEventTooltip,
+        renderToolbar,
+        renderEmpty,
         setConfigs,
     ]);
 
@@ -156,12 +172,14 @@ const CalendarInner = ({
                     ...style,
                 }}
             >
-                {showToolbar && <CalenderHeader />}
-                {activeView === 'month' && <CalenderMonthView />}
-                {activeView === 'week' && <DaysOfWeek />}
-                {activeView === 'day' && <CalenderDayView />}
-                {activeView === 'list' && <CalenderListView />}
-                {activeView === 'year' && <CalenderYearView />}
+                {showToolbar && <CalendarToolbar />}
+                <CalendarLoadingOverlay loading={loading}>
+                    {activeView === 'month' && <CalenderMonthView />}
+                    {activeView === 'week' && <DaysOfWeek />}
+                    {activeView === 'day' && <CalenderDayView />}
+                    {activeView === 'list' && <CalenderListView />}
+                    {activeView === 'year' && <CalenderYearView />}
+                </CalendarLoadingOverlay>
                 {!readOnly && <EventModal />}
             </div>
         </ConfigProvider>

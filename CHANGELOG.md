@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [1.5.0] - 2026-06-10
+
+### Added
+
+- `renderEvent` — custom event chip/card renderer (month, week, day, list views)
+- `renderEventTooltip` — custom month-view overflow tooltip
+- `renderToolbar` — replace default header with custom navigation UI
+- `renderEmpty` — custom empty state for list and year views
+- `loading` prop — spinner overlay while async events load
+- `metadata` field on `CalendarEvent` type
+- `CalendarToolbarApi` and `EventRenderContext` TypeScript types
+
 ## [1.4.0] - 2026-06-10
 
 ### Added
@@ -73,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial published feature set: 5 views, keyboard shortcuts, ICS export, theming
 
+[1.5.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.1.8...v1.3.0

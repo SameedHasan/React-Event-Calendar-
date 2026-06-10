@@ -1,7 +1,7 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `1.4.0`  
+**Current version:** `1.5.0`  
 **Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
@@ -206,11 +206,12 @@ Add to `package.json`:
 
 ---
 
-## Phase 3 — Customization API
+## Phase 3 — Customization API ✅ COMPLETE
 
 **Duration:** 3–5 days  
 **Target release:** `1.5.0`  
-**Breaking changes:** None (additive props only)
+**Breaking changes:** None (additive props only)  
+**Shipped in:** `v1.5.0` (June 10, 2026)
 
 ### 3.1 Render props / slots
 
@@ -219,7 +220,7 @@ Add to `package.json`:
 | `renderEvent` | `(event, context) => ReactNode` | Month, week, day, list views |
 | `renderEventTooltip` | `(events, date) => ReactNode` | Month view "+X more" tooltip |
 | `renderToolbar` | `(api) => ReactNode` | Replace header entirely |
-| `renderEmpty` | `(view) => ReactNode` | List and year empty states |
+| `renderEmpty` | `(view) => ReactNode` | List, year, week, and day empty states |
 
 `context` shape:
 

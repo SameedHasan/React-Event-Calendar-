@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | **Minor** | New backward-compatible features or props | `readOnly` prop, `renderEvent` slot |
 | **Major** | Breaking API changes, removed props, peer dependency range changes | Rename exports, change default behavior |
 
+## [1.4.0] - 2026-06-10
+
+### Added
+
+- Full test suite: `vitest` + `@testing-library/react` + `jsdom`
+- Unit tests for `dateHelpers`, `icsExport`, `eventColors`, keyboard shortcuts, store, and `<Calendar>`
+- `npm run test:coverage` with ≥90% threshold on `src/utils/*`
+
+### Fixed
+
+- Month/year navigation now preserves the day-of-month (e.g. June 15 → May 15)
+
+## [1.3.1] - 2026-06-10
+
+### Changed
+
+- Peer dependencies now accept `antd` and `@ant-design/icons` v5 **or** v6
+
 ## [1.3.0] - 2026-06-09
 
 ### Added
@@ -55,5 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial published feature set: 5 views, keyboard shortcuts, ICS export, theming
 
+[1.4.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.1...v1.4.0
+[1.3.1]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.1.8...v1.3.0
 [1.1.8]: https://github.com/SameedHasan/React-Event-Calendar-/compare/v1.1.7...v1.1.8

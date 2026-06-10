@@ -162,7 +162,11 @@ export const createCalendarStore = (initialState = {}) => {
         previousMonth: () => {
             const state = get();
             const currentDate = new Date(state.currentDate);
-            const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+            const newDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() - 1,
+                currentDate.getDate()
+            );
             set({ currentDate: newDate.toISOString() });
             if (state.onDateChange) state.onDateChange(newDate);
         },
@@ -170,7 +174,11 @@ export const createCalendarStore = (initialState = {}) => {
         nextMonth: () => {
             const state = get();
             const currentDate = new Date(state.currentDate);
-            const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+            const newDate = new Date(
+                currentDate.getFullYear(),
+                currentDate.getMonth() + 1,
+                currentDate.getDate()
+            );
             set({ currentDate: newDate.toISOString() });
             if (state.onDateChange) state.onDateChange(newDate);
         },
@@ -178,7 +186,11 @@ export const createCalendarStore = (initialState = {}) => {
         previousYear: () => {
             const state = get();
             const currentDate = new Date(state.currentDate);
-            const newDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth());
+            const newDate = new Date(
+                currentDate.getFullYear() - 1,
+                currentDate.getMonth(),
+                currentDate.getDate()
+            );
             set({ currentDate: newDate.toISOString() });
             if (state.onDateChange) state.onDateChange(newDate);
         },
@@ -186,7 +198,11 @@ export const createCalendarStore = (initialState = {}) => {
         nextYear: () => {
             const state = get();
             const currentDate = new Date(state.currentDate);
-            const newDate = new Date(currentDate.getFullYear() + 1, currentDate.getMonth());
+            const newDate = new Date(
+                currentDate.getFullYear() + 1,
+                currentDate.getMonth(),
+                currentDate.getDate()
+            );
             set({ currentDate: newDate.toISOString() });
             if (state.onDateChange) state.onDateChange(newDate);
         },

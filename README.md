@@ -1,5 +1,8 @@
 # react-event-calendar-suite
 
+[![CI](https://github.com/SameedHasan/React-Event-Calendar-/actions/workflows/ci.yml/badge.svg)](https://github.com/SameedHasan/React-Event-Calendar-/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-utils%20%E2%89%A590%25-brightgreen)](vitest.config.js)
+
 A premium, highly performant, and fully customizable React Event Calendar component suite. It offers native CSS-Grid based views (Month, Week, Day, List, Year), dynamic status-color assignment, global store management, and clean navigational controls.
 
 Ready to be dropped into any React application or published directly as a standalone npm package.
@@ -239,6 +242,17 @@ Alternatively, you can adjust theme colors globally by overriding these custom p
   --text-primary: #1e293b;       /* Primary text */
   --text-secondary: #64748b;     /* Secondary details */
 }
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test              # run once
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report (utils ≥ 90%)
+npm run ci            # build + lint + test
 ```
 
 ---

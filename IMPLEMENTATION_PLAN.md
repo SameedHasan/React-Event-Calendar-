@@ -1,8 +1,8 @@
 # Implementation Plan: `react-event-calendar-suite`
 
 **Package:** `react-event-calendar-suite`  
-**Current version:** `1.1.8`  
-**Last updated:** June 9, 2026  
+**Current version:** `1.4.0`  
+**Last updated:** June 10, 2026  
 **Status:** Draft roadmap
 
 ---
@@ -158,11 +158,12 @@ Calendar (provider)
 
 ---
 
-## Phase 2 — Testing & quality
+## Phase 2 — Testing & quality ✅ COMPLETE
 
 **Duration:** 2–4 days  
 **Target release:** `1.4.0`  
-**Breaking changes:** None
+**Breaking changes:** None  
+**Shipped in:** `v1.4.0` (June 10, 2026)
 
 ### 2.1 Test stack
 
@@ -187,6 +188,7 @@ Add to `package.json`:
 | `src/utils/icsExport.test.js` | RFC 5545 escaping, line folding, empty events, UTC output |
 | `src/utils/eventColors.test.js` | Hash consistency, custom `eventColors` override |
 | `src/hooks/useKeyboardShortcuts.test.js` | Key handlers, ignored when focus is in inputs |
+| `src/store/createCalendarStore.test.js` | Store actions, `readOnly` guards, controlled callbacks |
 | `src/Calender.test.jsx` | Renders views, `readOnly`, controlled `view`, instance isolation |
 
 ### 2.3 Coverage targets
